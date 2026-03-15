@@ -1,0 +1,34 @@
+# LESSONS: CEG OPERATIONS
+
+- id: 7
+  lesson: "No sudo on CEG — ceg user has no passwordless sudo. Use user-local paths."
+
+- id: 8
+  lesson: "SSH quoting — always single-quote SSH commands containing $ variables"
+
+- id: 10
+  lesson: "Service bind addresses — new CEG services default to 127.0.0.1. Must reconfigure to Tailscale IP."
+
+- id: 11
+  lesson: "LVM default on Ubuntu Server — installer only allocates ~100GB on 512GB disk"
+
+- id: 84
+  lesson: "Zuberi's path to CEG is curl to shell service (3003), never SSH or raw exec. Gateway container has no SSH keys."
+
+- id: 87
+  lesson: "Shell service blocklist blocks rm -rf but find -delete is the safe alternative."
+
+- id: 90
+  lesson: "loginctl enable-linger requires sudo. One-time command for systemd user services."
+
+- id: 91
+  lesson: "SSH heredoc escaping corrupts Python source. Prefer SCP over heredoc for Python scripts."
+
+- id: 92
+  lesson: "CEG WiFi interface is wlx90de80152e3f, NOT wlan0. USB WiFi adapters get MAC-based names."
+
+- id: 94
+  lesson: "Tailscale requires outbound: UDP 41641 (WireGuard), TCP 443 (control + DERP), UDP 3478 (STUN), UDP 53 (DNS), UDP 123 (NTP)."
+
+- id: 101
+  lesson: "Windows schtasks /Create with /RL HIGHEST requires elevation. Use PowerShell Register-ScheduledTask for user-level tasks."

@@ -1,0 +1,151 @@
+# PRIORITIES
+# Last updated: 2026-03-15 | Session 21
+# The working queue. Ordered by priority. Updated each session.
+# This replaces the "Next Up" box and the "Active RTL Items" section.
+
+# By column:
+#   executor: CC (ccode), Z (Zuberi), CCZ (both)
+#   priority: p0 (ship now), p1 (next up), p2 (queued), p3 (future), ongoing
+#   status: free text
+
+active:
+  - id: 1
+    task: "Stabilize Ed25519 device auth across gateway lifecycle"
+    rtl: "approval-cards"
+    priority: p0
+    executor: CC
+    status: "Ed25519 built (v1.0.22), signature accepted, but breaks on gateway restart + origin change (tauri.localhost vs localhost:3000). Need stable signing across restarts."
+    blocker: "device signature invalid after gateway restart with security:allowlist"
+    context: "designs/approval-cards.md"
+    note: "Reverted to dangerouslyDisableDeviceAuth=true + security:full to keep Zuberi online. Approval cards deferred until stable."
+
+  - id: 2
+    task: "ZuberiChat UI: cancel turn + conversation sidebar"
+    rtl: "RTL-065"
+    priority: p1
+    executor: CC
+    status: "Cancel turn: problem identified, no design. Sidebar: unblocked by lossless-claw (SQLite has conversation data)."
+    note: "Bundle — both are ZuberiChat frontend work."
+
+  - id: 3
+    task: "Self-improving corrections log"
+    priority: p1
+    executor: CCZ
+    status: "Design ready. Cannibalized from ClawHub self-improving skill."
+    context: "designs/self-improving.md"
+    note: "CC creates corrections.md + AGENTS.md instruction. Z uses it to log corrections from James."
+
+  - id: 4
+    task: "CEG hardening: Squid SNI proxy + shell service file-write endpoint"
+    priority: p1
+    executor: CC
+    status: "Squid: research done. File-write: greenfield."
+    note: "Bundle — both are CEG infrastructure. Squid closes TCP 443 gap in UFW."
+
+  - id: 5
+    task: "tldraw mural (CEG:3004)"
+    priority: p1
+    executor: Z
+    status: "Ready — Zuberi can install via shell service. Build guide exists."
+
+  - id: 6
+    task: "Rotate Azure creds + M365 skill"
+    priority: p1
+    executor: CCZ
+    status: "Queued. Azure creds exposed Session 20."
+
+  - id: 7
+    task: "Office I/O skill on CEG"
+    priority: p2
+    executor: Z
+    status: "Designed. python-docx/openpyxl/python-pptx skill. Deploy via shell service."
+
+  - id: 8
+    task: "Gate enforcement (RTL-019) + n8n wiring"
+    rtl: "RTL-019"
+    priority: p2
+    executor: CCZ
+    status: "Queued. Reference design: StrongDM Leash (Apache 2.0). Build natively."
+    note: "Bundle — both are integration/governance work. RTL-063 (ClawHub) blocked on RTL-019."
+
+  - id: 9
+    task: "Security maintenance: token rotation + CCODE-HANDOFF update"
+    priority: p2
+    executor: CC
+    status: "Gateway token, Azure creds, GitHub PAT all exposed. CCODE-HANDOFF stale since Session 19."
+
+  - id: 10
+    task: "GUI workstation — Playwright (RTL-064)"
+    rtl: "RTL-064"
+    priority: p3
+    executor: CC
+    status: "Concept. Zuberi operates browser via DOM manipulation. Vision fallback qwen3-vl:8b."
+
+  - id: 11
+    task: "YouTube transcript + workspace cleanup"
+    priority: p3
+    executor: Z
+    status: "YouTube: CEG:9011, plan approved. Cleanup: delete narrative, CHANGELOG, HEARTBEAT from workspace root."
+
+  - id: 12
+    task: "RTL-058 Phase 3 — autonomous routing self-improvement"
+    rtl: "RTL-058"
+    priority: p3
+    executor: Z
+    status: "Needs production routing data. Query Chroma for past routing decisions."
+
+  - id: 13
+    task: "Mission Ganesha ($25K/month)"
+    rtl: "RTL-014"
+    priority: ongoing
+    executor: Z
+    status: "Active. James + Zuberi directly. No architect visibility into specifics."
+
+completed_this_session:
+  - task: "lossless-claw ContextEngine plugin"
+    session: 21
+    executor: CC
+    result: "v0.3.0 installed. 437 messages, 7 summaries, 1 conversation in SQLite."
+
+  - task: "CXDB async sync layer"
+    session: 21
+    executor: CC
+    result: "Sync API (KILO:18790) + Sync Bridge (CEG systemd). CXDB context 13 + Chroma zuberi_conversations. 30s poll."
+
+  - task: "Priority matrix → RTL dashboard"
+    session: 21
+    executor: CC
+    result: "Data-driven Priorities tab in rtl_dashboard.html v1.4.0."
+
+  - task: "Zuberi behavioral audit"
+    session: 21
+    executor: Z
+    result: "3 corrections delivered: fabricated project list, fabricated Bloomberg summary, shell service pattern re-coached."
+
+  - task: "Connect RPC fix (v1.0.19)"
+    session: 21
+    executor: CC
+    result: "Moved token from URL to RPC body. Gateway no longer rejects with INVALID_REQUEST."
+
+  - task: "Ed25519 device identity (v1.0.20-v1.0.22)"
+    session: 21
+    executor: CC
+    result: "Rust crypto module, v2 payload signing, queue flush fix, nonce race fix. Signature accepted. Pairing works. Breaks on restart — deferred."
+
+  - task: "Docs repo initialized"
+    session: 21
+    executor: CC
+    result: "theovice/Zuberi on GitHub. 501+ files from AIAgent folder + project docs."
+
+phase_enlightenment:
+  note: "Separate track. Not infrastructure tasks. About Zuberi's evolving self-awareness."
+  items:
+    - name: "Jeremiel"
+      topic: "Self vs. project distinction"
+      status: pending
+      note: "Zuberi should distinguish her own infrastructure (brain, hands, disciplines) from external projects."
+
+    - name: "Uriel"
+      topic: "Beyond the framework"
+      status: future
+      note: "Replace OpenClaw with custom gateway. True individuality. Triggered by architectural limitations."

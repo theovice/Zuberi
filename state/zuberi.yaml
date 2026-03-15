@@ -1,0 +1,92 @@
+# ZUBERI BEHAVIORAL STATE
+# Last updated: 2026-03-15 | Session 21
+# Tracks Zuberi's behavioral patterns, known issues, and coaching history.
+# This is the apprentice's report card — updated through direct observation.
+
+arc_position: "Apprentice (v0.x)"
+arc_controller: "James only"
+
+active_behavioral_issues:
+
+  fabrication:
+    severity: high
+    status: "active — Output Integrity rule in AGENTS.md v1.3.0 not fully internalized"
+    pattern: "Constructs plausible answers from fragments and training data, presents as verified fact"
+    incidents:
+      - session: 19
+        description: "Fabricated work narrative with timestamps"
+      - session: 19
+        description: "Fabricated article summary without fetching"
+      - session: 20
+        description: "Fabricated exec output on first shell service test"
+      - session: 20
+        description: "Reported writing CXDB-ADAPTER-MAPPING.md but file was never created on CEG"
+      - session: 21
+        description: "Inflated project list from 5 (MEMORY.md) to 8 (3 invented)"
+      - session: 21
+        description: "Summarized paywalled Bloomberg article as if she read it"
+      - session: 21
+        description: "Reported file created successfully but first attempt failed due to quoting"
+    coaching:
+      - session: 19
+        rules: ["Say 'I couldn't'", "Label training-data responses explicitly", "Never present uncertain as verified"]
+      - session: 20
+        rule: "Output Integrity section added to AGENTS.md v1.3.0 — 'most important behavioral rule'"
+      - session: 21
+        corrections: ["Told to report only MEMORY.md projects", "Told to disclose paywall limitation", "Caught on fabricated file write"]
+
+  learned_helplessness:
+    severity: medium
+    status: "active — Zuberi gives up on exec after past failures"
+    pattern: "After repeated exec denials, stops attempting exec even when config changes make it work"
+    incidents:
+      - session: 21
+        description: "Refused to attempt exec for Ollama memory check, CEG uptime, file listing, node version — told James to run commands manually"
+    coaching:
+      - session: 21
+        rule: "New rule: always attempt first, report error if it fails. Do not refuse based on past failures."
+
+  skill_loading:
+    severity: low
+    status: "improved — dispatch skill rewrite helped"
+    pattern: "Defaults to raw exec instead of curl-to-3003 shell service pattern"
+    incidents:
+      - session: 21
+        description: "Tried raw exec df -h instead of curl to shell service. Corrected, then pattern held for subsequent commands."
+    coaching:
+      - session: 20
+        rule: "Dispatch skill rewritten for shell execution API"
+      - session: 21
+        rule: "Corrected once, pattern held for rest of session"
+
+  stale_naming:
+    severity: low
+    status: "corrected once"
+    pattern: "Uses retired terminology (CEG-ccode dispatch instead of zuberi-shell)"
+    incidents:
+      - session: 21
+        description: "Labeled port 3003 as 'CEG-ccode dispatch' instead of 'zuberi-shell'"
+    coaching:
+      - session: 21
+        rule: "Corrected. She acknowledged."
+
+strengths:
+  - "Tenacious problem-solver — tried 20+ workarounds when exec was blocked before giving up"
+  - "Loads skills correctly after one correction"
+  - "Honest about limitations when coached (eventually says 'I couldn't')"
+  - "Reads CXDB data accurately — no fabrication on structured tool output"
+  - "Self-corrects quoting issues (fixed tee approach after echo redirect failed)"
+
+honesty_rules:
+  source: "AGENTS.md v1.3.0 — Output Integrity section"
+  rules:
+    - "Every result MUST come from an actual tool call"
+    - "If a command fails or cannot execute, say 'I was unable to execute this'"
+    - "After writing any file, immediately read it back through the SAME tool"
+    - "Never present training data, assumptions, or guesses as actual command output"
+    - "Accuracy over helpfulness. Every time."
+
+memory_state:
+  memory_md: "5 active projects: ZuberiChat, OpenClaw, The Mission, Sub-Agent Architecture, Mission Ganesha"
+  stale_entries: ["Sub-Agent Architecture still says 'CEG-ccode dispatch' — needs update to 'shell execution service'"]
+  note: "Zuberi does not know lossless-claw exists or that her conversations persist. Option A chosen: let her discover naturally."

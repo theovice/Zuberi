@@ -1,0 +1,25 @@
+# LESSONS: CCODE PROMPTS
+
+- id: 26
+  lesson: "No jq anywhere — OpenClaw container doesn't have it."
+
+- id: 27
+  lesson: "No bash operators (||, 2>/dev/null) — PowerShell-compatible syntax only."
+
+- id: 29
+  lesson: "API key NEVER in workspace files."
+
+- id: 30
+  lesson: "No nested triple-backtick code blocks in prompts — use indentation instead."
+
+- id: 31
+  lesson: "Back up config files before editing."
+
+- id: 56
+  lesson: "Nested backtick collapse in ccode prompts — use inline descriptions instead of code blocks for curl/shell commands."
+
+- id: 85
+  lesson: "PowerShell curl is aliased to Invoke-WebRequest. Use curl.exe (with .exe) or Invoke-RestMethod."
+
+- id: 97
+  lesson: "Zuberi cannot write large files through shell service. JSON quoting makes heredocs impossible. Use ccode SCP for large file deployments."

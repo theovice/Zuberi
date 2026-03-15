@@ -1,0 +1,50 @@
+# LESSONS: OPENCLAW
+# Gateway, config, plugins, exec pipeline
+
+- id: 32
+  lesson: "qwen3:14b stuck-in-reasoning bug — confirmed. Do not add back."
+
+- id: 33
+  lesson: "<think> token injection does not work in Ollama — use think: true API parameter"
+
+- id: 36
+  lesson: "Compaction flush trigger formula: contextWindow - reserveTokensFloor - softThresholdTokens"
+
+- id: 37
+  lesson: "OpenClaw memory flush ≠ CXDB — flush is internal pre-compaction housekeeping"
+
+- id: 42
+  lesson: "OpenClaw model entry requires 'name' field — omitting causes crash loop"
+
+- id: 43
+  lesson: "Gateway restart method: docker compose down + up -d. 'docker compose restart' has OCI namespace error."
+
+- id: 45
+  lesson: "Ollama context length slider — check GUI settings. Default 4K may silently cap despite OpenClaw config."
+
+- id: 47
+  lesson: "OpenClaw skill loading — name + description in YAML frontmatter determines activation. Bad descriptions = silent skills."
+
+- id: 57
+  lesson: "OpenClaw exec approval is gateway-level, not prompt-level. AGENTS.md/TOOLS.md say reads are allowed, but gateway enforces execSecurity independently."
+
+- id: 62
+  lesson: "OpenClaw skill hot-reload works via chokidar — 250ms debounce. No gateway restart needed for SKILL.md changes."
+
+- id: 71
+  lesson: "gpt-oss:20b uses Harmony response format, not <think> tags. Three channels (analysis/commentary/final). Special tokens decoded as empty strings by Ollama."
+
+- id: 72
+  lesson: "Reasoning: low is the only valid suppression for gpt-oss:20b. Values like none, off, false silently default to medium."
+
+- id: 76
+  lesson: "v2026.3.8 has exec-approvals.sock initialization bug — 3-18 minute delay after gateway restart."
+
+- id: 80
+  lesson: "gpt-oss:20b re-calls exec with approval ID instead of waiting. 14/53 exec calls failed. Fix: AGENTS.md Section 11 STOP-and-WAIT."
+
+- id: 93
+  lesson: "tools.exec.ask (not execAsk) is the config schema key. execAsk is the session/RPC name."
+
+- id: 94
+  lesson: "Git Bash on KILO mangles container paths (/home/node/ → C:/Program Files/Git/home/node/). Use docker exec <container> sh -c instead."

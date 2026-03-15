@@ -1,0 +1,97 @@
+# OPENCLAW STATE
+# Last updated: 2026-03-15 | Session 21
+# Current gateway configuration and known behaviors.
+
+version: "v2026.3.8"
+image: "ghcr.io/openclaw/openclaw:2026.3.8"
+update_available: "v2026.3.13"
+
+config:
+  api_mode: "Native Ollama (no /v1)"
+  base_url: "http://host.docker.internal:11434"
+  heartbeat: "disabled (every: '0m')"
+  thinking_default: "off"
+  discipline_config: "Explicit per-model (not auto-discovery)"
+
+exec:
+  host: "gateway"
+  ask: "always"
+  security: "full"
+  note: "security:full bypasses allowlist checks. Approval cards don't render because dangerouslyDisableDeviceAuth=true strips scopes. See designs/approval-cards.md."
+
+compaction:
+  mode: "safeguard (legacy — lossless-claw overrides)"
+  reserve_tokens_floor: 25000
+  memory_flush_enabled: true
+  soft_threshold_tokens: 2000
+  note: "lossless-claw handles compaction now. Safeguard mode is fallback only."
+
+plugins:
+  context_engine:
+    slot: "lossless-claw"
+    version: "v0.3.0"
+    config_method: "env vars (LCM_* prefix) in docker-compose.yml"
+    note: "Inline JSON in plugins.entries rejected by schema. Env vars have highest precedence."
+
+device_auth:
+  dangerously_disable: true
+  reason: "Ed25519 handshake works (signature accepted, pairing succeeds) but breaks on gateway restart with security:allowlist. Reverted to true to keep Zuberi online."
+  paired_json_path: "/home/node/.openclaw/devices/paired.json"
+  zuberichat_device_id: "8fe4c29ca97ba8cebac24547495f77095aacef1163321263c9dca1a333808681"
+  zuberichat_public_key: "x_Q7OG-zTwUgOprRijLTiUQbypXJq6J9C8p4RdSI_W4"
+  zuberichat_keys_path: "%APPDATA%\\com.zuberichat.app\\device_keys.json"
+
+exec_approvals:
+  file: "/home/node/.openclaw/exec-approvals.json"
+  state: "empty (cleared Session 21)"
+  ask_fallback: "deny (hardcoded default)"
+  valid_fallback_values: ["deny", "allowlist", "full"]
+
+allowed_origins:
+  - "http://localhost:3000"
+  - "http://localhost:18789"
+  note: "Added localhost:3000 for Vite dev. tauri.localhost origin may also need adding."
+
+schema_gotchas:
+  - "tools.exec.ask (not execAsk) — config uses 'ask', session/RPC uses 'execAsk'"
+  - "tools.exec.security valid values: deny, allowlist, full"
+  - "plugins.entries inline config rejected by schema — use env vars"
+  - "client.id must be 'openclaw-control-ui' — custom IDs rejected"
+  - "Model entry requires 'name' field — omitting causes crash loop"
+  - "Gateway restart: docker compose down + up -d (restart has OCI namespace error)"
+
+exec_approval_pipeline:
+  order:
+    1: "Agent calls exec tool"
+    2: "Gateway resolves execution host (sandbox|gateway|node)"
+    3: "Security boundary evaluation (deny|allowlist|full)"
+    4: "If security=full: skip to step 6"
+    5: "If security=allowlist and command not in allowlist: check ask policy"
+    6: "Ask policy evaluation (off|on-miss|always)"
+    7: "If ask requires approval: WebSocket census for approval-capable clients"
+    8: "If zero capable clients: askFallback fires (default: deny)"
+    9: "If capable client found: emit exec.approval.requested"
+    10: "Client renders card, user decides, client sends exec.approval.resolve"
+
+  approval_capable_requirements:
+    - "operator.approvals scope GRANTED (not just requested)"
+    - "Scope only granted with valid device identity (Ed25519 signed challenge)"
+    - "Without device identity: scopes silently stripped to empty array"
+    - "caps: ['tool-events', 'structured-commands'] required for event routing"
+    - "client.mode: 'webchat' required for UI-capable classification"
+
+  connect_rpc_schema:
+    type: "req"
+    method: "connect"
+    required_fields:
+      - "minProtocol: 3, maxProtocol: 3"
+      - "client: {id: 'openclaw-control-ui', version: '...', platform: 'Win32', mode: 'webchat'}"
+      - "role: 'operator'"
+      - "scopes: ['operator.admin', 'operator.approvals', 'operator.pairing', 'operator.read', 'operator.write']"
+      - "device: {id, publicKey, signature, signedAt, nonce} — Ed25519 signed challenge"
+      - "caps: ['tool-events', 'structured-commands']"
+      - "auth: {token: '...'}"
+
+  v2_signing_payload: "v2|{deviceId}|{clientId}|{clientMode}|{role}|{scopes}|{signedAtMs}|{token}|{nonce}"
+  v3_signing_payload: "v2|...|{platform}|{deviceFamily}"
+  signing_verification: "crypto.verify(null, Buffer.from(payload, 'utf8'), key, sig)"

@@ -1,0 +1,214 @@
+# INFRASTRUCTURE STATE
+# Last updated: 2026-03-15 | Session 21
+# Canonical source for all hardware, services, network, and version info.
+
+nodes:
+  kilo:
+    role: "Brain + Interface"
+    tailscale_ip: "100.127.23.52"
+    os: "Windows 11 Pro"
+    cpu: "i7-13700K (16c/24t)"
+    motherboard: "MSI MPG Z690 EDGE WIFI DDR4"
+    ram: "64GB DDR4 3600MHz (4x16GB Corsair Vengeance)"
+    gpu: "RTX 5070 Ti 16GB GDDR7 + Intel UHD 770"
+    storage:
+      - "Samsung 980 PRO 1TB NVMe (OS + primary)"
+      - "870 EVO 1TB SATA"
+      - "Apacer AS340 240GB SATA"
+    network: "TP-Link Wi-Fi 6 PCIe (192.168.1.249)"
+    services:
+      openclaw_gateway:
+        version: "v2026.3.8"
+        port: 18789
+        container_name: "openclaw-openclaw-gateway-1"
+        image: "ghcr.io/openclaw/openclaw:2026.3.8"
+        docker_compose_path: "C:\\Users\\PLUTO\\github\\openclaw\\docker-compose.yml"
+        config_path: "C:\\Users\\PLUTO\\openclaw_config\\openclaw.json"
+        latest_backup: "C:\\Users\\PLUTO\\openclaw_config\\openclaw.json.bak-pre-security"
+      ollama:
+        models_loaded: ["gpt-oss:20b"]
+        models_available: ["gpt-oss:20b", "qwen2.5-coder:14b", "qwen3-vl:8b"]
+        vram_usage: "16GB (one model at a time)"
+        keep_alive: -1
+        kv_cache_type: "q8_0"
+        flash_attention: true
+        context_window: 131072
+        context_slider_gui: 128000
+      sync_api:
+        port: 18790
+        bind: "100.127.23.52"
+        script: "C:\\Users\\PLUTO\\openclaw_config\\sync-api.py"
+        persistence: "Windows Task Scheduler (ZuberiSyncAPI, logon trigger)"
+        reads_from: "C:\\Users\\PLUTO\\openclaw_config\\lcm.db"
+      zuberichat:
+        version: "v1.0.22"
+        repo: "C:\\Users\\PLUTO\\github\\Repo\\ZuberiChat"
+        github: "https://github.com/theovice/ZuberiChat"
+        tests: "155/155"
+        features:
+          - "Ed25519 device identity handshake (v1.0.20)"
+          - "Shell service detection in permissionPolicy (v1.0.18)"
+          - "Connect RPC auth (v1.0.19, removed URL token)"
+          - "Queue flush fix + nonce race fix (v1.0.22)"
+    lossless_claw:
+      version: "v0.3.0"
+      location: "/home/node/.openclaw/extensions/lossless-claw"
+      sqlite_container: "/home/node/.openclaw/lcm.db"
+      sqlite_host: "C:\\Users\\PLUTO\\openclaw_config\\lcm.db"
+      state: "active — 437 messages, 7 summaries, 1 conversation"
+      config_method: "env vars in docker-compose.yml (LCM_* prefix)"
+      env_vars:
+        LCM_INCREMENTAL_MAX_DEPTH: -1
+        LCM_PRUNE_HEARTBEAT_OK: true
+        LCM_TIMEZONE: "America/Chicago"
+      defaults_active:
+        threshold: 0.75
+        freshTailCount: 32
+        leafChunkTokens: 20000
+        leafTargetTokens: 1200
+        condensedTargetTokens: 2000
+        maxExpandTokens: 4000
+        autocompactDisabled: false
+
+  ceg:
+    role: "Toolbox + Storage"
+    tailscale_ip: "100.100.101.1"
+    os: "Ubuntu Server"
+    hardware: "Lenovo M710q"
+    storage: "512GB SSD (474GB usable after LVM expand)"
+    wifi_interface: "wlx90de80152e3f"
+    ssh_alias: "ceg"
+    ufw:
+      default_incoming: deny
+      default_outgoing: deny
+      default_routed: deny
+      allow_in: "Anywhere on tailscale0"
+      allow_out:
+        - "Anywhere on tailscale0"
+        - "53 on wlx90de80152e3f (DNS)"
+        - "123/udp on wlx90de80152e3f (NTP)"
+        - "3478/udp on wlx90de80152e3f (STUN)"
+        - "41641/udp on wlx90de80152e3f (WireGuard)"
+        - "443/tcp on wlx90de80152e3f (HTTPS — gap, needs Squid proxy)"
+
+  tailscale:
+    account: "jamesmwaweru@gmail.com (Google SSO)"
+    kilo: "100.127.23.52"
+    ceg: "100.100.101.1"
+
+services_on_ceg:
+  zuberi_shell:
+    port: 3003
+    bind: "100.100.101.1"
+    status: running
+    purpose: "Shell execution — Zuberi's hands on CEG"
+    blocklist_path: "/opt/zuberi/blocklist.json"
+    blocklist_count: 21
+    audit_log: "JSONL"
+    systemd: "zuberi-shell.service (user)"
+
+  searxng:
+    port: 8888
+    bind: "100.100.101.1"
+    status: running
+    purpose: "Web search"
+
+  n8n:
+    port: 5678
+    status: running
+    purpose: "Workflow automation"
+    auth: enabled
+
+  cxdb:
+    port_http: 9010
+    port_binary: 9009
+    bind: "100.100.101.1"
+    status: running
+    purpose: "Append-only context store"
+    contexts: 13
+    note: "Port 9010 for HTTP writes. Read field is 'data' not 'payload'. type_id not descriptor_type."
+
+  kanban:
+    port: 3001
+    status: running
+    purpose: "Task board (auth disabled, Tailscale-only)"
+
+  usage_tracker:
+    port: 3002
+    bind: "100.100.101.1"
+    status: running
+    purpose: "API usage logging + Kanban spend card"
+
+  agenticmail:
+    port: 3100
+    status: running
+    purpose: "Email (Gmail relay, zuberiwaweru@gmail.com)"
+
+  chroma:
+    port: 8000
+    bind: "100.100.101.1"
+    status: running
+    purpose: "Vector DB"
+    collections:
+      - "router_records (routing feedback from RTL-058)"
+      - "zuberi_conversations (conversation summaries from sync bridge)"
+
+  routing_shim:
+    port: 8100
+    bind: "100.100.101.1"
+    status: running
+    purpose: "FastAPI — routing feedback logging (CXDB + Chroma), idempotent"
+
+  sync_bridge:
+    port: none
+    status: running
+    purpose: "Polls KILO Sync API (18790), replicates to CXDB context 13 + Chroma zuberi_conversations"
+    systemd: "sync-bridge.service (user)"
+    poll_interval: "30 seconds"
+    state_file: "/opt/zuberi/data/sync-state.json"
+    log: "/opt/zuberi/data/sync-bridge.log"
+
+  ccode_cli:
+    status: deprecated
+    note: "Authenticated but no longer used for CEG operations. Shell service replaced it."
+
+workspace:
+  location: "C:\\Users\\PLUTO\\openclaw_workspace\\"
+  root_files:
+    - {file: "AGENTS.md", version: "v1.3.0", tokens: "~2700"}
+    - {file: "SOUL.md", version: "v0.1.1", tokens: "~1500"}
+    - {file: "MEMORY.md", version: "v1.0.0", tokens: "~400"}
+    - {file: "TOOLS.md", version: "v1.1.0", tokens: "~800"}
+    - {file: "IDENTITY.md", tokens: "~500"}
+    - {file: "USER.md", tokens: "~700"}
+  total_root_tokens: "~5916 per turn"
+  skills_count: 15
+
+disciplines:
+  - {name: "General expertise", model: "gpt-oss:20b", size: "13GB", context: "131K", tools: true, status: "active (primary)"}
+  - {name: "Software engineering", model: "qwen2.5-coder:14b", size: "9.0GB", context: "131K", tools: true, status: "active"}
+  - {name: "Visual analysis", model: "qwen3-vl:8b", size: "6.1GB", context: "131K", tools: "unverified", status: "active"}
+  banned_models:
+    - "qwen3:14b — stuck-in-reasoning bug on tool calls"
+    - "qwen3:14b-fast — same bug"
+    - "gemma3:12b — hard tool-support limitation at Ollama registry level"
+
+spending:
+  monthly_budget: "$20.00"
+  alert_threshold: "$15.00"
+  per_dispatch_confirm: "Above $1.00"
+  tracker_url: "http://100.100.101.1:3002/limits"
+
+credentials:
+  note: "NEVER store values. Reference by env var name or location only."
+  locations:
+    anthropic_api_key: "CEG ~/.bashrc + systemd Environment="
+    agenticmail_master: "CEG ~/.agenticmail/config.json"
+    agenticmail_agent: "CEG ~/.agenticmail/"
+    gmail_app_password: "CEG ~/.agenticmail/"
+    n8n_api_key: "KILO workspace skill (marked SECRET)"
+    gateway_token: "${OPENCLAW_GATEWAY_TOKEN} env var"
+  exposed_tokens:
+    - "Gateway dashboard token — exposed Session 21 during approval card debug. ROTATE."
+    - "Azure credentials — exposed Session 20. ROTATE."
+    - "GitHub PAT — exposed Session 21. ROTATE after session."

@@ -1,0 +1,47 @@
+# LESSONS: ARCHITECTURE
+# Numbered globally across all lesson files. Do not reuse numbers.
+
+- id: 1
+  lesson: "OpenClaw container can curl to CEG (Tailscale gateway) but cannot SSH — no key mounted in container"
+
+- id: 4
+  lesson: "OpenClaw does NOT support custom search/MCP via openclaw.json — use workspace skills"
+
+- id: 5
+  lesson: "sandbox.docker.network must stay 'none' — host mode crashes the compose stack"
+
+- id: 6
+  lesson: "tools.exec.host: 'gateway' required for sandbox exec in openclaw.json"
+
+- id: 44
+  lesson: "CXDB has no search — retrieval by context ID and turn index only. Chroma needed for semantic search."
+
+- id: 82
+  lesson: "lossless-claw v0.3.0 installed as OpenClaw ContextEngine plugin (Session 21). Replaces lossy safeguard compaction. Hooks: bootstrap, ingest, assemble, afterTurn, compact. SQLite on KILO. CXDB role revised to audit trail only."
+
+- id: 92
+  lesson: "docker-compose.yml is at C:\\Users\\PLUTO\\github\\openclaw\\docker-compose.yml, NOT openclaw_config/. Always verify path."
+
+- id: 93
+  lesson: "OpenClaw plugin inline config rejected by schema validator. Use env vars (LCM_* prefix) in docker-compose.yml."
+
+- id: 95
+  lesson: "lossless-claw uses lazy migration. Empty lcm.db (4096 bytes) after install is expected — tables appear on first bootstrap."
+
+- id: 96
+  lesson: "lossless-claw ConversationStore has 18 methods, SummaryStore has 17. Many depend on SQLite-specific features. Replacing SQLite with CXDB REST calls is not feasible. Use SQLite natively, sync to CXDB async."
+
+- id: 97
+  lesson: "CXDB does not have a /v1/types endpoint. Type descriptors defined inline per-turn via type_id and type_version."
+
+- id: 98
+  lesson: "OpenClaw plugin registration: plugins.slots.contextEngine: 'lossless-claw' in openclaw.json. Plugin at /home/node/.openclaw/extensions/lossless-claw."
+
+- id: 99
+  lesson: "ZuberiChat has no 'new conversation' feature. Single persistent session. Same session ID reconnects. Gateway restart clears session."
+
+- id: 100
+  lesson: "CXDB append uses type_id not descriptor_type."
+
+- id: 102
+  lesson: "Sync pipeline: Sync API (KILO:18790) → Sync Bridge (CEG systemd) → CXDB context 13 + Chroma zuberi_conversations. 30s polling. CXDB writes authoritative, Chroma secondary."

@@ -1,0 +1,43 @@
+# LESSONS: ZUBETICHAT
+
+- id: 15
+  lesson: "Kill pnpm tauri dev before any ZuberiChat work. Include relaunch step at end."
+
+- id: 16
+  lesson: "155 Vitest smoke tests must pass before and after every change."
+
+- id: 17
+  lesson: "Never mutate refs inside React state updaters — StrictMode double-invokes them."
+
+- id: 18
+  lesson: "Tauri uses invoke() for Rust↔JS bridge — never fetch()."
+
+- id: 24
+  lesson: "VERSION PROTOCOL: version in tauri.conf.json is single source of truth. Always query, never assume."
+
+- id: 54
+  lesson: "ZuberiChat version bump required for update detection. Include bump + update-local.ps1 in every ccode prompt."
+
+- id: 55
+  lesson: "About Zuberi version is hardcoded in ZuberiContextMenu.tsx — must be updated manually on each bump."
+
+- id: 66
+  lesson: "WebSocket send() silently drops messages when not OPEN. Fixed v1.0.11 with pendingQueueRef."
+
+- id: 67
+  lesson: "streamingMessageIdRef must not be unconditionally cleared on final events. v1.0.13 fix."
+
+- id: 77
+  lesson: "version.json must be regenerated on every version bump."
+
+- id: 79
+  lesson: "ZuberiChat approval cards never worked because operator.approvals scope was never requested. Fixed v1.0.17."
+
+- id: 89
+  lesson: "Approval cards may fail mid-session despite v1.0.17 fix. Root cause: URL-token auth and device auth are separate paths."
+
+- id: 99
+  lesson: "Ed25519 device auth: challenge→sign→connect RPC. Without device object, scopes silently stripped to empty array."
+
+- id: "v1.0.22"
+  lesson: "Queue flush before handshake: stale queued messages sent before connect RPC. Fixed by dropping stale queue. Nonce race: sign_challenge from connection N-1 fires on connection N. Fixed with connectionGenRef counter."

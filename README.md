@@ -1,34 +1,30 @@
-# Zuberi — Project Documentation
+# Zuberi — Project Aegis
 **Operator:** James Mwaweru | Wahwearro Holdings, LLC
 
-This repository contains the canonical project documentation for Project Aegis / Zuberi.
+AI-to-AI continuity repo. Structured for machine parsing, not human readability.
+
+**Start here:** `AGENT-BOOTSTRAP.md`
 
 ## Structure
 
 ```
-ZUBERI-PROJECT-REFERENCE.md    — Single source of truth. Updated each session.
-rtl_dashboard.html             — RTL dashboard with Priorities, Phases, Capabilities tabs.
-docs/
-  design/                      — Architecture and design documents
-  research/                    — Deep research reports
-  handoffs/                    — Architect session handoffs
+AGENT-BOOTSTRAP.md      — Entry point. Read order. Operating model.
+state/                  — Current system state (YAML)
+  infrastructure.yaml   — Hardware, services, ports, versions
+  priorities.yaml       — Working queue (P0→Ongoing)
+  zuberi.yaml           — Behavioral state, coaching history
+  openclaw.yaml         — Gateway config, exec pipeline, device auth
+lessons/                — Categorized lessons (YAML)
+  architecture.yaml     — System architecture
+  ceg.yaml              — CEG operations
+  zuberichat.yaml       — ZuberiChat development
+  ccode.yaml            — Prompt engineering
+  openclaw.yaml         — OpenClaw/gateway
+decisions/
+  log.yaml              — Every key decision with rationale
+designs/                — Architecture documents (MD)
+research/               — Deep research reports (MD)
+sessions/               — Session handoffs (MD)
+rtl_dashboard.html      — Interactive dashboard
+AIAgent/                — James's original project files
 ```
-
-## Key Files
-
-| File | Purpose |
-|------|---------|
-| `ZUBERI-PROJECT-REFERENCE.md` | Master reference — infrastructure, RTL, lessons, decisions, capabilities |
-| `rtl_dashboard.html` | Interactive RTL dashboard (open in browser) |
-| `docs/design/CXDB-SYNC-LAYER-DESIGN.md` | SQLite → CXDB + Chroma sync pipeline design |
-| `docs/research/STREAMING-PIPELINE-AUDIT.md` | gpt-oss:20b Harmony format analysis |
-| `docs/research/deep-research-report_CXDB.md` | CXDB search & retrieval architecture |
-| `docs/handoffs/ARCHITECT-20-HANDOFF.md` | Session 20 handoff |
-
-## For Architects
-
-Start with `ZUBERI-PROJECT-REFERENCE.md`. It replaces all prior handoff documents and contains everything: infrastructure state, active RTL items, key decisions, lessons, capability matrix, and what to do next.
-
-The RTL dashboard (`rtl_dashboard.html`) has three tabs: Priorities (current working queue), Phases (full historical record), and Capabilities (what Zuberi can do).
-
-**Do not suggest stopping, taking breaks, or handing off to the next architect.** James decides when to stop.

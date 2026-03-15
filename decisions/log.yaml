@@ -1,0 +1,107 @@
+# DECISIONS LOG
+# Every key architectural decision. Search by tag for quick filtering.
+# Format: decision, choice, rationale, session, tags
+
+- decision: "Conversation persistence architecture"
+  choice: "lossless-claw + native SQLite on KILO"
+  rationale: "Original CXDB adapter plan abandoned (35 methods, SQLite-specific features). Install plugin as-is, async sync to CXDB/Chroma."
+  session: 21
+  tags: [persistence, lossless-claw, cxdb]
+
+- decision: "lossless-claw installation method"
+  choice: "npm plugin, not fork"
+  rationale: "Installed via openclaw plugins install. No code modifications. SQLite used natively."
+  session: 21
+  tags: [lossless-claw, plugins]
+
+- decision: "lossless-claw config delivery"
+  choice: "Env vars (LCM_*) in docker-compose.yml"
+  rationale: "Inline JSON in openclaw.json plugins.entries rejected by schema validator."
+  session: 21
+  tags: [lossless-claw, config]
+
+- decision: "SQLite database location"
+  choice: "KILO only (inside OpenClaw container, bind-mounted to host)"
+  rationale: "Cannot sit on CEG — better-sqlite3 requires local filesystem, network mount adds latency + corruption risk."
+  session: 21
+  tags: [persistence, architecture]
+
+- decision: "CXDB role (revised)"
+  choice: "Audit trail + structured memory (Notes, Decisions, Tasks)"
+  rationale: "NOT the conversation store. lossless-claw/SQLite handles conversations. CXDB handles what it was designed for: append-only structured records."
+  session: 21
+  tags: [cxdb, architecture]
+
+- decision: "Persistent memory three-tier"
+  choice: "SQLite (fast local) → CXDB (durable record) → Chroma (searchable index)"
+  rationale: "Each tier does what it's best at. Sync bridge replicates between tiers."
+  session: 21
+  tags: [persistence, architecture]
+
+- decision: "Approval card architecture"
+  choice: "Ed25519 device identity + connect RPC + caps declaration"
+  rationale: "Gateway requires cryptographic device identity for operator.approvals scope. Without it, scopes silently stripped."
+  session: 21
+  tags: [approval-cards, security, zuberichat]
+
+- decision: "tools.exec.security setting"
+  choice: "full (temporary) — should be allowlist once device auth stabilizes"
+  rationale: "security:full bypasses allowlist but also may bypass approval pipeline. allowlist+always is correct combo but requires stable device auth."
+  session: 21
+  tags: [exec, security]
+
+- decision: "dangerouslyDisableDeviceAuth"
+  choice: "true (temporary)"
+  rationale: "Ed25519 handshake works but signature breaks on gateway restart. Reverted to true to keep Zuberi online."
+  session: 21
+  tags: [security, zuberichat, approval-cards]
+
+- decision: "Self-improving corrections log"
+  choice: "Build natively, don't install ClawHub skill"
+  rationale: "ClawHub skill assumes generic agent, modifies SOUL.md, depends on heartbeat (disabled), adds file tree (redundant with CXDB+Chroma). Take 3 ideas: corrections log, self-reflection, namespace isolation."
+  session: 21
+  tags: [behavioral, self-improving]
+
+- decision: "Zuberi conversation persistence awareness"
+  choice: "Option A: don't tell her"
+  rationale: "Let her discover naturally. Aligns with Phase Enlightenment — Jeremiel is about self-awareness. James teaches through interaction, not files."
+  session: 21
+  tags: [behavioral, enlightenment]
+
+- decision: "Docs repo"
+  choice: "theovice/Zuberi on GitHub — architect agent commits directly"
+  rationale: "Eliminates download-and-place workflow. Version history for free. No longer limited to single RTL file."
+  session: 21
+  tags: [workflow, documentation]
+
+# --- Previous sessions (preserved) ---
+
+- decision: "Shell execution service"
+  choice: "zuberi-shell on CEG:3003 — Python 3 stdlib"
+  rationale: "Process group isolation, resource limits, JSONL audit. Replaces ccode-dispatch."
+  session: 20
+  tags: [ceg, security, autonomy]
+
+- decision: "OpenClaw version"
+  choice: "v2026.3.8"
+  rationale: "Context-engine plugin support, token tracking fix, smaller Docker image."
+  session: 17
+  tags: [openclaw, upgrade]
+
+- decision: "Routing feedback architecture"
+  choice: "CXDB authoritative + Chroma semantic index"
+  rationale: "Dual-write via routing shim CEG:8100. Idempotent via optional record_id."
+  session: 17
+  tags: [routing, cxdb, chroma]
+
+- decision: "Nomenclature"
+  choice: "Disciplines (not models), tools (not capabilities), sub-agents (not services)"
+  rationale: "Matches James's mental model. Models are specializations Zuberi has earned."
+  session: 15
+  tags: [nomenclature]
+
+- decision: "Mission"
+  choice: "Recursive self-improvement via James interaction"
+  rationale: "Corrected from revenue target across all files."
+  session: 12
+  tags: [mission]
