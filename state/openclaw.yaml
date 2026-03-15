@@ -15,9 +15,9 @@ config:
 
 exec:
   host: "gateway"
-  ask: "always"
+  ask: "off"
   security: "full"
-  note: "security:full bypasses allowlist checks. Approval cards don't render because dangerouslyDisableDeviceAuth=true strips scopes. See designs/approval-cards.md."
+  note: "Reverted Session 21. security:full + ask:off = commands execute immediately, no approval cards. Working state."
 
 compaction:
   mode: "safeguard (legacy — lossless-claw overrides)"
@@ -35,7 +35,7 @@ plugins:
 
 device_auth:
   dangerously_disable: true
-  reason: "Ed25519 handshake works (signature accepted, pairing succeeds) but breaks on gateway restart with security:allowlist. Reverted to true to keep Zuberi online."
+  reason: "Reverted Session 21. Ed25519 handshake code exists in v1.0.22 but compounded config changes broke connectivity. Approval cards deferred to dedicated agent."
   paired_json_path: "/home/node/.openclaw/devices/paired.json"
   zuberichat_device_id: "8fe4c29ca97ba8cebac24547495f77095aacef1163321263c9dca1a333808681"
   zuberichat_public_key: "x_Q7OG-zTwUgOprRijLTiUQbypXJq6J9C8p4RdSI_W4"
