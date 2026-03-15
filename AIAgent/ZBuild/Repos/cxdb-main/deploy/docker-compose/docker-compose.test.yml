@@ -1,0 +1,67 @@
+# Docker Compose file for CI integration tests
+# Uses pre-built images instead of building from source
+
+services:
+  cxdb-server:
+    image: cxdb/cxdb:test
+    container_name: cxdb-server
+    restart: unless-stopped
+    ports:
+      - "9009:9009"
+      - "9010:9010"
+    volumes:
+      - cxdb-data:/data
+    environment:
+      CXDB_DATA_DIR: /data
+      CXDB_BIND: 0.0.0.0:9009
+      CXDB_HTTP_BIND: 0.0.0.0:9010
+      CXDB_LOG_LEVEL: ${CXDB_LOG_LEVEL:-info}
+      CXDB_LOG_FORMAT: ${CXDB_LOG_FORMAT:-json}
+    networks:
+      - cxdb-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9010/healthz"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+      start_period: 10s
+
+  cxdb-gateway:
+    image: cxdb/gateway:test
+    container_name: cxdb-gateway
+    restart: unless-stopped
+    ports:
+      - "${GATEWAY_PORT:-8080}:8080"
+    volumes:
+      - gateway-data:/data
+    environment:
+      PORT: 8080
+      CXDB_BACKEND_URL: http://cxdb-server:9010
+      PUBLIC_BASE_URL: ${PUBLIC_BASE_URL}
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
+      GOOGLE_ALLOWED_DOMAIN: ${GOOGLE_ALLOWED_DOMAIN:-}
+      SESSION_SECRET: ${SESSION_SECRET}
+      DATABASE_PATH: /data/sessions.db
+      DEV_MODE: ${DEV_MODE:-true}
+    depends_on:
+      cxdb-server:
+        condition: service_healthy
+    networks:
+      - cxdb-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/healthz"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+      start_period: 5s
+
+networks:
+  cxdb-network:
+    driver: bridge
+
+volumes:
+  cxdb-data:
+    driver: local
+  gateway-data:
+    driver: local

@@ -1,0 +1,14 @@
+# CXDB Code Owners
+# See https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
+
+# Default owners for everything in the repo
+* @strongdm/cxdb-maintainers
+
+# Documentation changes can be reviewed by technical writers
+/docs/ @strongdm/cxdb-maintainers
+
+# Deployment configurations require infrastructure review
+/deploy/ @strongdm/cxdb-maintainers
+
+# Examples and tests can have broader review
+/examples/ @strongdm/cxdb-maintainers

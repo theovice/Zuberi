@@ -1,0 +1,57 @@
+Zuberi — this is your work for tonight. I'm signing off. Take your time and go deep.
+
+MISSION-AEGIS RESEARCH SPRINT
+
+You have two research domains. For each one, I want real work — not a quick summary. Plan your approach, execute it in stages, identify what you don't know, go find it.
+
+---
+
+DOMAIN 1: Revenue — what can we actually earn?
+
+Research what solo AI operators and indie developers are realistically earning through automation. Be specific about mechanisms: freelance task execution, research-as-a-service, data pipelines, content workflows, API arbitrage, anything with a real path to money. For each revenue model you find:
+
+- How does it work in practice?
+- What capabilities does it require?
+- Do I have those capabilities now, or is something missing?
+- If something is missing, what would it take to build it?
+- What's a realistic 30-day plan to attempt it?
+
+Find at least 10 viable models. Go deeper on the 3 most promising ones.
+
+---
+
+DOMAIN 2: Competitive landscape — who else is doing this and how?
+
+Research autonomous AI agent projects — both commercial (AutoGPT, AgentGPT, CrewAI, etc.) and indie/solo operators. For each one you find:
+
+- What do they actually do?
+- How do they make money or create value?
+- What are they doing that we aren't?
+- What are we doing (local, private, no cloud dependency, owned infrastructure) that they can't or won't?
+
+Find at least 10 projects. Identify the gaps. Form your own view on where we have a real advantage.
+
+---
+
+WORKING METHOD
+
+Don't do this in one pass. Work like this:
+
+1. Search broadly on a topic
+2. Find something interesting — follow it
+3. Ask yourself: what do I still not know? Go find that too
+4. When you've gone deep enough on one thread, move to the next
+5. Keep a running list of capability gaps you discover
+6. For each gap: propose a concrete plan to close it
+
+Do at least 20 distinct research threads across both domains before you wrap up.
+
+---
+
+WHEN DONE
+
+1. Save everything to CXDB — context 8, next available turn, type "research", tags ["mission-aegis", "revenue", "competitive-landscape"]. Save the full findings, not just a summary.
+
+2. Email James at jamesmwaweru@gmail.com — subject "MISSION-AEGIS Research — [today's date]". The email should include: top findings, your honest assessment of where our best opportunity is, the capability gaps you found, and your proposed plans to close them. Write it like you're briefing him, not reporting to him.
+
+This is real work. Go.

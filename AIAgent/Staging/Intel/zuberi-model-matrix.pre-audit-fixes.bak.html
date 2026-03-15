@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Model Matrix</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'JetBrains Mono', 'SF Mono', 'Fira Code', monospace;
+    background: #0a0f1a;
+    color: #e2e8f0;
+    min-height: 100vh;
+    padding: 24px 16px;
+  }
+
+  .container { max-width: 1400px; margin: 0 auto; }
+
+  h1 {
+    font-size: 24px; font-weight: 700; letter-spacing: -0.02em;
+    background: linear-gradient(135deg, #10b981, #06b6d4);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .subtitle { font-size: 11px; color: #64748b; margin: 6px 0 0; line-height: 1.5; }
+
+  /* ── Hardware Selector Bar ── */
+  .hw-bar {
+    margin: 20px 0 0;
+    padding: 16px 20px;
+    background: #0f172a;
+    border: 1px solid #1e293b;
+    border-radius: 10px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    align-items: flex-start;
+  }
+
+  .hw-group { display: flex; flex-direction: column; gap: 6px; }
+  .hw-label {
+    font-size: 10px; font-weight: 600; text-transform: uppercase;
+    letter-spacing: 0.08em; color: #64748b;
+  }
+  .hw-chips { display: flex; gap: 5px; flex-wrap: wrap; }
+
+  .hw-chip {
+    padding: 5px 12px; border-radius: 6px; border: 1px solid #1e293b;
+    background: #0a0f1a; color: #64748b; font-size: 11px; font-weight: 500;
+    cursor: pointer; font-family: inherit; transition: all 0.2s;
+  }
+  .hw-chip:hover { border-color: #334155; color: #94a3b8; }
+  .hw-chip.active { border-color: #10b981; background: rgba(16,185,129,0.1); color: #10b981; }
+
+  .hw-chip.warn.active { border-color: #f59e0b; background: rgba(245,158,11,0.1); color: #f59e0b; }
+
+  /* ── Summary Card ── */
+  .summary-card {
+    margin: 16px 0;
+    padding: 16px 20px;
+    background: linear-gradient(135deg, #0f172a 0%, #111827 100%);
+    border: 1px solid #1e3a3a;
+    border-radius: 10px;
+  }
+  .summary-title {
+    font-size: 12px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.06em; color: #10b981; margin-bottom: 10px;
+  }
+  .summary-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 10px;
+  }
+  .summary-item {
+    display: flex; flex-direction: column; gap: 2px;
+    padding: 8px 12px; background: rgba(16,185,129,0.04);
+    border-radius: 6px; border: 1px solid #1e293b;
+  }
+  .summary-item-label { font-size: 10px; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em; }
+  .summary-item-value { font-size: 13px; font-weight: 600; color: #e2e8f0; }
+  .summary-item-meta { font-size: 10px; color: #475569; }
+
+  /* ── Table ── */
+  .table-wrap {
+    overflow-x: auto; border-radius: 8px; border: 1px solid #1e293b;
+    scrollbar-width: thin; scrollbar-color: #1e293b #0a0f1a;
+    margin-top: 16px;
+  }
+
+  table { width: 100%; border-collapse: collapse; font-size: 12px; min-width: 1050px; }
+
+  thead th {
+    padding: 10px 10px; text-align: left; cursor: pointer; user-select: none;
+    font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em;
+    color: #64748b; border-bottom: 2px solid #1e293b; white-space: nowrap;
+    background: #0f172a; transition: all 0.15s; position: sticky; top: 0; z-index: 2;
+  }
+  thead th:hover { color: #94a3b8; }
+  thead th.sorted { color: #e2e8f0; background: #0c1322; }
+
+  tbody tr { cursor: pointer; transition: all 0.2s; }
+  tbody tr:hover { background: rgba(16,185,129,0.04); }
+  tbody tr.dimmed { opacity: 0.35; }
+  tbody tr.dimmed:hover { opacity: 0.55; }
+
+  tbody td {
+    padding: 9px 10px; border-bottom: 1px solid #1e293b;
+    vertical-align: top;
+  }
+
+  .model-name { font-weight: 600; font-size: 12px; }
+  .model-meta { font-size: 10px; color: #475569; margin-top: 2px; }
+
+  /* ── Notes Panel ── */
+  .notes-box {
+    margin-top: 8px; padding: 10px 12px; background: #1e293b;
+    border-radius: 6px; font-size: 11px; line-height: 1.7; color: #94a3b8;
+    display: none; animation: fadeIn 0.2s ease;
+  }
+  .notes-box.open { display: block; }
+  .notes-section { margin-bottom: 4px; }
+  .notes-section:last-child { margin-bottom: 0; }
+
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: translateY(0); } }
+
+  .params { font-size: 12px; color: #94a3b8; }
+  .context-val { font-size: 12px; color: #94a3b8; }
+
+  /* ── VRAM Badge ── */
+  .vram-badge { font-size: 12px; font-weight: 600; font-variant-numeric: tabular-nums; }
+  .vram-green { color: #10b981; }
+  .vram-yellow { color: #f59e0b; }
+  .vram-orange { color: #f97316; }
+  .vram-red { color: #ef4444; }
+
+  /* ── Speed ── */
+  .speed { font-weight: 600; font-variant-numeric: tabular-nums; }
+  .speed-fast { color: #10b981; }
+  .speed-mid { color: #f59e0b; }
+  .speed-slow { color: #f97316; }
+  .speed-na { color: #475569; font-size: 11px; font-weight: 400; }
+  .speed-prov {
+    font-size: 9px; font-weight: 400; color: #475569;
+    padding: 1px 4px; border-radius: 3px; background: rgba(100,116,139,0.1);
+    margin-left: 4px; vertical-align: middle;
+  }
+
+  /* ── Tool Dots ── */
+  .tool-dots { display: flex; gap: 3px; }
+  .tool-dot { width: 8px; height: 8px; border-radius: 50%; }
+  .tool-dot.on { background: #10b981; }
+  .tool-dot.off { background: #1e293b; border: 1px solid #334155; }
+
+  /* ── Agent Fit Bar ── */
+  .quality-bar-wrap { display: flex; align-items: center; gap: 6px; }
+  .quality-track { width: 70px; height: 7px; background: #1e293b; border-radius: 4px; overflow: hidden; }
+  .quality-fill { height: 100%; border-radius: 4px; transition: width 0.4s ease; }
+  .quality-fill.high { background: #10b981; }
+  .quality-fill.mid { background: #f59e0b; }
+  .quality-fill.low { background: #f97316; }
+  .quality-fill.vlow { background: #ef4444; }
+  .quality-label { font-size: 10px; color: #94a3b8; font-variant-numeric: tabular-nums; }
+
+  /* ── Fit Badge ── */
+  .fit-badge {
+    display: inline-block; padding: 2px 7px; border-radius: 4px;
+    font-size: 9px; font-weight: 600; letter-spacing: 0.03em;
+    white-space: nowrap;
+  }
+  .fit-full { background: rgba(16,185,129,0.15); color: #10b981; }
+  .fit-offload { background: rgba(245,158,11,0.15); color: #f59e0b; }
+  .fit-no { background: rgba(239,68,68,0.15); color: #ef4444; }
+
+  /* ── Trait Badges ── */
+  .trait-badges { display: flex; gap: 3px; flex-wrap: wrap; }
+  .trait-badge {
+    display: inline-flex; align-items: center; gap: 2px;
+    padding: 2px 6px; border-radius: 4px; font-size: 9px; font-weight: 500;
+    background: rgba(100,116,139,0.12); color: #94a3b8;
+    white-space: nowrap;
+  }
+
+  /* ── Caps Icons ── */
+  .caps { display: flex; gap: 4px; font-size: 13px; }
+  .cap-icon { opacity: 0.25; }
+  .cap-icon.on { opacity: 1; }
+
+  /* ── Footer ── */
+  .footer {
+    margin-top: 16px; padding: 12px 16px; background: #0f172a;
+    border-radius: 8px; border: 1px solid #1e293b;
+    font-size: 10px; color: #475569; line-height: 1.7;
+  }
+
+  /* ── Reference Row Marker ── */
+  .ref-marker {
+    font-size: 9px; color: #ef4444; font-weight: 600;
+    background: rgba(239,68,68,0.1); padding: 1px 5px;
+    border-radius: 3px; margin-left: 5px;
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <div style="margin-bottom: 4px;">
+    <h1>MODEL MATRIX</h1>
+    <p class="subtitle">Representative open models &middot; Select your hardware to filter and rank &middot; Click headers to sort &middot; Click rows to expand</p>
+  </div>
+
+  <div class="hw-bar" id="hwBar">
+    <div class="hw-group">
+      <span class="hw-label">VRAM</span>
+      <div class="hw-chips" id="vramChips"></div>
+    </div>
+    <div class="hw-group">
+      <span class="hw-label">CPU Offload</span>
+      <div class="hw-chips" id="offloadChips"></div>
+    </div>
+    <div class="hw-group">
+      <span class="hw-label">Workload</span>
+      <div class="hw-chips" id="workloadChips"></div>
+    </div>
+  </div>
+
+  <div class="summary-card" id="summaryCard"></div>
+
+  <div class="table-wrap">
+    <table>
+      <thead id="thead"></thead>
+      <tbody id="tbody"></tbody>
+    </table>
+  </div>
+
+  <div class="footer">
+    Speed estimates are based on community benchmarks and equivalent hardware estimates.
+    Fit and ranking update dynamically based on the selected hardware profile.
+    Provenance: <span style="color:#94a3b8">M</span> = Measured, <span style="color:#94a3b8">C</span> = Community, <span style="color:#94a3b8">E</span> = Estimated.
+  </div>
+</div>
+
+<script>
+// ── Model Data ──────────────────────────────────────────────────────────────
+const models = [
+  // Llama family
+  { name:"Llama 3.2 3B", maker:"Meta", family:"Llama", arch:"Dense", params:"3B", vram:3, context:"128K", toolScore:2, quality:28, vision:false, reasoning:false, coding:false, longContext:true, fast:true, agentic:false, speedEst:{6:95,8:110,12:120,16:120,24:120,48:120}, prov:"C", bestFor:"Lightweight edge inference, mobile deployment, quick prototyping", avoidIf:"You need strong reasoning, tool use, or complex multi-step tasks", hwNotes:"Fits any modern GPU. Full speed even on 6 GB cards.", caveats:"Limited capability at 3B — best as a draft or classification model." },
+  { name:"Llama 3.1 8B", maker:"Meta", family:"Llama", arch:"Dense", params:"8B", vram:6, context:"128K", toolScore:3, quality:38, vision:false, reasoning:false, coding:true, longContext:true, fast:true, agentic:false, speedEst:{6:55,8:70,12:85,16:85,24:85,48:85}, prov:"C", bestFor:"General chat, simple tool use, code completion, long-doc summarization", avoidIf:"You need strong agent chains or complex reasoning", hwNotes:"100% GPU on 8 GB+. Usable with offload on 6 GB.", caveats:"128K context available but quality degrades beyond 32K in practice." },
+  { name:"Llama 3.1 70B", maker:"Meta", family:"Llama", arch:"Dense", params:"70B", vram:45, context:"128K", toolScore:3, quality:72, vision:false, reasoning:true, coding:true, longContext:true, fast:false, agentic:false, speedEst:{6:0,8:0,12:0,16:0,24:5,48:12}, prov:"C", bestFor:"High-quality generation, reasoning, analysis, long documents", avoidIf:"You need fast inference or have < 48 GB VRAM", hwNotes:"Q3 quant fits 48 GB. Dual-GPU (2x24 GB) possible but slow (~5 t/s). Not practical on single consumer GPU.", caveats:"Ecosystem well-supported but behind Qwen 72B for structured tool use." },
+
+  // Qwen family
+  { name:"Qwen2.5 7B Instruct", maker:"Alibaba", family:"Qwen", arch:"Dense", params:"7B", vram:5, context:"32K", toolScore:3, quality:40, vision:false, reasoning:false, coding:true, longContext:false, fast:true, agentic:false, speedEst:{6:65,8:80,12:90,16:90,24:90,48:90}, prov:"C", bestFor:"Instruction following, chat, quick tasks, code assist", avoidIf:"You need vision, deep reasoning, or agent work", hwNotes:"Fits 6 GB cards. Very fast on 8 GB+.", caveats:"Solid all-rounder at 7B but limited by parameter count for complex tasks." },
+  { name:"Qwen2.5 14B Instruct", maker:"Alibaba", family:"Qwen", arch:"Dense", params:"14B", vram:10, context:"32K", toolScore:4, quality:52, vision:false, reasoning:true, coding:true, longContext:false, fast:true, agentic:true, speedEst:{6:20,8:40,12:60,16:65,24:65,48:65}, prov:"C", bestFor:"Balanced agent work, tool calling, code generation, structured output", avoidIf:"You need vision or very long context (> 32K)", hwNotes:"100% GPU on 12 GB+. Usable with offload on 8 GB.", caveats:"Strong instruction follower. Thinking mode available for reasoning tasks." },
+  { name:"Qwen2.5 32B Instruct", maker:"Alibaba", family:"Qwen", arch:"Dense", params:"32B", vram:22, context:"32K", toolScore:4, quality:65, vision:false, reasoning:true, coding:true, longContext:false, fast:false, agentic:true, speedEst:{6:0,8:0,12:10,16:18,24:45,48:64}, prov:"C", bestFor:"Strong reasoning, reliable tool use, code review, complex analysis", avoidIf:"You need fast inference on < 24 GB or vision capability", hwNotes:"Sweet spot for 24 GB GPUs. Fits 100% on RTX 3090/4090.", caveats:"Good balance of speed and capability. Slightly behind 72B for agent chains." },
+  { name:"Qwen2.5-Coder 7B", maker:"Alibaba", family:"Qwen", arch:"Dense", params:"7B", vram:5, context:"128K", toolScore:3, quality:38, vision:false, reasoning:false, coding:true, longContext:true, fast:true, agentic:false, speedEst:{6:65,8:80,12:90,16:90,24:90,48:90}, prov:"C", bestFor:"Code completion, code explanation, dev assistant tasks", avoidIf:"You need general knowledge or multi-tool agent work", hwNotes:"Fits 6 GB. 128K context but VRAM increases with long inputs.", caveats:"Code-specialized — weaker than base Qwen2.5 7B for general chat." },
+  { name:"Qwen2.5-Coder 14B", maker:"Alibaba", family:"Qwen", arch:"Dense", params:"14B", vram:10, context:"128K", toolScore:3, quality:50, vision:false, reasoning:false, coding:true, longContext:true, fast:true, agentic:false, speedEst:{6:20,8:40,12:60,16:65,24:65,48:65}, prov:"C", bestFor:"Serious code generation, repository-level tasks, code review", avoidIf:"You need general agent work or reasoning — use base Qwen2.5 14B instead", hwNotes:"100% GPU on 12 GB+. Long context increases VRAM usage.", caveats:"Excellent code quality. Not optimized for general tool use or agent chains." },
+  { name:"Qwen2.5-VL 7B", maker:"Alibaba", family:"Qwen", arch:"Dense", params:"7B", vram:6, context:"32K", toolScore:2, quality:36, vision:true, reasoning:false, coding:false, longContext:false, fast:true, agentic:false, speedEst:{6:55,8:70,12:80,16:80,24:80,48:80}, prov:"E", bestFor:"Image understanding, visual QA, document analysis, OCR", avoidIf:"You need text-only speed or strong tool calling", hwNotes:"Fits 8 GB. Vision encoder adds overhead vs text-only models.", caveats:"Vision quality good for 7B. Limited reasoning compared to larger VL models." },
+  { name:"Qwen3 14B", maker:"Alibaba", family:"Qwen", arch:"Dense", params:"14B", vram:10, context:"32K", toolScore:4, quality:54, vision:false, reasoning:true, coding:true, longContext:false, fast:true, agentic:true, speedEst:{6:20,8:40,12:62,16:65,24:65,48:65}, prov:"C", bestFor:"Agent work, tool calling, thinking-mode reasoning, 12 GB GPU sweet spot", avoidIf:"You need vision capability", hwNotes:"100% GPU on 12 GB+ cards. Thinking mode for chain-of-thought.", caveats:"Community favorite for 12 GB setups. Strong instruction following." },
+  { name:"Qwen3 14B Fast", maker:"Alibaba", family:"Qwen", arch:"Dense", params:"14B", vram:10, context:"32K", toolScore:4, quality:50, vision:false, reasoning:false, coding:true, longContext:false, fast:true, agentic:true, speedEst:{6:25,8:48,12:72,16:78,24:78,48:78}, prov:"C", bestFor:"Fast agent loops, interactive chat, rapid tool calling", avoidIf:"You need deep chain-of-thought reasoning (use Qwen3 14B with thinking instead)", hwNotes:"Same VRAM as Qwen3 14B but faster — thinking disabled for speed.", caveats:"Trades reasoning depth for throughput. Good for latency-sensitive workflows." },
+  { name:"Qwen3-VL 8B Fast", maker:"Alibaba", family:"Qwen", arch:"Dense", params:"8B", vram:7, context:"32K", toolScore:2, quality:35, vision:true, reasoning:false, coding:false, longContext:false, fast:true, agentic:false, speedEst:{6:40,8:60,12:75,16:75,24:75,48:75}, prov:"E", bestFor:"Fast visual understanding, screenshot analysis, image-based tasks", avoidIf:"You need strong text reasoning or tool use", hwNotes:"Fits 8 GB. Vision adds ~1 GB overhead vs text-only.", caveats:"Speed-optimized variant. Good enough for visual triage, not deep analysis." },
+
+  // Mistral family
+  { name:"Mistral 7B Instruct", maker:"Mistral", family:"Mistral", arch:"Dense", params:"7B", vram:5, context:"32K", toolScore:3, quality:36, vision:false, reasoning:false, coding:true, longContext:false, fast:true, agentic:false, speedEst:{6:70,8:85,12:95,16:95,24:95,48:95}, prov:"C", bestFor:"Fast chat, instruction following, lightweight tasks", avoidIf:"You need agent-level tool use or deep reasoning", hwNotes:"Fits any 6 GB+ GPU. Very fast inference.", caveats:"Pioneer model — well-supported ecosystem but overtaken by Qwen/Llama at 7B." },
+  { name:"Ministral 8B", maker:"Mistral", family:"Mistral", arch:"Dense", params:"8B", vram:6, context:"128K", toolScore:3, quality:39, vision:false, reasoning:false, coding:true, longContext:true, fast:true, agentic:false, speedEst:{6:55,8:72,12:85,16:85,24:85,48:85}, prov:"E", bestFor:"Long-context tasks, summarization, edge deployment with large docs", avoidIf:"You need strong reasoning or complex agent chains", hwNotes:"128K context available but VRAM grows with input length. 8 GB sufficient for shorter inputs.", caveats:"Newer Mistral small model. 128K context is headline feature." },
+  { name:"Mixtral 8x7B", maker:"Mistral", family:"Mistral", arch:"MoE", params:"47B (12.9B active)", vram:26, context:"32K", toolScore:3, quality:52, vision:false, reasoning:true, coding:true, longContext:false, fast:false, agentic:false, speedEst:{6:0,8:0,12:0,16:8,24:22,48:40}, prov:"C", bestFor:"Balanced quality/speed MoE, multi-task general use", avoidIf:"You need < 24 GB VRAM or fast interactive chat", hwNotes:"MoE — needs full model in memory (~26 GB) despite only 12.9B active. Best on 48 GB.", caveats:"Groundbreaking MoE but surpassed by newer models. Still useful for its inference efficiency." },
+  { name:"Mixtral 8x22B", maker:"Mistral", family:"Mistral", arch:"MoE", params:"141B (39B active)", vram:85, context:"64K", toolScore:3, quality:70, vision:false, reasoning:true, coding:true, longContext:true, fast:false, agentic:false, speedEst:{6:0,8:0,12:0,16:0,24:0,48:6}, prov:"E", bestFor:"High-quality generation where latency is not critical", avoidIf:"You have less than 80 GB VRAM — not practical for consumer hardware", hwNotes:"Requires multi-GPU enterprise setup or heavy quantization. Reference row.", caveats:"Enormous MoE. High quality but impractical for most local setups.", refRow:true },
+
+  // Gemma family
+  { name:"Gemma 2 9B", maker:"Google", family:"Gemma", arch:"Dense", params:"9B", vram:7, context:"8K", toolScore:2, quality:40, vision:false, reasoning:false, coding:true, longContext:false, fast:true, agentic:false, speedEst:{6:50,8:68,12:82,16:82,24:82,48:82}, prov:"C", bestFor:"Efficient small model, code tasks, quick generation", avoidIf:"You need long context (8K limit) or strong tool calling", hwNotes:"Fits 8 GB easily. Fast inference.", caveats:"8K context is a significant limitation. Google's licensing is permissive." },
+  { name:"Gemma 2 27B", maker:"Google", family:"Gemma", arch:"Dense", params:"27B", vram:18, context:"8K", toolScore:3, quality:56, vision:false, reasoning:true, coding:true, longContext:false, fast:false, agentic:false, speedEst:{6:0,8:0,12:12,16:22,24:42,48:55}, prov:"C", bestFor:"Strong reasoning for its size, code generation, analysis", avoidIf:"You need long context (8K limit) or vision", hwNotes:"Fits 24 GB GPUs. Usable with offload on 16 GB.", caveats:"High quality per parameter but 8K context limits use cases significantly." },
+  { name:"Gemma 3 12B", maker:"Google", family:"Gemma", arch:"Dense", params:"12B", vram:9, context:"128K", toolScore:3, quality:48, vision:true, reasoning:true, coding:true, longContext:true, fast:true, agentic:false, speedEst:{6:30,8:52,12:68,16:72,24:72,48:72}, prov:"C", bestFor:"Multimodal tasks, long documents, code — strong for its size class", avoidIf:"You need top-tier agent/tool use or maximum reasoning depth", hwNotes:"Fits 12 GB. 128K context is a big upgrade over Gemma 2. Vision capable.", caveats:"Major improvement over Gemma 2. Vision + long context + good coding." },
+
+  // Granite family
+  { name:"Granite 3.1 8B Instruct", maker:"IBM", family:"Granite", arch:"Dense", params:"8B", vram:6, context:"128K", toolScore:3, quality:38, vision:false, reasoning:false, coding:false, longContext:true, fast:true, agentic:true, speedEst:{6:55,8:72,12:85,16:85,24:85,48:85}, prov:"E", bestFor:"Enterprise tasks, RAG, instruction following, agentic workflows", avoidIf:"You need top-tier code generation or deep reasoning", hwNotes:"Fits 8 GB. 128K context grows VRAM with input length.", caveats:"IBM's enterprise-focused model. Apache 2.0 license. Good for structured tasks." },
+  { name:"Granite 3.1 8B Code", maker:"IBM", family:"Granite", arch:"Dense", params:"8B", vram:6, context:"128K", toolScore:2, quality:36, vision:false, reasoning:false, coding:true, longContext:true, fast:true, agentic:false, speedEst:{6:55,8:72,12:85,16:85,24:85,48:85}, prov:"E", bestFor:"Code generation, completion, code explanation at small model size", avoidIf:"You need general chat or agent tool use", hwNotes:"Same footprint as Granite 3.1 8B Instruct.", caveats:"Code-specialized variant. Less versatile than general Granite 8B." },
+  { name:"Granite Vision 3.2 2B", maker:"IBM", family:"Granite", arch:"Dense", params:"2B", vram:2, context:"4K", toolScore:1, quality:22, vision:true, reasoning:false, coding:false, longContext:false, fast:true, agentic:false, speedEst:{6:120,8:130,12:130,16:130,24:130,48:130}, prov:"E", bestFor:"Ultra-lightweight vision tasks, edge deployment, image classification", avoidIf:"You need any serious text generation or reasoning", hwNotes:"Runs on almost anything. Minimal VRAM.", caveats:"Very small model — useful for vision triage only, not general use." },
+  { name:"Granite Vision 3.2 8B", maker:"IBM", family:"Granite", arch:"Dense", params:"8B", vram:7, context:"8K", toolScore:2, quality:36, vision:true, reasoning:false, coding:false, longContext:false, fast:true, agentic:false, speedEst:{6:45,8:62,12:78,16:78,24:78,48:78}, prov:"E", bestFor:"Document understanding, visual QA, chart/table extraction", avoidIf:"You need long context or strong text-only performance", hwNotes:"Fits 8 GB. Vision encoder adds ~1 GB over text-only equivalent.", caveats:"Good for enterprise document processing. 8K context limits multi-page analysis." },
+
+  // DeepSeek family
+  { name:"DeepSeek-R1-Distill-Qwen-7B", maker:"DeepSeek", family:"DeepSeek", arch:"Dense", params:"7B", vram:5, context:"32K", toolScore:2, quality:38, vision:false, reasoning:true, coding:true, longContext:false, fast:true, agentic:false, speedEst:{6:65,8:80,12:90,16:90,24:90,48:90}, prov:"C", bestFor:"Chain-of-thought reasoning at small scale, math, analysis", avoidIf:"You need tool use or agent chains — reasoning focus only", hwNotes:"Fits 6 GB. Distilled from DeepSeek-R1.", caveats:"Strong reasoning for 7B but limited tool-use capability. MIT license." },
+  { name:"DeepSeek-R1-Distill-Qwen-14B", maker:"DeepSeek", family:"DeepSeek", arch:"Dense", params:"14B", vram:10, context:"64K", toolScore:3, quality:55, vision:false, reasoning:true, coding:true, longContext:true, fast:false, agentic:false, speedEst:{6:18,8:35,12:52,16:58,24:62,48:62}, prov:"C", bestFor:"Complex reasoning, math, code analysis, chain-of-thought tasks", avoidIf:"You need fast interactive chat or strong tool calling", hwNotes:"100% GPU on 12 GB+. 64K context for long reasoning chains.", caveats:"Excellent reasoning depth. Slower than base Qwen due to extended thinking." },
+  { name:"DeepSeek-V3", maker:"DeepSeek", family:"DeepSeek", arch:"MoE", params:"671B (37B active)", vram:350, context:"128K", toolScore:4, quality:88, vision:false, reasoning:true, coding:true, longContext:true, fast:false, agentic:true, speedEst:{6:0,8:0,12:0,16:0,24:0,48:0}, prov:"E", bestFor:"Reference: frontier-class open model, top-tier code and reasoning", avoidIf:"You want to run locally — requires datacenter hardware (8xH100 or equivalent)", hwNotes:"~350 GB VRAM minimum. Not for consumer or prosumer hardware. API access recommended.", caveats:"Included as a reference row. Frontier-class quality but not practical for local deployment.", refRow:true },
+
+  // GPT-OSS family
+  { name:"GPT-OSS 20B", maker:"OpenAI", family:"GPT-OSS", arch:"MoE", params:"20B (3.6B active)", vram:14, context:"8K", toolScore:3, quality:55, vision:false, reasoning:true, coding:true, longContext:false, fast:true, agentic:false, speedEst:{6:0,8:0,12:45,16:130,24:140,48:140}, prov:"C", bestFor:"Fast MoE inference, strong reasoning for active param count, general tasks", avoidIf:"You need long context (8K limit) or vision capability", hwNotes:"MXFP4 quantization. 14 GB footprint — fits fully on 16 GB+. CPU spillover on 12 GB cards.", caveats:"Low active param count (3.6B) means very fast inference. 8K context is a meaningful limitation for long documents." },
+
+  // Phi family
+  { name:"Phi-4 Mini", maker:"Microsoft", family:"Phi", arch:"Dense", params:"3.8B", vram:3, context:"16K", toolScore:2, quality:32, vision:false, reasoning:true, coding:true, longContext:false, fast:true, agentic:false, speedEst:{6:100,8:115,12:125,16:125,24:125,48:125}, prov:"E", bestFor:"Lightweight reasoning and math, edge deployment, resource-constrained setups", avoidIf:"You need tool use, agent chains, or strong multi-turn conversation", hwNotes:"Fits any GPU with 4 GB+. Extremely fast inference.", caveats:"Punches above its weight on reasoning benchmarks for 3.8B. Limited capability for complex workflows." },
+  { name:"Phi-4 Multimodal", maker:"Microsoft", family:"Phi", arch:"Dense", params:"5.6B", vram:5, context:"16K", toolScore:2, quality:34, vision:true, reasoning:true, coding:false, longContext:false, fast:true, agentic:false, speedEst:{6:60,8:80,12:95,16:95,24:95,48:95}, prov:"E", bestFor:"Lightweight multimodal tasks, image understanding at small footprint, visual QA", avoidIf:"You need strong tool calling, coding, or long context processing", hwNotes:"Vision encoder adds ~1.5 GB overhead. Fits 6 GB+ cards. Also supports audio input.", caveats:"Compact multimodal model. Vision quality limited compared to larger VL models but useful for triage." },
+  { name:"Phi-4", maker:"Microsoft", family:"Phi", arch:"Dense", params:"14B", vram:9, context:"16K", toolScore:3, quality:52, vision:false, reasoning:true, coding:true, longContext:false, fast:true, agentic:false, speedEst:{6:18,8:38,12:58,16:62,24:62,48:62}, prov:"E", bestFor:"Strong reasoning and coding at 14B, math, structured output, analysis", avoidIf:"You need long context (16K limit), vision, or strong agent tool-use chains", hwNotes:"Fits 12 GB GPUs fully. Usable with offload on 8 GB.", caveats:"Competitive with Qwen2.5 14B on reasoning benchmarks. 16K context is shorter than many peers." },
+
+  // Aya family
+  { name:"Aya Expanse 8B", maker:"Cohere", family:"Aya", arch:"Dense", params:"8B", vram:6, context:"8K", toolScore:2, quality:36, vision:false, reasoning:false, coding:false, longContext:false, fast:true, agentic:false, speedEst:{6:55,8:70,12:82,16:82,24:82,48:82}, prov:"E", bestFor:"Multilingual tasks (23+ languages), cross-lingual generation, translation, non-English chat", avoidIf:"You need English-only performance, coding, or agent tool use — other 8B models are stronger", hwNotes:"Fits 8 GB. Standard 8B inference profile.", caveats:"Unique strength is multilingual coverage. For English-only work, Llama 3.1 8B or Qwen2.5 7B are better choices." },
+  { name:"Aya Expanse 32B", maker:"Cohere", family:"Aya", arch:"Dense", params:"32B", vram:22, context:"128K", toolScore:3, quality:55, vision:false, reasoning:true, coding:false, longContext:true, fast:false, agentic:false, speedEst:{6:0,8:0,12:10,16:16,24:42,48:58}, prov:"E", bestFor:"High-quality multilingual generation, long multilingual documents, cross-lingual reasoning", avoidIf:"You need fast inference on < 24 GB or strong coding support", hwNotes:"Fits 24 GB GPUs. 128K context available but VRAM increases with input length.", caveats:"Best-in-class multilingual quality at 32B. Based on Command-R architecture. Weaker than Qwen 32B for English-only agent work." },
+  { name:"Aya Vision 8B", maker:"Cohere", family:"Aya", arch:"Dense", params:"8B", vram:7, context:"8K", toolScore:2, quality:34, vision:true, reasoning:false, coding:false, longContext:false, fast:true, agentic:false, speedEst:{6:45,8:60,12:75,16:75,24:75,48:75}, prov:"E", bestFor:"Multilingual visual understanding, document OCR in non-English languages, visual QA across languages", avoidIf:"You need English-only vision (Qwen2.5-VL or Gemma 3 are better), coding, or tool use", hwNotes:"Fits 8 GB. Vision encoder adds ~1 GB overhead.", caveats:"Unique niche: multilingual + vision. For English-only vision tasks, other VL models offer higher quality." },
+];
+
+// ── State ───────────────────────────────────────────────────────────────────
+let selectedVram = 16;
+let cpuOffload = false;
+let workload = "agent";
+let sortKey = "quality";
+let sortDir = -1;
+let expandedRow = null;
+
+const VRAM_OPTIONS = [6, 8, 12, 16, 24, 48];
+const WORKLOADS = [
+  { id:"general", label:"General" },
+  { id:"coding", label:"Coding" },
+  { id:"agent", label:"Agent & Tools" },
+  { id:"research", label:"Research" },
+  { id:"vision", label:"Vision" },
+  { id:"fast", label:"Fast" },
+];
+
+// ── Fit Calculation ─────────────────────────────────────────────────────────
+function getFit(m) {
+  if (m.vram <= selectedVram) return "full";
+  if (cpuOffload && m.vram <= selectedVram * 2.5) return "offload";
+  return "no";
+}
+
+function getEstSpeed(m) {
+  const speeds = m.speedEst;
+  // find closest VRAM tier
+  let best = 0;
+  for (const [v, s] of Object.entries(speeds)) {
+    if (parseInt(v) <= selectedVram) best = Math.max(best, s);
+  }
+  if (best === 0 && cpuOffload) {
+    // estimate offload speed at ~25% of next-tier
+    for (const [v, s] of Object.entries(speeds)) {
+      if (parseInt(v) > selectedVram && s > 0) { best = Math.round(s * 0.25); break; }
+    }
+  }
+  return best;
+}
+
+function getWorkloadScore(m) {
+  let score = m.quality;
+  switch (workload) {
+    case "coding":
+      if (m.coding) score += 12;
+      if (m.name.toLowerCase().includes("coder") || m.name.toLowerCase().includes("code")) score += 8;
+      break;
+    case "agent":
+      score += (m.toolScore - 2) * 8;
+      if (m.agentic) score += 10;
+      break;
+    case "research":
+      if (m.reasoning) score += 12;
+      if (m.longContext) score += 5;
+      break;
+    case "vision":
+      if (m.vision) score += 20;
+      else score -= 30;
+      break;
+    case "fast":
+      const spd = getEstSpeed(m);
+      if (spd >= 80) score += 15;
+      else if (spd >= 50) score += 8;
+      else if (spd < 20) score -= 10;
+      if (m.fast) score += 5;
+      break;
+  }
+  return score;
+}
+
+// ── Summary Calculation ─────────────────────────────────────────────────────
+function computeSummary() {
+  const fitting = models.filter(m => getFit(m) !== "no" && !m.refRow);
+  if (fitting.length === 0) return null;
+
+  const best = (arr, scoreFn) => {
+    if (arr.length === 0) return null;
+    return arr.reduce((a, b) => scoreFn(b) > scoreFn(a) ? b : a);
+  };
+
+  const bestOverall = best(fitting, m => getWorkloadScore(m));
+  const bestFast = best(fitting.filter(m => getEstSpeed(m) >= 40), m => getEstSpeed(m) + m.quality * 0.3);
+  const bestAgent = best(fitting.filter(m => m.toolScore >= 3), m => m.toolScore * 15 + m.quality + (m.agentic ? 10 : 0));
+  const bestVision = best(fitting.filter(m => m.vision), m => m.quality);
+  const bestCoding = best(fitting.filter(m => m.coding), m => m.quality + (m.name.toLowerCase().includes("coder") || m.name.toLowerCase().includes("code") ? 10 : 0));
+
+  return { bestOverall, bestFast, bestAgent, bestVision, bestCoding };
+}
+
+// ── Render ───────────────────────────────────────────────────────────────────
+function render() {
+  renderHwBar();
+  renderSummary();
+  renderTable();
+}
+
+function renderHwBar() {
+  // VRAM chips
+  const vc = document.getElementById("vramChips");
+  vc.innerHTML = "";
+  VRAM_OPTIONS.forEach(v => {
+    const btn = document.createElement("button");
+    btn.className = "hw-chip" + (selectedVram === v ? " active" : "");
+    btn.textContent = v >= 48 ? "48 GB+" : v + " GB";
+    btn.onclick = () => { selectedVram = v; expandedRow = null; render(); };
+    vc.appendChild(btn);
+  });
+
+  // Offload chips
+  const oc = document.getElementById("offloadChips");
+  oc.innerHTML = "";
+  [{ val:false, label:"GPU only" }, { val:true, label:"Allowed" }].forEach(o => {
+    const btn = document.createElement("button");
+    btn.className = "hw-chip" + (cpuOffload === o.val ? " active" : "") + (o.val && cpuOffload ? " warn" : "");
+    btn.textContent = o.label;
+    btn.onclick = () => { cpuOffload = o.val; expandedRow = null; render(); };
+    oc.appendChild(btn);
+  });
+
+  // Workload chips
+  const wc = document.getElementById("workloadChips");
+  wc.innerHTML = "";
+  WORKLOADS.forEach(w => {
+    const btn = document.createElement("button");
+    btn.className = "hw-chip" + (workload === w.id ? " active" : "");
+    btn.textContent = w.label;
+    btn.onclick = () => { workload = w.id; expandedRow = null; render(); };
+    wc.appendChild(btn);
+  });
+}
+
+function renderSummary() {
+  const card = document.getElementById("summaryCard");
+  const s = computeSummary();
+  if (!s) {
+    card.innerHTML = '<div class="summary-title">Best for your hardware</div><div style="font-size:11px;color:#64748b;">No models fit the selected VRAM with current settings. Try enabling CPU offload or increasing VRAM.</div>';
+    return;
+  }
+
+  const item = (label, m, meta) => {
+    if (!m) return `<div class="summary-item"><span class="summary-item-label">${label}</span><span class="summary-item-value" style="color:#475569">None fit</span></div>`;
+    return `<div class="summary-item"><span class="summary-item-label">${label}</span><span class="summary-item-value">${m.name}</span><span class="summary-item-meta">${meta || (m.params + ' · ' + m.maker)}</span></div>`;
+  };
+
+  const spd = s.bestFast ? getEstSpeed(s.bestFast) + ' t/s · ' + s.bestFast.params : '';
+
+  card.innerHTML =
+    '<div class="summary-title">Best for your hardware</div>' +
+    '<div class="summary-grid">' +
+      item("Best overall", s.bestOverall) +
+      item("Best fast", s.bestFast, spd) +
+      item("Best agent / tools", s.bestAgent) +
+      item("Best vision", s.bestVision) +
+      item("Best coding", s.bestCoding) +
+    '</div>';
+}
+
+function renderTable() {
+  // Prepare data
+  let data = models.map(m => ({
+    ...m,
+    fit: getFit(m),
+    estSpeed: getEstSpeed(m),
+    wScore: getWorkloadScore(m),
+  }));
+
+  // Sort
+  data = data.sort((a, b) => {
+    const av = sortKey === "estSpeed" ? a.estSpeed : sortKey === "wScore" ? a.wScore : a[sortKey];
+    const bv = sortKey === "estSpeed" ? b.estSpeed : sortKey === "wScore" ? b.wScore : b[sortKey];
+    if (typeof av === "number" && typeof bv === "number") return (av - bv) * sortDir;
+    return String(av || "").localeCompare(String(bv || "")) * sortDir;
+  });
+
+  // Header
+  const thead = document.getElementById("thead");
+  thead.innerHTML = "";
+  const hr = document.createElement("tr");
+  const cols = [
+    ["Model","name",170],["Family","family",80],["Params","params",90],["VRAM","vram",65],
+    ["Est. t/s","estSpeed",75],["Context","context",70],["Tool Use","toolScore",75],
+    ["Agent Fit","quality",100],["Caps","caps",80],["Fit","fit",60],
+  ];
+  cols.forEach(([label, field, w]) => {
+    const th = document.createElement("th");
+    th.textContent = label + (sortKey === field ? (sortDir === 1 ? " \u2191" : " \u2193") : "");
+    th.style.width = w + "px";
+    if (sortKey === field) th.classList.add("sorted");
+    if (field !== "caps") {
+      th.onclick = () => {
+        if (sortKey === field) sortDir *= -1;
+        else { sortKey = field; sortDir = field === "name" || field === "family" ? 1 : -1; }
+        expandedRow = null;
+        render();
+      };
+    }
+    hr.appendChild(th);
+  });
+  thead.appendChild(hr);
+
+  // Body
+  const tbody = document.getElementById("tbody");
+  tbody.innerHTML = "";
+  data.forEach((m, i) => {
+    const tr = document.createElement("tr");
+    if (m.fit === "no") tr.classList.add("dimmed");
+    tr.onclick = () => { expandedRow = expandedRow === i ? null : i; renderTable(); };
+
+    // Model
+    const td1 = document.createElement("td");
+    let nameHtml = `<div class="model-name">${m.name}</div>`;
+    nameHtml += `<div class="model-meta">${m.maker} \u00b7 ${m.arch}</div>`;
+    if (m.refRow) nameHtml = `<div class="model-name">${m.name}<span class="ref-marker">REF</span></div><div class="model-meta">${m.maker} \u00b7 ${m.arch}</div>`;
+    if (expandedRow === i) {
+      nameHtml += '<div class="notes-box open">';
+      nameHtml += `<div class="notes-section">\u2705 <strong>Best for:</strong> ${m.bestFor}</div>`;
+      nameHtml += `<div class="notes-section">\u26a0\ufe0f <strong>Avoid if:</strong> ${m.avoidIf}</div>`;
+      nameHtml += `<div class="notes-section">\ud83d\udcbe <strong>Hardware notes:</strong> ${m.hwNotes}</div>`;
+      nameHtml += `<div class="notes-section">\ud83d\udd0d <strong>Caveats:</strong> ${m.caveats}</div>`;
+      nameHtml += '</div>';
+    }
+    td1.innerHTML = nameHtml;
+    tr.appendChild(td1);
+
+    // Family
+    const tdF = document.createElement("td");
+    tdF.innerHTML = `<span class="params">${m.family}</span>`;
+    tr.appendChild(tdF);
+
+    // Params
+    const td2 = document.createElement("td");
+    td2.innerHTML = `<span class="params">${m.params}</span>`;
+    tr.appendChild(td2);
+
+    // VRAM
+    const td3 = document.createElement("td");
+    const vc = m.vram <= 8 ? "vram-green" : m.vram <= 16 ? "vram-yellow" : m.vram <= 48 ? "vram-orange" : "vram-red";
+    td3.innerHTML = `<span class="vram-badge ${vc}">${m.vram} GB</span>`;
+    tr.appendChild(td3);
+
+    // Est. t/s
+    const td4 = document.createElement("td");
+    if (m.estSpeed === 0) {
+      td4.innerHTML = '<span class="speed-na">\u2014</span>';
+    } else {
+      const sc = m.estSpeed >= 60 ? "speed-fast" : m.estSpeed >= 30 ? "speed-mid" : "speed-slow";
+      td4.innerHTML = `<span class="speed ${sc}">${m.estSpeed}</span><span class="speed-prov">${m.prov}</span>`;
+    }
+    tr.appendChild(td4);
+
+    // Context
+    const td6 = document.createElement("td");
+    td6.innerHTML = `<span class="context-val">${m.context}</span>`;
+    tr.appendChild(td6);
+
+    // Tool dots
+    const td7 = document.createElement("td");
+    let dots = '<div class="tool-dots">';
+    for (let j = 1; j <= 5; j++) dots += `<div class="tool-dot ${j <= m.toolScore ? 'on' : 'off'}"></div>`;
+    dots += '</div>';
+    td7.innerHTML = dots;
+    tr.appendChild(td7);
+
+    // Agent Fit bar
+    const td8 = document.createElement("td");
+    const qc = m.quality >= 75 ? "high" : m.quality >= 55 ? "mid" : m.quality >= 35 ? "low" : "vlow";
+    td8.innerHTML = `<div class="quality-bar-wrap"><div class="quality-track"><div class="quality-fill ${qc}" style="width:${m.quality}%"></div></div><span class="quality-label">${m.quality}%</span></div>`;
+    tr.appendChild(td8);
+
+    // Caps
+    const td9 = document.createElement("td");
+    td9.innerHTML = '<div class="caps">' +
+      `<span class="cap-icon ${m.vision ? 'on' : ''}" title="Vision">\ud83d\udc41</span>` +
+      `<span class="cap-icon ${m.toolScore >= 3 ? 'on' : ''}" title="Tool Use">\ud83d\udd27</span>` +
+      `<span class="cap-icon ${m.reasoning ? 'on' : ''}" title="Reasoning">\ud83e\udde0</span>` +
+      `<span class="cap-icon ${m.longContext ? 'on' : ''}" title="Long Context">\ud83d\udcc4</span>` +
+    '</div>';
+    tr.appendChild(td9);
+
+    // Fit badge
+    const td10 = document.createElement("td");
+    if (m.fit === "full") td10.innerHTML = '<span class="fit-badge fit-full">Full</span>';
+    else if (m.fit === "offload") td10.innerHTML = '<span class="fit-badge fit-offload">Offload</span>';
+    else td10.innerHTML = '<span class="fit-badge fit-no">No</span>';
+    tr.appendChild(td10);
+
+    tbody.appendChild(tr);
+  });
+}
+
+// ── Initial Render ──────────────────────────────────────────────────────────
+render();
+</script>
+</body>
+</html>

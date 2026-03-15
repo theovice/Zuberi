@@ -1,0 +1,258 @@
+# RTL — Roadmap to Launch
+**Version:** 0.6.0
+**Updated:** 2026-03-02
+**Author:** Architect 7 (Sessions 9–9c)
+
+---
+
+## Mission
+Zuberi: a local autonomous AI assistant for Wahwearro Holdings LLC. Complete privacy, no cloud dependencies, self-sufficient agent capable of orchestrating coding tasks, workflow automation, and business operations. Revenue target: $350K in 180 days.
+
+---
+
+## Infrastructure Status
+
+### Nodes
+
+| Node | Role | Status | Tailscale IP |
+|------|------|--------|--------------|
+| KILO | Brain + Interface | ✅ Online | 100.127.23.52 |
+| CEG | Toolbox + Storage | ✅ Online | 100.100.101.1 |
+
+### KILO Specs
+i7-13700K (16c/24t), MSI MPG Z690 EDGE WIFI DDR4, 64GB DDR4 3600MHz, RTX 5070 Ti 16GB + Intel UHD 770, Samsung 980 PRO 1TB NVMe + 870 EVO 1TB SATA + Apacer AS340 240GB SATA, Windows 11 Pro.
+
+### CEG Services
+
+| Service | Port | Status | Purpose |
+|---------|------|--------|---------|
+| SearXNG | 8888 | ✅ Running | Web search (4 engines) |
+| n8n | 5678 | ✅ Wired | Workflow automation (API key active) |
+| CXDB | 9009/9010 | ✅ Running | Conversation memory |
+| Veritas-Kanban | 3001 | ✅ Running | Task board |
+| Usage Tracker | 3002 | ✅ Running | API usage logging + stats (systemd service) |
+| ccode CLI | — | 🟡 Installed, needs auth | v2.1.63 at ~/.local/bin/claude |
+
+### Models (Ollama on KILO)
+
+| Model | ID | Size | Role | Status |
+|-------|-----|------|------|--------|
+| Fast General | qwen3:14b-fast | 9.3GB | Primary (thinking disabled, ~1-2s) | ✅ Active |
+| Deep Thinker | qwen3:14b | 9.3GB | Reasoning (thinking enabled, ~6-11s) | ✅ Pulled |
+| Vision | qwen3-vl:8b | 5.7GB | Image analysis, OCR | ✅ Pulled |
+| Large General | gpt-oss:20b | 13GB | Fallback | ✅ Pulled |
+
+### Workspace Skills (C:\Users\PLUTO\openclaw_workspace\skills\)
+
+| Skill | Status | Purpose |
+|-------|--------|---------|
+| searxng | ✅ Deployed | Web search via CEG |
+| cxdb | ✅ Deployed | Conversation memory via CEG |
+| ollama | ✅ Deployed | Model management (GPU refs updated to 5070 Ti) |
+| n8n | ✅ Deployed | Workflow automation via CEG |
+| model-router | ✅ Deployed | Autonomous model selection |
+| horizon | ✅ Deployed | Long-term vision (converted from root .md) |
+| infrastructure | ✅ Deployed | Hardware/service specs (converted from root .md) |
+
+---
+
+## Phase Status
+
+### Phase 1: Basic Setup — ✅ COMPLETE
+### Phase 2: Networking — ✅ COMPLETE
+### Phase 3: Service Deployment — ✅ FUNCTIONALLY COMPLETE
+
+- SearXNG end-to-end: ✅ | CXDB end-to-end: ✅ | n8n wired: ✅ | Kanban: ✅
+- Usage tracker on CEG:3002: ✅ (Session 9c)
+- First n8n workflow via Zuberi: ⬜ RTL-002 (James testing autonomously)
+
+### Phase 3B: Autonomous Capabilities — IN PROGRESS
+
+- Model router skill: ✅ RTL-020 deployed (Session 9b)
+- Context optimization: ✅ RTL-021 + RTL-022 complete (Session 9b)
+- Ccode on CEG: 🟡 RTL-012 — CLI installed, backend ready, **auth blocked** (see below)
+- Vision skill: ⬜ Deferred (depends on model router validation)
+- ZuberiChat usage meter UI: ⬜ RTL-024 — ccode prompt ready, not yet sent
+
+### Phase 4: Mission Launch — NOT STARTED
+
+---
+
+## Capability Matrix
+
+| ID | Capability | Status | Blocker |
+|----|-----------|--------|---------|
+| C1 | Conversation | ✅ Ready | — |
+| C2 | Identity/personality | ✅ Ready | — |
+| C3 | Long-term memory | ✅ Ready | CXDB wired |
+| C4 | Web search | ✅ Ready | SearXNG wired |
+| C5 | Package install (sandbox) | ⛔ Blocked | Custom sandbox or CEG ccode |
+| C6 | Code execution | 🟡 Gateway only | No sandbox runtime |
+| C7 | Workflow automation | 🟡 Wired, no workflows | RTL-002 |
+| C8 | Spreadsheet generation | ⛔ Blocked | Needs openpyxl in sandbox or CEG |
+| C9 | Database access | ✅ Ready | CXDB wired |
+| C10 | Task tracking | ✅ Ready | Kanban wired |
+| C11 | Model selection | ✅ Skill deployed | RTL-020 complete |
+| C12 | Vision/OCR | ⬜ Pending | Vision skill + model router validation |
+| C13 | Diagram generation | ⛔ Blocked | Needs Mermaid CLI in sandbox or CEG |
+| C14 | Browser automation | ⛔ Blocked | Phase 2C |
+| C15 | PDF/DOCX generation | ⛔ Blocked | Needs reportlab/python-docx |
+| C16 | Email | ⛔ Blocked | AgentMail not configured |
+| C17 | External API access | ⛔ Blocked | Phase 2D |
+| C18 | Sub-agent dispatch | 🟡 Infra ready, auth blocked | RTL-012 |
+| C19 | Usage monitoring | 🟡 Backend ready, UI pending | RTL-024 |
+
+---
+
+## Active RTL Items
+
+### P0 — Ship Now
+
+| ID | Task | Status | Notes |
+|----|------|--------|-------|
+| RTL-012 | Ccode auth on CEG | 🟡 Infra complete, auth pending | CLI installed, usage tracker running, dispatch wrapper deployed. **Blocked on James choosing auth path** — see Key Decisions below. |
+| RTL-024 | ZuberiChat usage meter UI | ⬜ Ccode prompt ready | Meter icon in titlebar, dropdown overlay with gauges. Mock data until backend wired. Prompt at: ccode-prompt-zuberimeter-ui.md |
+
+### P1 — Next Up
+
+| ID | Task | Status | Notes |
+|----|------|--------|-------|
+| RTL-002 | First n8n workflow via Zuberi | ⬜ In test | James testing autonomously |
+| RTL-025 | SSH key mount for OpenClaw | ⬜ New | Zuberi can't SSH to CEG from inside container — needs key mounted or HTTP dispatch wrapper. See Architecture Gap below. |
+| RTL-007 | Express 5 wildcard fix commit | ⬜ Quick win | Fix exists only on CEG, needs commit to ZuberiChat repo |
+
+### P2 — Queued
+
+| ID | Task | Status | Notes |
+|----|------|--------|-------|
+| RTL-005 | MEMORY.md cleanup | ⬜ Needs James | Stale entries |
+| RTL-013 | Version consistency audit | ⬜ Partial | AGENTS.md v0.8.1, TOOLS.md v0.8.3. MEMORY.md still behind. |
+| RTL-023 | CEG compute migration | ⬜ Design phase | Blocked on RTL-012 + RTL-025 |
+
+### P3 — Future
+
+| ID | Task | Status | Notes |
+|----|------|--------|-------|
+| RTL-014 | MISSION-AEGIS strategy | ⬜ Needs James | $350K/180-day revenue plan |
+| RTL-016 | Self-learning loop | ⬜ Needs CXDB maturity | — |
+| RTL-018 | Multi-agent dispatch | ⬜ Needs RTL-012 + RTL-025 | — |
+| RTL-019 | Gate enforcement layer | ⬜ Unblocked | — |
+
+---
+
+## Key Decisions (Sessions 9–9c)
+
+| Decision | Choice | Rationale |
+|----------|--------|-----------|
+| n8n API key storage | Hardcoded in skill file | Tailscale-internal only, James sole user, marked SECRET |
+| n8n auth method | X-N8N-API-KEY header (JWT) | Standard n8n public REST API pattern |
+| Phase 2B sandbox | Redirected to CEG | James decision: shift all non-inference compute to CEG |
+| Model routing | Skill-level, not OpenClaw config | OpenClaw only does provider failover, not task-based routing |
+| Context optimization | Root files → skills conversion | HORIZON.md, INFRASTRUCTURE.md moved to skills. Recovered ~9.6K tokens/turn. |
+| HEARTBEAT.md | Stays at root, NOT a skill | Autonomous process — must load every turn without model deciding to read it |
+| Bundled skills filter | allowBundled in openclaw.json | Filtered ~42 unused bundled skills, kept 8 relevant ones |
+| Ccode auth on CEG | **PENDING — James researching** | Two options: Pro subscription (free, shared limits) vs API key (pay-per-token, separate). See below. |
+
+### Ccode Auth Decision (RTL-012) — OPEN
+
+**Option A: Pro subscription credentials (free)**
+- Authenticate ccode on CEG via `claude login` (SSH tunnel or credential copy from KILO)
+- Dispatches count against Pro weekly limit (currently 48% used)
+- No extra cost, but heavy Zuberi usage could rate-limit James's own claude.ai sessions
+- Critical: must NOT set ANTHROPIC_API_KEY env var on CEG, or it silently switches to pay-per-token
+- ~$150 worth of API-equivalent usage included in $20/month Pro plan
+
+**Option B: API key (pay-per-token)**
+- Set ANTHROPIC_API_KEY on CEG
+- Dispatches billed separately at ~$3/M input, $15/M output (Sonnet rates)
+- Pro limits untouched for James's personal use
+- Estimated cost: $0.05–0.15 per dispatch, <$20/month for moderate use
+- $1.53 prepaid credit balance already on account
+
+**James is currently researching the optimal path with other agents.**
+
+---
+
+## Architecture Gap: Zuberi → CEG Dispatch
+
+**Problem identified (Session 9c):** Zuberi runs inside OpenClaw's Docker container. The container has host network access at gateway level (how curl to CEG services works). But SSH to CEG requires the private key at `C:\Users\PLUTO\.ssh\id_ed25519`, which is **not mounted** into the container.
+
+**Two solutions:**
+
+1. **Mount SSH key** — Add volume mount to docker-compose.yml: `~/.ssh:/home/node/.ssh:ro`. Simple but exposes the key to the container.
+
+2. **HTTP dispatch wrapper on CEG** — Small HTTP service (like the usage tracker) that accepts task prompts via POST and runs ccode locally. Zuberi hits it with curl, same as every other CEG service. No SSH needed. Cleaner separation.
+
+**Decision needed from James.** Recommendation: Option 2 (HTTP wrapper) — follows the established curl-based pattern for all CEG services and doesn't require mounting credentials into containers.
+
+---
+
+## Architecture
+
+```
+KILO (Brain + Interface)              CEG (Toolbox + Storage)
+100.127.23.52                          100.100.101.1
+┌─────────────────────┐               ┌─────────────────────┐
+│ OpenClaw v2026.2.26 │               │ SearXNG     :8888   │
+│ Ollama              │    Tailscale  │ n8n         :5678   │
+│   qwen3:14b-fast    │◄────────────►│ CXDB     :9009/9010 │
+│   qwen3:14b         │               │ Kanban      :3001   │
+│   qwen3-vl:8b       │               │ Usage Track :3002   │
+│   gpt-oss:20b       │               │ ccode CLI   (local) │
+│ Dashboard :18789    │               │                     │
+│ ZuberiChat (Tauri)  │               │ Pending:            │
+│                     │               │   ccode HTTP :3003? │
+└─────────────────────┘               └─────────────────────┘
+```
+
+---
+
+## Workspace Files (C:\Users\PLUTO\openclaw_workspace\)
+
+### Root files (load every turn)
+| File | Version | Purpose |
+|------|---------|---------|
+| AGENTS.md | v0.8.1 | Autonomy rules, gate enforcement |
+| SOUL.md | v0.1.0 | Identity, personality |
+| MEMORY.md | — | Persistent knowledge (needs cleanup) |
+| TOOLS.md | v0.8.3 | Quick tool commands, architecture |
+| HEARTBEAT.md | — | Proactive check schedule |
+| IDENTITY.md | — | OpenClaw self-authored identity |
+| USER.md | — | About James |
+
+### Skill files (load on-demand)
+horizon, infrastructure, searxng, cxdb, ollama, n8n, model-router
+
+### Context budget (post-optimization)
+| Metric | Value |
+|--------|-------|
+| Root .md tokens per turn | ~11,100 |
+| Skill listing tokens | ~360 |
+| Total per-turn overhead | ~11,500 |
+| Available for conversation | ~20,500 (of 32K) |
+
+---
+
+## Session Log
+
+| Session | Architect | Key Accomplishments |
+|---------|-----------|-------------------|
+| 1-4 | Various | Foundation: OpenClaw install, Ollama, identity, ZuberiChat, basic config |
+| 5-7 | Various | CEG setup, Tailscale networking, skill deployment, context trimming fix |
+| 8 | 7 | SearXNG + CXDB end-to-end, Kanban deploy, skill discovery fix, RTL created |
+| 9 | 7 | n8n wired, KILO specs updated, model router designed, CEG compute migration decided |
+| 9b | 7 | Context optimization: ~9.6K tokens recovered. RTL-020 model router skill deployed. RTL-021 + RTL-022 complete. Bundled skills filtered. HORIZON.md + INFRASTRUCTURE.md → skills. |
+| 9c | 7 | RTL-012 backend: ccode CLI installed on CEG, usage tracker service deployed (CEG:3002), dispatch wrapper created. ZuberiChat meter UI prompt designed. Ccode auth path researched — Pro vs API key decision pending with James. SSH-to-CEG gap identified (OpenClaw container lacks key mount). |
+
+---
+
+## Ccode Prompts Ready (not yet executed)
+
+| Prompt | File | Purpose |
+|--------|------|---------|
+| ZuberiChat Usage Meter UI | ccode-prompt-zuberimeter-ui.md | Meter icon in titlebar, dropdown overlay with arc gauges + budget bar. Mock data. |
+| Model Router Skill | ccode-prompt-model-router.md | RTL-020 — may already be deployed (Session 9b via earlier prompt) |
+
+---
+
+*RTL is the canonical roadmap. Maintained in Claude project. Updated each session.*

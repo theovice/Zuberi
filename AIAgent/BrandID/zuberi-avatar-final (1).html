@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Zuberi Avatar</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&display=swap');
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: #0e0d0c;
+    color: #eae9e9;
+    font-family: 'Syne', sans-serif;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 48px;
+    padding: 48px;
+  }
+
+  h1 {
+    font-size: 0.75rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: #444;
+  }
+
+  .sizes {
+    display: flex;
+    align-items: center;
+    gap: 48px;
+  }
+
+  .size-label {
+    font-size: 0.6rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #333;
+    text-align: center;
+    margin-top: 12px;
+  }
+
+  .size-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  /* Dark background preview */
+  .preview-dark {
+    background: #1c1b1a;
+    border-radius: 16px;
+    padding: 32px;
+    display: flex;
+    gap: 32px;
+    align-items: center;
+    border: 1px solid rgba(255,255,255,0.06);
+  }
+
+  .chat-mock {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    max-width: 300px;
+  }
+
+  .chat-bubble {
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 12px;
+    padding: 12px 16px;
+    font-size: 0.8rem;
+    color: #b0afae;
+    line-height: 1.5;
+  }
+</style>
+</head>
+<body>
+
+<h1>Zuberi — Avatar</h1>
+
+<!-- SIZE VARIANTS -->
+<div class="sizes">
+
+  <!-- 24px -->
+  <div class="size-item">
+    <svg width="24" height="24" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="s1edge" x1="60" y1="0" x2="60" y2="120" gradientUnits="userSpaceOnUse">
+          <stop offset="0%" stop-color="#c8c4bc"/>
+          <stop offset="45%" stop-color="#706860"/>
+          <stop offset="100%" stop-color="#282420"/>
+        </linearGradient>
+        <radialGradient id="s1ref" cx="42%" cy="28%" r="55%">
+          <stop offset="0%" stop-color="#ffffff" stop-opacity="0.18"/>
+          <stop offset="100%" stop-color="#000000" stop-opacity="0"/>
+        </radialGradient>
+        <filter id="s1glow">
+          <feGaussianBlur stdDeviation="2.5" result="blur"/>
+          <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+        </filter>
+      </defs>
+      <polygon points="60,8 108,60 60,112 12,60" fill="#0f0e0d" stroke="url(#s1edge)" stroke-width="2"/>
+      <polygon points="60,8 108,60 60,112 12,60" fill="url(#s1ref)"/>
+      <polygon points="60,8 84,36 60,42 36,36" fill="rgba(255,255,255,0.1)" stroke="rgba(200,196,188,0.4)" stroke-width="0.75"/>
+      <polygon points="12,60 36,36 60,42 36,76" fill="rgba(255,255,255,0.03)" stroke="rgba(160,156,148,0.2)" stroke-width="0.75"/>
+      <polygon points="108,60 84,36 60,42 84,76" fill="rgba(255,255,255,0.06)" stroke="rgba(180,176,168,0.25)" stroke-width="0.75"/>
+      <polygon points="60,112 36,76 60,70 84,76" fill="rgba(0,0,0,0.3)" stroke="rgba(100,96,88,0.2)" stroke-width="0.75"/>
+      <line x1="12" y1="60" x2="108" y2="60" stroke="rgba(200,196,188,0.15)" stroke-width="0.5"/>
+      <line x1="60" y1="8" x2="60" y2="112" stroke="rgba(200,196,188,0.08)" stroke-width="0.5"/>
+      <circle cx="60" cy="38" r="4" fill="rgba(255,255,255,0.55)" filter="url(#s1glow)"/>
+    </svg>
+    <div class="size-label">24px</div>
+  </div>
+
+  <!-- 48px -->
+  <div class="size-item">
+    <svg width="48" height="48" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="s2edge" x1="60" y1="0" x2="60" y2="120" gradientUnits="userSpaceOnUse">
+          <stop offset="0%" stop-color="#c8c4bc"/>
+          <stop offset="45%" stop-color="#706860"/>
+          <stop offset="100%" stop-color="#282420"/>
+        </linearGradient>
+        <radialGradient id="s2ref" cx="42%" cy="28%" r="55%">
+          <stop offset="0%" stop-color="#ffffff" stop-opacity="0.18"/>
+          <stop offset="100%" stop-color="#000000" stop-opacity="0"/>
+        </radialGradient>
+        <filter id="s2glow">
+          <feGaussianBlur stdDeviation="2.5" result="blur"/>
+          <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+        </filter>
+      </defs>
+      <polygon points="60,8 108,60 60,112 12,60" fill="#0f0e0d" stroke="url(#s2edge)" stroke-width="1.5"/>
+      <polygon points="60,8 108,60 60,112 12,60" fill="url(#s2ref)"/>
+      <polygon points="60,8 84,36 60,42 36,36" fill="rgba(255,255,255,0.1)" stroke="rgba(200,196,188,0.4)" stroke-width="0.75"/>
+      <polygon points="12,60 36,36 60,42 36,76" fill="rgba(255,255,255,0.03)" stroke="rgba(160,156,148,0.2)" stroke-width="0.75"/>
+      <polygon points="108,60 84,36 60,42 84,76" fill="rgba(255,255,255,0.06)" stroke="rgba(180,176,168,0.25)" stroke-width="0.75"/>
+      <polygon points="60,112 36,76 60,70 84,76" fill="rgba(0,0,0,0.3)" stroke="rgba(100,96,88,0.2)" stroke-width="0.75"/>
+      <line x1="12" y1="60" x2="108" y2="60" stroke="rgba(200,196,188,0.15)" stroke-width="0.5"/>
+      <line x1="60" y1="8" x2="60" y2="112" stroke="rgba(200,196,188,0.08)" stroke-width="0.5"/>
+      <circle cx="60" cy="38" r="4" fill="rgba(255,255,255,0.55)" filter="url(#s2glow)"/>
+    </svg>
+    <div class="size-label">48px</div>
+  </div>
+
+  <!-- 96px -->
+  <div class="size-item">
+    <svg width="96" height="96" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="s3edge" x1="60" y1="0" x2="60" y2="120" gradientUnits="userSpaceOnUse">
+          <stop offset="0%" stop-color="#c8c4bc"/>
+          <stop offset="45%" stop-color="#706860"/>
+          <stop offset="100%" stop-color="#282420"/>
+        </linearGradient>
+        <radialGradient id="s3ref" cx="42%" cy="28%" r="55%">
+          <stop offset="0%" stop-color="#ffffff" stop-opacity="0.18"/>
+          <stop offset="100%" stop-color="#000000" stop-opacity="0"/>
+        </radialGradient>
+        <filter id="s3glow">
+          <feGaussianBlur stdDeviation="2.5" result="blur"/>
+          <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+        </filter>
+      </defs>
+      <polygon points="60,8 108,60 60,112 12,60" fill="#0f0e0d" stroke="url(#s3edge)" stroke-width="1.5"/>
+      <polygon points="60,8 108,60 60,112 12,60" fill="url(#s3ref)"/>
+      <polygon points="60,8 84,36 60,42 36,36" fill="rgba(255,255,255,0.1)" stroke="rgba(200,196,188,0.4)" stroke-width="0.75"/>
+      <polygon points="12,60 36,36 60,42 36,76" fill="rgba(255,255,255,0.03)" stroke="rgba(160,156,148,0.2)" stroke-width="0.75"/>
+      <polygon points="108,60 84,36 60,42 84,76" fill="rgba(255,255,255,0.06)" stroke="rgba(180,176,168,0.25)" stroke-width="0.75"/>
+      <polygon points="60,112 36,76 60,70 84,76" fill="rgba(0,0,0,0.3)" stroke="rgba(100,96,88,0.2)" stroke-width="0.75"/>
+      <line x1="12" y1="60" x2="108" y2="60" stroke="rgba(200,196,188,0.15)" stroke-width="0.5"/>
+      <line x1="60" y1="8" x2="60" y2="112" stroke="rgba(200,196,188,0.08)" stroke-width="0.5"/>
+      <circle cx="60" cy="38" r="5" fill="rgba(255,255,255,0.55)" filter="url(s3glow)"/>
+    </svg>
+    <div class="size-label">96px</div>
+  </div>
+
+  <!-- 160px hero -->
+  <div class="size-item">
+    <svg width="160" height="160" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="s4edge" x1="60" y1="0" x2="60" y2="120" gradientUnits="userSpaceOnUse">
+          <stop offset="0%" stop-color="#d4d0c8"/>
+          <stop offset="35%" stop-color="#887e74"/>
+          <stop offset="70%" stop-color="#403830"/>
+          <stop offset="100%" stop-color="#181410"/>
+        </linearGradient>
+        <radialGradient id="s4ref" cx="40%" cy="25%" r="50%">
+          <stop offset="0%" stop-color="#ffffff" stop-opacity="0.22"/>
+          <stop offset="60%" stop-color="#ffffff" stop-opacity="0.04"/>
+          <stop offset="100%" stop-color="#000000" stop-opacity="0"/>
+        </radialGradient>
+        <radialGradient id="s4deep" cx="60%" cy="70%" r="50%">
+          <stop offset="0%" stop-color="#000000" stop-opacity="0.5"/>
+          <stop offset="100%" stop-color="#000000" stop-opacity="0"/>
+        </radialGradient>
+        <filter id="s4glow">
+          <feGaussianBlur stdDeviation="3" result="blur"/>
+          <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+        </filter>
+        <filter id="s4softglow">
+          <feGaussianBlur stdDeviation="5" result="blur"/>
+          <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+        </filter>
+      </defs>
+
+      <!-- Base diamond — obsidian fill -->
+      <polygon points="60,8 108,60 60,112 12,60" 
+               fill="#0a0908" 
+               stroke="url(#s4edge)" 
+               stroke-width="1.5"/>
+
+      <!-- Radial light reflection (concept 5 technique) -->
+      <polygon points="60,8 108,60 60,112 12,60" fill="url(#s4ref)"/>
+      <!-- Deep shadow bottom -->
+      <polygon points="60,8 108,60 60,112 12,60" fill="url(#s4deep)"/>
+
+      <!-- TOP FACET — brightest (concept 1 geometry) -->
+      <polygon points="60,8 84,36 60,42 36,36" 
+               fill="rgba(255,255,255,0.12)" 
+               stroke="rgba(212,208,200,0.55)" 
+               stroke-width="0.75"/>
+
+      <!-- LEFT FACET — mid shadow -->
+      <polygon points="12,60 36,36 60,42 36,76" 
+               fill="rgba(255,255,255,0.025)" 
+               stroke="rgba(140,132,120,0.2)" 
+               stroke-width="0.75"/>
+
+      <!-- RIGHT FACET — slight highlight -->
+      <polygon points="108,60 84,36 60,42 84,76" 
+               fill="rgba(255,255,255,0.055)" 
+               stroke="rgba(160,154,144,0.28)" 
+               stroke-width="0.75"/>
+
+      <!-- BOTTOM FACET — darkest -->
+      <polygon points="60,112 36,76 60,70 84,76" 
+               fill="rgba(0,0,0,0.45)" 
+               stroke="rgba(80,74,66,0.25)" 
+               stroke-width="0.75"/>
+
+      <!-- BOTTOM LEFT -->
+      <polygon points="12,60 36,76 60,70 60,112" 
+               fill="rgba(0,0,0,0.2)" 
+               stroke="rgba(60,54,48,0.15)" 
+               stroke-width="0.5"/>
+
+      <!-- BOTTOM RIGHT -->
+      <polygon points="108,60 84,76 60,70 60,112" 
+               fill="rgba(0,0,0,0.15)" 
+               stroke="rgba(70,64,56,0.15)" 
+               stroke-width="0.5"/>
+
+      <!-- Equator line (concept 1) -->
+      <line x1="12" y1="60" x2="108" y2="60" 
+            stroke="rgba(200,196,188,0.18)" stroke-width="0.75"/>
+
+      <!-- Vertical axis -->
+      <line x1="60" y1="8" x2="60" y2="112" 
+            stroke="rgba(180,176,168,0.07)" stroke-width="0.5"/>
+
+      <!-- Diagonal structure lines -->
+      <line x1="36" y1="36" x2="84" y2="84" 
+            stroke="rgba(160,156,148,0.06)" stroke-width="0.5"/>
+      <line x1="84" y1="36" x2="36" y2="84" 
+            stroke="rgba(160,156,148,0.06)" stroke-width="0.5"/>
+
+      <!-- Crown glow (concept 1 feature) — soft white -->
+      <ellipse cx="60" cy="36" rx="7" ry="4.5" 
+               fill="rgba(255,255,255,0.35)" 
+               filter="url(#s4glow)"/>
+
+      <!-- Apex point -->
+      <circle cx="60" cy="8" r="2.5" 
+              fill="rgba(255,255,255,0.7)" 
+              filter="url(#s4glow)"/>
+
+      <!-- Subtle outer glow on diamond edge -->
+      <polygon points="60,8 108,60 60,112 12,60" 
+               fill="none" 
+               stroke="rgba(200,190,180,0.08)" 
+               stroke-width="4" 
+               filter="url(#s4softglow)"/>
+    </svg>
+    <div class="size-label">160px — hero</div>
+  </div>
+
+</div>
+
+<!-- IN-APP PREVIEW -->
+<div class="preview-dark">
+  <svg width="36" height="36" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <linearGradient id="pavEdge" x1="60" y1="0" x2="60" y2="120" gradientUnits="userSpaceOnUse">
+        <stop offset="0%" stop-color="#c8c4bc"/>
+        <stop offset="45%" stop-color="#706860"/>
+        <stop offset="100%" stop-color="#282420"/>
+      </linearGradient>
+      <radialGradient id="pavRef" cx="40%" cy="25%" r="55%">
+        <stop offset="0%" stop-color="#ffffff" stop-opacity="0.2"/>
+        <stop offset="100%" stop-color="#000000" stop-opacity="0"/>
+      </radialGradient>
+      <filter id="pavGlow">
+        <feGaussianBlur stdDeviation="2.5" result="blur"/>
+        <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+      </filter>
+    </defs>
+    <polygon points="60,8 108,60 60,112 12,60" fill="#0a0908" stroke="url(#pavEdge)" stroke-width="1.5"/>
+    <polygon points="60,8 108,60 60,112 12,60" fill="url(#pavRef)"/>
+    <polygon points="60,8 84,36 60,42 36,36" fill="rgba(255,255,255,0.12)" stroke="rgba(212,208,200,0.5)" stroke-width="0.75"/>
+    <polygon points="12,60 36,36 60,42 36,76" fill="rgba(255,255,255,0.025)" stroke="rgba(140,132,120,0.2)" stroke-width="0.75"/>
+    <polygon points="108,60 84,36 60,42 84,76" fill="rgba(255,255,255,0.055)" stroke="rgba(160,154,144,0.28)" stroke-width="0.75"/>
+    <polygon points="60,112 36,76 60,70 84,76" fill="rgba(0,0,0,0.45)" stroke="rgba(80,74,66,0.2)" stroke-width="0.75"/>
+    <line x1="12" y1="60" x2="108" y2="60" stroke="rgba(200,196,188,0.18)" stroke-width="0.75"/>
+    <ellipse cx="60" cy="36" rx="6" ry="4" fill="rgba(255,255,255,0.35)" filter="url(#pavGlow)"/>
+    <circle cx="60" cy="8" r="2.5" fill="rgba(255,255,255,0.7)" filter="url(#pavGlow)"/>
+  </svg>
+  <div class="chat-bubble">
+    Good evening, James. How can I help you today?
+  </div>
+</div>
+
+<div style="color: #2a2826; font-size: 0.6rem; letter-spacing: 0.15em; text-transform: uppercase;">
+  Zuberi · Obsidian Diamond
+</div>
+
+</body>
+</html>

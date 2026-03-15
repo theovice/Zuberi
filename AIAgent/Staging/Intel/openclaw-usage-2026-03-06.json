@@ -1,0 +1,2247 @@
+{
+  "totals": {
+    "input": 1469418,
+    "output": 6653,
+    "cacheRead": 0,
+    "cacheWrite": 0,
+    "totalTokens": 1476071,
+    "totalCost": 0,
+    "inputCost": 0,
+    "outputCost": 0,
+    "cacheReadCost": 0,
+    "cacheWriteCost": 0,
+    "missingCostEntries": 0
+  },
+  "sessions": [
+    {
+      "key": "agent:main:a9513ead-0b68-4a50-85a1-9b26ac300fef",
+      "sessionId": "a9513ead-0b68-4a50-85a1-9b26ac300fef",
+      "updatedAt": 1772423932398.73,
+      "agentId": "main",
+      "usage": {
+        "sessionId": "a9513ead-0b68-4a50-85a1-9b26ac300fef",
+        "sessionFile": "/home/node/.openclaw/agents/main/sessions/a9513ead-0b68-4a50-85a1-9b26ac300fef.jsonl",
+        "firstActivity": 1772338896365,
+        "lastActivity": 1772423932397,
+        "durationMs": 85036032,
+        "activityDates": [
+          "2026-03-01",
+          "2026-03-02"
+        ],
+        "dailyBreakdown": [
+          {
+            "date": "2026-03-01",
+            "tokens": 384383,
+            "cost": 0
+          },
+          {
+            "date": "2026-03-02",
+            "tokens": 407284,
+            "cost": 0
+          }
+        ],
+        "dailyMessageCounts": [
+          {
+            "date": "2026-03-01",
+            "total": 42,
+            "user": 18,
+            "assistant": 24,
+            "toolCalls": 6,
+            "toolResults": 0,
+            "errors": 6
+          },
+          {
+            "date": "2026-03-02",
+            "total": 26,
+            "user": 9,
+            "assistant": 17,
+            "toolCalls": 8,
+            "toolResults": 0,
+            "errors": 1
+          }
+        ],
+        "dailyLatency": [
+          {
+            "date": "2026-03-01",
+            "count": 24,
+            "avgMs": 167878.33333333334,
+            "p95Ms": 599993,
+            "minMs": 5559,
+            "maxMs": 599997
+          },
+          {
+            "date": "2026-03-02",
+            "count": 17,
+            "avgMs": 140931.35294117648,
+            "p95Ms": 599987,
+            "minMs": 13512,
+            "maxMs": 599987
+          }
+        ],
+        "dailyModelUsage": [
+          {
+            "date": "2026-03-01",
+            "provider": "ollama",
+            "model": "qwen3:14b-fast",
+            "tokens": 384383,
+            "cost": 0,
+            "count": 24
+          },
+          {
+            "date": "2026-03-02",
+            "provider": "ollama",
+            "model": "qwen3:14b-fast",
+            "tokens": 407284,
+            "cost": 0,
+            "count": 17
+          }
+        ],
+        "messageCounts": {
+          "total": 68,
+          "user": 27,
+          "assistant": 41,
+          "toolCalls": 14,
+          "toolResults": 0,
+          "errors": 7
+        },
+        "toolUsage": {
+          "totalCalls": 14,
+          "uniqueTools": 2,
+          "tools": [
+            {
+              "name": "read",
+              "count": 13
+            },
+            {
+              "name": "web_search",
+              "count": 1
+            }
+          ]
+        },
+        "modelUsage": [
+          {
+            "provider": "ollama",
+            "model": "qwen3:14b-fast",
+            "count": 41,
+            "totals": {
+              "input": 790190,
+              "output": 1477,
+              "cacheRead": 0,
+              "cacheWrite": 0,
+              "totalTokens": 791667,
+              "totalCost": 0,
+              "inputCost": 0,
+              "outputCost": 0,
+              "cacheReadCost": 0,
+              "cacheWriteCost": 0,
+              "missingCostEntries": 0
+            }
+          }
+        ],
+        "latency": {
+          "count": 41,
+          "avgMs": 156705.19512195123,
+          "p95Ms": 599991,
+          "minMs": 5559,
+          "maxMs": 599997
+        },
+        "input": 790190,
+        "output": 1477,
+        "cacheRead": 0,
+        "cacheWrite": 0,
+        "totalTokens": 791667,
+        "totalCost": 0,
+        "inputCost": 0,
+        "outputCost": 0,
+        "cacheReadCost": 0,
+        "cacheWriteCost": 0,
+        "missingCostEntries": 0
+      },
+      "contextWeight": null
+    },
+    {
+      "key": "agent:main:e38a8ed4-31ae-4977-9b73-8e47f6d1bda6",
+      "sessionId": "e38a8ed4-31ae-4977-9b73-8e47f6d1bda6",
+      "updatedAt": 1772509468853.4016,
+      "agentId": "main",
+      "usage": {
+        "sessionId": "e38a8ed4-31ae-4977-9b73-8e47f6d1bda6",
+        "sessionFile": "/home/node/.openclaw/agents/main/sessions/e38a8ed4-31ae-4977-9b73-8e47f6d1bda6.jsonl",
+        "firstActivity": 1772506683437,
+        "lastActivity": 1772509468852,
+        "durationMs": 2785415,
+        "activityDates": [
+          "2026-03-03"
+        ],
+        "dailyBreakdown": [
+          {
+            "date": "2026-03-03",
+            "tokens": 234446,
+            "cost": 0
+          }
+        ],
+        "dailyMessageCounts": [
+          {
+            "date": "2026-03-03",
+            "total": 19,
+            "user": 6,
+            "assistant": 13,
+            "toolCalls": 7,
+            "toolResults": 0,
+            "errors": 0
+          }
+        ],
+        "dailyLatency": [
+          {
+            "date": "2026-03-03",
+            "count": 13,
+            "avgMs": 9666.692307692309,
+            "p95Ms": 14478,
+            "minMs": 1568,
+            "maxMs": 14478
+          }
+        ],
+        "dailyModelUsage": [
+          {
+            "date": "2026-03-03",
+            "provider": "ollama",
+            "model": "qwen3:14b-fast",
+            "tokens": 234446,
+            "cost": 0,
+            "count": 13
+          }
+        ],
+        "messageCounts": {
+          "total": 19,
+          "user": 6,
+          "assistant": 13,
+          "toolCalls": 7,
+          "toolResults": 0,
+          "errors": 0
+        },
+        "toolUsage": {
+          "totalCalls": 7,
+          "uniqueTools": 3,
+          "tools": [
+            {
+              "name": "write",
+              "count": 3
+            },
+            {
+              "name": "read",
+              "count": 2
+            },
+            {
+              "name": "exec",
+              "count": 2
+            }
+          ]
+        },
+        "modelUsage": [
+          {
+            "provider": "ollama",
+            "model": "qwen3:14b-fast",
+            "count": 13,
+            "totals": {
+              "input": 233347,
+              "output": 1099,
+              "cacheRead": 0,
+              "cacheWrite": 0,
+              "totalTokens": 234446,
+              "totalCost": 0,
+              "inputCost": 0,
+              "outputCost": 0,
+              "cacheReadCost": 0,
+              "cacheWriteCost": 0,
+              "missingCostEntries": 0
+            }
+          }
+        ],
+        "latency": {
+          "count": 13,
+          "avgMs": 9666.692307692309,
+          "p95Ms": 14478,
+          "minMs": 1568,
+          "maxMs": 14478
+        },
+        "input": 233347,
+        "output": 1099,
+        "cacheRead": 0,
+        "cacheWrite": 0,
+        "totalTokens": 234446,
+        "totalCost": 0,
+        "inputCost": 0,
+        "outputCost": 0,
+        "cacheReadCost": 0,
+        "cacheWriteCost": 0,
+        "missingCostEntries": 0
+      },
+      "contextWeight": null
+    },
+    {
+      "key": "agent:main:e34429a4-8011-4aa1-a45f-861fd0fbec5b",
+      "sessionId": "e34429a4-8011-4aa1-a45f-861fd0fbec5b",
+      "updatedAt": 1772595229061.3464,
+      "agentId": "main",
+      "usage": {
+        "sessionId": "e34429a4-8011-4aa1-a45f-861fd0fbec5b",
+        "sessionFile": "/home/node/.openclaw/agents/main/sessions/e34429a4-8011-4aa1-a45f-861fd0fbec5b.jsonl",
+        "firstActivity": 1772511256090,
+        "lastActivity": 1772586182994,
+        "durationMs": 74926904,
+        "activityDates": [
+          "2026-03-03",
+          "2026-03-04"
+        ],
+        "dailyBreakdown": [
+          {
+            "date": "2026-03-03",
+            "tokens": 53728,
+            "cost": 0
+          },
+          {
+            "date": "2026-03-04",
+            "tokens": 101259,
+            "cost": 0
+          }
+        ],
+        "dailyMessageCounts": [
+          {
+            "date": "2026-03-03",
+            "total": 6,
+            "user": 2,
+            "assistant": 4,
+            "toolCalls": 2,
+            "toolResults": 0,
+            "errors": 1
+          },
+          {
+            "date": "2026-03-04",
+            "total": 11,
+            "user": 5,
+            "assistant": 6,
+            "toolCalls": 1,
+            "toolResults": 0,
+            "errors": 0
+          }
+        ],
+        "dailyLatency": [
+          {
+            "date": "2026-03-03",
+            "count": 4,
+            "avgMs": 153822.25,
+            "p95Ms": 599986,
+            "minMs": 978,
+            "maxMs": 599986
+          },
+          {
+            "date": "2026-03-04",
+            "count": 6,
+            "avgMs": 51484.5,
+            "p95Ms": 90083,
+            "minMs": 39324,
+            "maxMs": 90083
+          }
+        ],
+        "dailyModelUsage": [
+          {
+            "date": "2026-03-03",
+            "provider": "ollama",
+            "model": "qwen3:14b-fast",
+            "tokens": 53728,
+            "cost": 0,
+            "count": 4
+          },
+          {
+            "date": "2026-03-04",
+            "provider": "ollama",
+            "model": "gpt-oss:20b",
+            "tokens": 9924,
+            "cost": 0,
+            "count": 2
+          },
+          {
+            "date": "2026-03-04",
+            "provider": "ollama",
+            "model": "qwen3:14b-fast",
+            "tokens": 91335,
+            "cost": 0,
+            "count": 4
+          }
+        ],
+        "messageCounts": {
+          "total": 17,
+          "user": 7,
+          "assistant": 10,
+          "toolCalls": 3,
+          "toolResults": 0,
+          "errors": 1
+        },
+        "toolUsage": {
+          "totalCalls": 3,
+          "uniqueTools": 2,
+          "tools": [
+            {
+              "name": "read",
+              "count": 2
+            },
+            {
+              "name": "write",
+              "count": 1
+            }
+          ]
+        },
+        "modelUsage": [
+          {
+            "provider": "ollama",
+            "model": "qwen3:14b-fast",
+            "count": 8,
+            "totals": {
+              "input": 144803,
+              "output": 260,
+              "cacheRead": 0,
+              "cacheWrite": 0,
+              "totalTokens": 145063,
+              "totalCost": 0,
+              "inputCost": 0,
+              "outputCost": 0,
+              "cacheReadCost": 0,
+              "cacheWriteCost": 0,
+              "missingCostEntries": 0
+            }
+          },
+          {
+            "provider": "ollama",
+            "model": "gpt-oss:20b",
+            "count": 2,
+            "totals": {
+              "input": 8192,
+              "output": 1732,
+              "cacheRead": 0,
+              "cacheWrite": 0,
+              "totalTokens": 9924,
+              "totalCost": 0,
+              "inputCost": 0,
+              "outputCost": 0,
+              "cacheReadCost": 0,
+              "cacheWriteCost": 0,
+              "missingCostEntries": 0
+            }
+          }
+        ],
+        "latency": {
+          "count": 10,
+          "avgMs": 92419.6,
+          "p95Ms": 599986,
+          "minMs": 978,
+          "maxMs": 599986
+        },
+        "input": 152995,
+        "output": 1992,
+        "cacheRead": 0,
+        "cacheWrite": 0,
+        "totalTokens": 154987,
+        "totalCost": 0,
+        "inputCost": 0,
+        "outputCost": 0,
+        "cacheReadCost": 0,
+        "cacheWriteCost": 0,
+        "missingCostEntries": 0
+      },
+      "contextWeight": null
+    },
+    {
+      "key": "agent:main:f3dabbd3-896d-4bd9-8e68-5efa7615fed1",
+      "sessionId": "f3dabbd3-896d-4bd9-8e68-5efa7615fed1",
+      "updatedAt": 1772337478331.6924,
+      "agentId": "main",
+      "usage": {
+        "sessionId": "f3dabbd3-896d-4bd9-8e68-5efa7615fed1",
+        "sessionFile": "/home/node/.openclaw/agents/main/sessions/f3dabbd3-896d-4bd9-8e68-5efa7615fed1.jsonl",
+        "firstActivity": 1772311852735,
+        "lastActivity": 1772337478329,
+        "durationMs": 25625594,
+        "activityDates": [
+          "2026-02-28",
+          "2026-03-01"
+        ],
+        "dailyBreakdown": [
+          {
+            "date": "2026-02-28",
+            "tokens": 8626,
+            "cost": 0
+          },
+          {
+            "date": "2026-03-01",
+            "tokens": 107562,
+            "cost": 0
+          }
+        ],
+        "dailyMessageCounts": [
+          {
+            "date": "2026-02-28",
+            "total": 14,
+            "user": 7,
+            "assistant": 7,
+            "toolCalls": 0,
+            "toolResults": 0,
+            "errors": 5
+          },
+          {
+            "date": "2026-03-01",
+            "total": 11,
+            "user": 5,
+            "assistant": 6,
+            "toolCalls": 1,
+            "toolResults": 0,
+            "errors": 0
+          }
+        ],
+        "dailyLatency": [
+          {
+            "date": "2026-02-28",
+            "count": 7,
+            "avgMs": 3829.1428571428573,
+            "p95Ms": 14461,
+            "minMs": 14,
+            "maxMs": 14461
+          },
+          {
+            "date": "2026-03-01",
+            "count": 6,
+            "avgMs": 49414,
+            "p95Ms": 104420,
+            "minMs": 11366,
+            "maxMs": 104420
+          }
+        ],
+        "dailyModelUsage": [
+          {
+            "date": "2026-02-28",
+            "provider": "ollama",
+            "model": "qwen3:14b",
+            "tokens": 8626,
+            "cost": 0,
+            "count": 7
+          },
+          {
+            "date": "2026-03-01",
+            "provider": "ollama",
+            "model": "qwen3:14b-fast",
+            "tokens": 107562,
+            "cost": 0,
+            "count": 6
+          }
+        ],
+        "messageCounts": {
+          "total": 25,
+          "user": 12,
+          "assistant": 13,
+          "toolCalls": 1,
+          "toolResults": 0,
+          "errors": 5
+        },
+        "toolUsage": {
+          "totalCalls": 1,
+          "uniqueTools": 1,
+          "tools": [
+            {
+              "name": "web_search",
+              "count": 1
+            }
+          ]
+        },
+        "modelUsage": [
+          {
+            "provider": "ollama",
+            "model": "qwen3:14b-fast",
+            "count": 6,
+            "totals": {
+              "input": 107324,
+              "output": 238,
+              "cacheRead": 0,
+              "cacheWrite": 0,
+              "totalTokens": 107562,
+              "totalCost": 0,
+              "inputCost": 0,
+              "outputCost": 0,
+              "cacheReadCost": 0,
+              "cacheWriteCost": 0,
+              "missingCostEntries": 0
+            }
+          },
+          {
+            "provider": "ollama",
+            "model": "qwen3:14b",
+            "count": 7,
+            "totals": {
+              "input": 8192,
+              "output": 434,
+              "cacheRead": 0,
+              "cacheWrite": 0,
+              "totalTokens": 8626,
+              "totalCost": 0,
+              "inputCost": 0,
+              "outputCost": 0,
+              "cacheReadCost": 0,
+              "cacheWriteCost": 0,
+              "missingCostEntries": 0
+            }
+          }
+        ],
+        "latency": {
+          "count": 13,
+          "avgMs": 24868.30769230769,
+          "p95Ms": 104420,
+          "minMs": 14,
+          "maxMs": 104420
+        },
+        "input": 115516,
+        "output": 672,
+        "cacheRead": 0,
+        "cacheWrite": 0,
+        "totalTokens": 116188,
+        "totalCost": 0,
+        "inputCost": 0,
+        "outputCost": 0,
+        "cacheReadCost": 0,
+        "cacheWriteCost": 0,
+        "missingCostEntries": 0
+      },
+      "contextWeight": null
+    },
+    {
+      "key": "agent:main:4e097bea-7900-495d-a5ad-f06cadac6d16",
+      "sessionId": "4e097bea-7900-495d-a5ad-f06cadac6d16",
+      "updatedAt": 1772681188346.77,
+      "agentId": "main",
+      "usage": {
+        "sessionId": "4e097bea-7900-495d-a5ad-f06cadac6d16",
+        "sessionFile": "/home/node/.openclaw/agents/main/sessions/4e097bea-7900-495d-a5ad-f06cadac6d16.jsonl",
+        "firstActivity": 1772597004672,
+        "lastActivity": 1772658378400,
+        "durationMs": 61373728,
+        "activityDates": [
+          "2026-03-04"
+        ],
+        "dailyBreakdown": [
+          {
+            "date": "2026-03-04",
+            "tokens": 74893,
+            "cost": 0
+          }
+        ],
+        "dailyMessageCounts": [
+          {
+            "date": "2026-03-04",
+            "total": 17,
+            "user": 7,
+            "assistant": 10,
+            "toolCalls": 3,
+            "toolResults": 0,
+            "errors": 6
+          }
+        ],
+        "dailyLatency": [
+          {
+            "date": "2026-03-04",
+            "count": 10,
+            "avgMs": 376534,
+            "p95Ms": 599955,
+            "minMs": 15637,
+            "maxMs": 599955
+          }
+        ],
+        "dailyModelUsage": [
+          {
+            "date": "2026-03-04",
+            "provider": "ollama",
+            "model": "qwen3:14b-fast",
+            "tokens": 74893,
+            "cost": 0,
+            "count": 10
+          }
+        ],
+        "messageCounts": {
+          "total": 17,
+          "user": 7,
+          "assistant": 10,
+          "toolCalls": 3,
+          "toolResults": 0,
+          "errors": 6
+        },
+        "toolUsage": {
+          "totalCalls": 3,
+          "uniqueTools": 1,
+          "tools": [
+            {
+              "name": "read",
+              "count": 3
+            }
+          ]
+        },
+        "modelUsage": [
+          {
+            "provider": "ollama",
+            "model": "qwen3:14b-fast",
+            "count": 10,
+            "totals": {
+              "input": 74790,
+              "output": 103,
+              "cacheRead": 0,
+              "cacheWrite": 0,
+              "totalTokens": 74893,
+              "totalCost": 0,
+              "inputCost": 0,
+              "outputCost": 0,
+              "cacheReadCost": 0,
+              "cacheWriteCost": 0,
+              "missingCostEntries": 0
+            }
+          }
+        ],
+        "latency": {
+          "count": 10,
+          "avgMs": 376534,
+          "p95Ms": 599955,
+          "minMs": 15637,
+          "maxMs": 599955
+        },
+        "input": 74790,
+        "output": 103,
+        "cacheRead": 0,
+        "cacheWrite": 0,
+        "totalTokens": 74893,
+        "totalCost": 0,
+        "inputCost": 0,
+        "outputCost": 0,
+        "cacheReadCost": 0,
+        "cacheWriteCost": 0,
+        "missingCostEntries": 0
+      },
+      "contextWeight": null
+    },
+    {
+      "key": "agent:main:main",
+      "sessionId": "83167809-67f0-4e6d-bf57-18e27d6f4caf",
+      "updatedAt": 1772792788675,
+      "agentId": "main",
+      "channel": "heartbeat",
+      "chatType": "direct",
+      "origin": {
+        "label": "heartbeat",
+        "provider": "heartbeat",
+        "from": "heartbeat",
+        "to": "heartbeat"
+      },
+      "modelProvider": "ollama",
+      "model": "qwen3:14b-fast",
+      "usage": {
+        "sessionId": "83167809-67f0-4e6d-bf57-18e27d6f4caf",
+        "sessionFile": "/home/node/.openclaw/agents/main/sessions/83167809-67f0-4e6d-bf57-18e27d6f4caf.jsonl",
+        "firstActivity": 1772771173399,
+        "lastActivity": 1772771196517,
+        "durationMs": 23118,
+        "activityDates": [
+          "2026-03-06"
+        ],
+        "dailyBreakdown": [
+          {
+            "date": "2026-03-06",
+            "tokens": 36993,
+            "cost": 0
+          }
+        ],
+        "dailyMessageCounts": [
+          {
+            "date": "2026-03-06",
+            "total": 3,
+            "user": 1,
+            "assistant": 2,
+            "toolCalls": 1,
+            "toolResults": 0,
+            "errors": 0
+          }
+        ],
+        "dailyLatency": [
+          {
+            "date": "2026-03-06",
+            "count": 2,
+            "avgMs": 19997.5,
+            "p95Ms": 23118,
+            "minMs": 16877,
+            "maxMs": 23118
+          }
+        ],
+        "dailyModelUsage": [
+          {
+            "date": "2026-03-06",
+            "provider": "ollama",
+            "model": "qwen3:14b-fast",
+            "tokens": 36993,
+            "cost": 0,
+            "count": 2
+          }
+        ],
+        "messageCounts": {
+          "total": 3,
+          "user": 1,
+          "assistant": 2,
+          "toolCalls": 1,
+          "toolResults": 0,
+          "errors": 0
+        },
+        "toolUsage": {
+          "totalCalls": 1,
+          "uniqueTools": 1,
+          "tools": [
+            {
+              "name": "read",
+              "count": 1
+            }
+          ]
+        },
+        "modelUsage": [
+          {
+            "provider": "ollama",
+            "model": "qwen3:14b-fast",
+            "count": 2,
+            "totals": {
+              "input": 36954,
+              "output": 39,
+              "cacheRead": 0,
+              "cacheWrite": 0,
+              "totalTokens": 36993,
+              "totalCost": 0,
+              "inputCost": 0,
+              "outputCost": 0,
+              "cacheReadCost": 0,
+              "cacheWriteCost": 0,
+              "missingCostEntries": 0
+            }
+          }
+        ],
+        "latency": {
+          "count": 2,
+          "avgMs": 19997.5,
+          "p95Ms": 23118,
+          "minMs": 16877,
+          "maxMs": 23118
+        },
+        "input": 36954,
+        "output": 39,
+        "cacheRead": 0,
+        "cacheWrite": 0,
+        "totalTokens": 36993,
+        "totalCost": 0,
+        "inputCost": 0,
+        "outputCost": 0,
+        "cacheReadCost": 0,
+        "cacheWriteCost": 0,
+        "missingCostEntries": 0
+      },
+      "contextWeight": {
+        "source": "run",
+        "generatedAt": 1772792773029,
+        "sessionId": "83167809-67f0-4e6d-bf57-18e27d6f4caf",
+        "sessionKey": "agent:main:main",
+        "provider": "ollama",
+        "model": "qwen3:14b-fast",
+        "workspaceDir": "/home/node/.openclaw/workspace",
+        "bootstrapMaxChars": 20000,
+        "bootstrapTotalMaxChars": 150000,
+        "sandbox": {
+          "mode": "non-main",
+          "sandboxed": false
+        },
+        "systemPrompt": {
+          "chars": 58794,
+          "projectContextChars": 48660,
+          "nonProjectContextChars": 10134
+        },
+        "injectedWorkspaceFiles": [
+          {
+            "name": "AGENTS.md",
+            "path": "/home/node/.openclaw/workspace/AGENTS.md",
+            "missing": false,
+            "rawChars": 8198,
+            "injectedChars": 8198,
+            "truncated": false
+          },
+          {
+            "name": "SOUL.md",
+            "path": "/home/node/.openclaw/workspace/SOUL.md",
+            "missing": false,
+            "rawChars": 5502,
+            "injectedChars": 5502,
+            "truncated": false
+          },
+          {
+            "name": "TOOLS.md",
+            "path": "/home/node/.openclaw/workspace/TOOLS.md",
+            "missing": false,
+            "rawChars": 11515,
+            "injectedChars": 11515,
+            "truncated": false
+          },
+          {
+            "name": "IDENTITY.md",
+            "path": "/home/node/.openclaw/workspace/IDENTITY.md",
+            "missing": false,
+            "rawChars": 1827,
+            "injectedChars": 1827,
+            "truncated": false
+          },
+          {
+            "name": "USER.md",
+            "path": "/home/node/.openclaw/workspace/USER.md",
+            "missing": false,
+            "rawChars": 2269,
+            "injectedChars": 2269,
+            "truncated": false
+          },
+          {
+            "name": "HEARTBEAT.md",
+            "path": "/home/node/.openclaw/workspace/HEARTBEAT.md",
+            "missing": false,
+            "rawChars": 6696,
+            "injectedChars": 6696,
+            "truncated": false
+          },
+          {
+            "name": "BOOTSTRAP.md",
+            "path": "/home/node/.openclaw/workspace/BOOTSTRAP.md",
+            "missing": true,
+            "rawChars": 0,
+            "injectedChars": 66,
+            "truncated": false
+          },
+          {
+            "name": "MEMORY.md",
+            "path": "/home/node/.openclaw/workspace/MEMORY.md",
+            "missing": false,
+            "rawChars": 5978,
+            "injectedChars": 5978,
+            "truncated": false
+          },
+          {
+            "name": "memory.md",
+            "path": "/home/node/.openclaw/workspace/memory.md",
+            "missing": false,
+            "rawChars": 5978,
+            "injectedChars": 5978,
+            "truncated": false
+          }
+        ],
+        "skills": {
+          "promptChars": 3788,
+          "entries": [
+            {
+              "name": "healthcheck",
+              "blockChars": 456
+            },
+            {
+              "name": "skill-creator",
+              "blockChars": 261
+            },
+            {
+              "name": "cxdb",
+              "blockChars": 320
+            },
+            {
+              "name": "email",
+              "blockChars": 315
+            },
+            {
+              "name": "horizon",
+              "blockChars": 312
+            },
+            {
+              "name": "infrastructure",
+              "blockChars": 376
+            },
+            {
+              "name": "model-router",
+              "blockChars": 327
+            },
+            {
+              "name": "n8n",
+              "blockChars": 367
+            },
+            {
+              "name": "ollama",
+              "blockChars": 344
+            },
+            {
+              "name": "searxng",
+              "blockChars": 314
+            }
+          ]
+        },
+        "tools": {
+          "listChars": 126,
+          "schemaChars": 1791,
+          "entries": [
+            {
+              "name": "read",
+              "summaryChars": 298,
+              "schemaChars": 392,
+              "propertiesCount": 4
+            },
+            {
+              "name": "write",
+              "summaryChars": 127,
+              "schemaChars": 313,
+              "propertiesCount": 3
+            },
+            {
+              "name": "exec",
+              "summaryChars": 181,
+              "schemaChars": 1086,
+              "propertiesCount": 12
+            }
+          ]
+        }
+      }
+    },
+    {
+      "key": "agent:main:ef84b150-4fc1-4d9b-a330-abc6c25955d1",
+      "sessionId": "ef84b150-4fc1-4d9b-a330-abc6c25955d1",
+      "updatedAt": 1772769394736.7932,
+      "agentId": "main",
+      "usage": {
+        "sessionId": "ef84b150-4fc1-4d9b-a330-abc6c25955d1",
+        "sessionFile": "/home/node/.openclaw/agents/main/sessions/ef84b150-4fc1-4d9b-a330-abc6c25955d1.jsonl",
+        "firstActivity": 1772735173366,
+        "lastActivity": 1772735206432,
+        "durationMs": 33066,
+        "activityDates": [
+          "2026-03-05"
+        ],
+        "dailyBreakdown": [
+          {
+            "date": "2026-03-05",
+            "tokens": 36993,
+            "cost": 0
+          }
+        ],
+        "dailyMessageCounts": [
+          {
+            "date": "2026-03-05",
+            "total": 3,
+            "user": 1,
+            "assistant": 2,
+            "toolCalls": 1,
+            "toolResults": 0,
+            "errors": 0
+          }
+        ],
+        "dailyLatency": [
+          {
+            "date": "2026-03-05",
+            "count": 2,
+            "avgMs": 32401.5,
+            "p95Ms": 33066,
+            "minMs": 31737,
+            "maxMs": 33066
+          }
+        ],
+        "dailyModelUsage": [
+          {
+            "date": "2026-03-05",
+            "provider": "ollama",
+            "model": "qwen3:14b-fast",
+            "tokens": 36993,
+            "cost": 0,
+            "count": 2
+          }
+        ],
+        "messageCounts": {
+          "total": 3,
+          "user": 1,
+          "assistant": 2,
+          "toolCalls": 1,
+          "toolResults": 0,
+          "errors": 0
+        },
+        "toolUsage": {
+          "totalCalls": 1,
+          "uniqueTools": 1,
+          "tools": [
+            {
+              "name": "read",
+              "count": 1
+            }
+          ]
+        },
+        "modelUsage": [
+          {
+            "provider": "ollama",
+            "model": "qwen3:14b-fast",
+            "count": 2,
+            "totals": {
+              "input": 36954,
+              "output": 39,
+              "cacheRead": 0,
+              "cacheWrite": 0,
+              "totalTokens": 36993,
+              "totalCost": 0,
+              "inputCost": 0,
+              "outputCost": 0,
+              "cacheReadCost": 0,
+              "cacheWriteCost": 0,
+              "missingCostEntries": 0
+            }
+          }
+        ],
+        "latency": {
+          "count": 2,
+          "avgMs": 32401.5,
+          "p95Ms": 33066,
+          "minMs": 31737,
+          "maxMs": 33066
+        },
+        "input": 36954,
+        "output": 39,
+        "cacheRead": 0,
+        "cacheWrite": 0,
+        "totalTokens": 36993,
+        "totalCost": 0,
+        "inputCost": 0,
+        "outputCost": 0,
+        "cacheReadCost": 0,
+        "cacheWriteCost": 0,
+        "missingCostEntries": 0
+      },
+      "contextWeight": null
+    },
+    {
+      "key": "agent:main:c342963a-776e-48a8-84d8-20c25ad95f4e",
+      "sessionId": "c342963a-776e-48a8-84d8-20c25ad95f4e",
+      "updatedAt": 1771877408871.884,
+      "agentId": "main",
+      "usage": {
+        "sessionId": "c342963a-776e-48a8-84d8-20c25ad95f4e",
+        "sessionFile": "/home/node/.openclaw/agents/main/sessions/c342963a-776e-48a8-84d8-20c25ad95f4e.jsonl",
+        "firstActivity": 1771846080089,
+        "lastActivity": 1771877408870,
+        "durationMs": 31328781,
+        "activityDates": [
+          "2026-02-23"
+        ],
+        "dailyBreakdown": [
+          {
+            "date": "2026-02-23",
+            "tokens": 21460,
+            "cost": 0
+          }
+        ],
+        "dailyMessageCounts": [
+          {
+            "date": "2026-02-23",
+            "total": 10,
+            "user": 5,
+            "assistant": 5,
+            "toolCalls": 0,
+            "toolResults": 0,
+            "errors": 0
+          }
+        ],
+        "dailyLatency": [
+          {
+            "date": "2026-02-23",
+            "count": 5,
+            "avgMs": 17778.4,
+            "p95Ms": 24302,
+            "minMs": 12545,
+            "maxMs": 24302
+          }
+        ],
+        "dailyModelUsage": [
+          {
+            "date": "2026-02-23",
+            "provider": "ollama",
+            "model": "gpt-oss:20b",
+            "tokens": 21460,
+            "cost": 0,
+            "count": 5
+          }
+        ],
+        "messageCounts": {
+          "total": 10,
+          "user": 5,
+          "assistant": 5,
+          "toolCalls": 0,
+          "toolResults": 0,
+          "errors": 0
+        },
+        "modelUsage": [
+          {
+            "provider": "ollama",
+            "model": "gpt-oss:20b",
+            "count": 5,
+            "totals": {
+              "input": 20480,
+              "output": 980,
+              "cacheRead": 0,
+              "cacheWrite": 0,
+              "totalTokens": 21460,
+              "totalCost": 0,
+              "inputCost": 0,
+              "outputCost": 0,
+              "cacheReadCost": 0,
+              "cacheWriteCost": 0,
+              "missingCostEntries": 0
+            }
+          }
+        ],
+        "latency": {
+          "count": 5,
+          "avgMs": 17778.4,
+          "p95Ms": 24302,
+          "minMs": 12545,
+          "maxMs": 24302
+        },
+        "input": 20480,
+        "output": 980,
+        "cacheRead": 0,
+        "cacheWrite": 0,
+        "totalTokens": 21460,
+        "totalCost": 0,
+        "inputCost": 0,
+        "outputCost": 0,
+        "cacheReadCost": 0,
+        "cacheWriteCost": 0,
+        "missingCostEntries": 0
+      },
+      "contextWeight": null
+    },
+    {
+      "key": "agent:main:edea0e38-9523-4dbb-b09c-76f326306257",
+      "sessionId": "edea0e38-9523-4dbb-b09c-76f326306257",
+      "updatedAt": 1771794634034.2212,
+      "agentId": "main",
+      "usage": {
+        "sessionId": "edea0e38-9523-4dbb-b09c-76f326306257",
+        "sessionFile": "/home/node/.openclaw/agents/main/sessions/edea0e38-9523-4dbb-b09c-76f326306257.jsonl",
+        "firstActivity": 1771794614882,
+        "lastActivity": 1771794634018,
+        "durationMs": 19136,
+        "activityDates": [
+          "2026-02-22"
+        ],
+        "dailyBreakdown": [
+          {
+            "date": "2026-02-22",
+            "tokens": 4315,
+            "cost": 0
+          }
+        ],
+        "dailyMessageCounts": [
+          {
+            "date": "2026-02-22",
+            "total": 2,
+            "user": 1,
+            "assistant": 1,
+            "toolCalls": 0,
+            "toolResults": 0,
+            "errors": 0
+          }
+        ],
+        "dailyLatency": [
+          {
+            "date": "2026-02-22",
+            "count": 1,
+            "avgMs": 19136,
+            "p95Ms": 19136,
+            "minMs": 19136,
+            "maxMs": 19136
+          }
+        ],
+        "dailyModelUsage": [
+          {
+            "date": "2026-02-22",
+            "provider": "ollama",
+            "model": "gpt-oss:20b",
+            "tokens": 4315,
+            "cost": 0,
+            "count": 1
+          }
+        ],
+        "messageCounts": {
+          "total": 2,
+          "user": 1,
+          "assistant": 1,
+          "toolCalls": 0,
+          "toolResults": 0,
+          "errors": 0
+        },
+        "modelUsage": [
+          {
+            "provider": "ollama",
+            "model": "gpt-oss:20b",
+            "count": 1,
+            "totals": {
+              "input": 4096,
+              "output": 219,
+              "cacheRead": 0,
+              "cacheWrite": 0,
+              "totalTokens": 4315,
+              "totalCost": 0,
+              "inputCost": 0,
+              "outputCost": 0,
+              "cacheReadCost": 0,
+              "cacheWriteCost": 0,
+              "missingCostEntries": 0
+            }
+          }
+        ],
+        "latency": {
+          "count": 1,
+          "avgMs": 19136,
+          "p95Ms": 19136,
+          "minMs": 19136,
+          "maxMs": 19136
+        },
+        "input": 4096,
+        "output": 219,
+        "cacheRead": 0,
+        "cacheWrite": 0,
+        "totalTokens": 4315,
+        "totalCost": 0,
+        "inputCost": 0,
+        "outputCost": 0,
+        "cacheReadCost": 0,
+        "cacheWriteCost": 0,
+        "missingCostEntries": 0
+      },
+      "contextWeight": null
+    },
+    {
+      "key": "agent:main:main",
+      "sessionId": "main",
+      "updatedAt": 1771790568731.444,
+      "agentId": "main",
+      "usage": {
+        "sessionId": "main",
+        "sessionFile": "/home/node/.openclaw/agents/main/sessions/main.jsonl",
+        "firstActivity": 1771746574369,
+        "lastActivity": 1771790568730,
+        "durationMs": 43994361,
+        "activityDates": [
+          "2026-02-22"
+        ],
+        "dailyBreakdown": [
+          {
+            "date": "2026-02-22",
+            "tokens": 4129,
+            "cost": 0
+          }
+        ],
+        "dailyMessageCounts": [
+          {
+            "date": "2026-02-22",
+            "total": 10,
+            "user": 5,
+            "assistant": 5,
+            "toolCalls": 0,
+            "toolResults": 0,
+            "errors": 4
+          }
+        ],
+        "dailyLatency": [
+          {
+            "date": "2026-02-22",
+            "count": 5,
+            "avgMs": 7043.2,
+            "p95Ms": 34752,
+            "minMs": 21,
+            "maxMs": 34752
+          }
+        ],
+        "dailyModelUsage": [
+          {
+            "date": "2026-02-22",
+            "provider": "ollama",
+            "model": "gemma3:12b",
+            "tokens": 0,
+            "cost": 0,
+            "count": 2
+          },
+          {
+            "date": "2026-02-22",
+            "provider": "ollama",
+            "model": "gpt-oss:20b",
+            "tokens": 4129,
+            "cost": 0,
+            "count": 3
+          }
+        ],
+        "messageCounts": {
+          "total": 10,
+          "user": 5,
+          "assistant": 5,
+          "toolCalls": 0,
+          "toolResults": 0,
+          "errors": 4
+        },
+        "modelUsage": [
+          {
+            "provider": "ollama",
+            "model": "gpt-oss:20b",
+            "count": 3,
+            "totals": {
+              "input": 4096,
+              "output": 33,
+              "cacheRead": 0,
+              "cacheWrite": 0,
+              "totalTokens": 4129,
+              "totalCost": 0,
+              "inputCost": 0,
+              "outputCost": 0,
+              "cacheReadCost": 0,
+              "cacheWriteCost": 0,
+              "missingCostEntries": 0
+            }
+          },
+          {
+            "provider": "ollama",
+            "model": "gemma3:12b",
+            "count": 2,
+            "totals": {
+              "input": 0,
+              "output": 0,
+              "cacheRead": 0,
+              "cacheWrite": 0,
+              "totalTokens": 0,
+              "totalCost": 0,
+              "inputCost": 0,
+              "outputCost": 0,
+              "cacheReadCost": 0,
+              "cacheWriteCost": 0,
+              "missingCostEntries": 0
+            }
+          }
+        ],
+        "latency": {
+          "count": 5,
+          "avgMs": 7043.2,
+          "p95Ms": 34752,
+          "minMs": 21,
+          "maxMs": 34752
+        },
+        "input": 4096,
+        "output": 33,
+        "cacheRead": 0,
+        "cacheWrite": 0,
+        "totalTokens": 4129,
+        "totalCost": 0,
+        "inputCost": 0,
+        "outputCost": 0,
+        "cacheReadCost": 0,
+        "cacheWriteCost": 0,
+        "missingCostEntries": 0
+      },
+      "contextWeight": null
+    },
+    {
+      "key": "agent:main:searxng-test",
+      "sessionId": "5add645e-3c5d-49e1-807c-69bf0714e0c7",
+      "updatedAt": 1772431238678,
+      "agentId": "main",
+      "channel": "webchat",
+      "chatType": "direct",
+      "origin": {
+        "label": "Test",
+        "provider": "webchat",
+        "surface": "webchat",
+        "chatType": "direct"
+      },
+      "usage": {
+        "sessionId": "5add645e-3c5d-49e1-807c-69bf0714e0c7",
+        "sessionFile": "/home/node/.openclaw/agents/main/sessions/5add645e-3c5d-49e1-807c-69bf0714e0c7.jsonl",
+        "firstActivity": 1772431241627,
+        "lastActivity": 1772431241627,
+        "durationMs": 0,
+        "activityDates": [
+          "2026-03-02"
+        ],
+        "dailyBreakdown": [
+          {
+            "date": "2026-03-02",
+            "tokens": 0,
+            "cost": 0
+          }
+        ],
+        "dailyMessageCounts": [
+          {
+            "date": "2026-03-02",
+            "total": 1,
+            "user": 0,
+            "assistant": 1,
+            "toolCalls": 0,
+            "toolResults": 0,
+            "errors": 0
+          }
+        ],
+        "dailyModelUsage": [
+          {
+            "date": "2026-03-02",
+            "provider": "openclaw",
+            "model": "gateway-injected",
+            "tokens": 0,
+            "cost": 0,
+            "count": 1
+          }
+        ],
+        "messageCounts": {
+          "total": 1,
+          "user": 0,
+          "assistant": 1,
+          "toolCalls": 0,
+          "toolResults": 0,
+          "errors": 0
+        },
+        "modelUsage": [
+          {
+            "provider": "openclaw",
+            "model": "gateway-injected",
+            "count": 1,
+            "totals": {
+              "input": 0,
+              "output": 0,
+              "cacheRead": 0,
+              "cacheWrite": 0,
+              "totalTokens": 0,
+              "totalCost": 0,
+              "inputCost": 0,
+              "outputCost": 0,
+              "cacheReadCost": 0,
+              "cacheWriteCost": 0,
+              "missingCostEntries": 0
+            }
+          }
+        ],
+        "input": 0,
+        "output": 0,
+        "cacheRead": 0,
+        "cacheWrite": 0,
+        "totalTokens": 0,
+        "totalCost": 0,
+        "inputCost": 0,
+        "outputCost": 0,
+        "cacheReadCost": 0,
+        "cacheWriteCost": 0,
+        "missingCostEntries": 0
+      },
+      "contextWeight": null
+    },
+    {
+      "key": "agent:main:6205e289-497f-4232-8684-a9d027d98545",
+      "sessionId": "6205e289-497f-4232-8684-a9d027d98545",
+      "updatedAt": 1772014524351.261,
+      "agentId": "main",
+      "usage": {
+        "sessionId": "6205e289-497f-4232-8684-a9d027d98545",
+        "sessionFile": "/home/node/.openclaw/agents/main/sessions/6205e289-497f-4232-8684-a9d027d98545.jsonl",
+        "firstActivity": 1772014524349,
+        "lastActivity": 1772014524349,
+        "durationMs": 0,
+        "activityDates": [
+          "2026-02-25"
+        ],
+        "dailyBreakdown": [
+          {
+            "date": "2026-02-25",
+            "tokens": 0,
+            "cost": 0
+          }
+        ],
+        "dailyMessageCounts": [
+          {
+            "date": "2026-02-25",
+            "total": 1,
+            "user": 0,
+            "assistant": 1,
+            "toolCalls": 0,
+            "toolResults": 0,
+            "errors": 0
+          }
+        ],
+        "dailyModelUsage": [
+          {
+            "date": "2026-02-25",
+            "provider": "openclaw",
+            "model": "gateway-injected",
+            "tokens": 0,
+            "cost": 0,
+            "count": 1
+          }
+        ],
+        "messageCounts": {
+          "total": 1,
+          "user": 0,
+          "assistant": 1,
+          "toolCalls": 0,
+          "toolResults": 0,
+          "errors": 0
+        },
+        "modelUsage": [
+          {
+            "provider": "openclaw",
+            "model": "gateway-injected",
+            "count": 1,
+            "totals": {
+              "input": 0,
+              "output": 0,
+              "cacheRead": 0,
+              "cacheWrite": 0,
+              "totalTokens": 0,
+              "totalCost": 0,
+              "inputCost": 0,
+              "outputCost": 0,
+              "cacheReadCost": 0,
+              "cacheWriteCost": 0,
+              "missingCostEntries": 0
+            }
+          }
+        ],
+        "input": 0,
+        "output": 0,
+        "cacheRead": 0,
+        "cacheWrite": 0,
+        "totalTokens": 0,
+        "totalCost": 0,
+        "inputCost": 0,
+        "outputCost": 0,
+        "cacheReadCost": 0,
+        "cacheWriteCost": 0,
+        "missingCostEntries": 0
+      },
+      "contextWeight": null
+    }
+  ],
+  "daily": [
+    {
+      "date": "2026-02-22",
+      "input": 8192,
+      "output": 252,
+      "cacheRead": 0,
+      "cacheWrite": 0,
+      "totalTokens": 8444,
+      "totalCost": 0,
+      "inputCost": 0,
+      "outputCost": 0,
+      "cacheReadCost": 0,
+      "cacheWriteCost": 0,
+      "missingCostEntries": 0
+    },
+    {
+      "date": "2026-02-23",
+      "input": 20480,
+      "output": 980,
+      "cacheRead": 0,
+      "cacheWrite": 0,
+      "totalTokens": 21460,
+      "totalCost": 0,
+      "inputCost": 0,
+      "outputCost": 0,
+      "cacheReadCost": 0,
+      "cacheWriteCost": 0,
+      "missingCostEntries": 0
+    },
+    {
+      "date": "2026-02-25",
+      "input": 0,
+      "output": 0,
+      "cacheRead": 0,
+      "cacheWrite": 0,
+      "totalTokens": 0,
+      "totalCost": 0,
+      "inputCost": 0,
+      "outputCost": 0,
+      "cacheReadCost": 0,
+      "cacheWriteCost": 0,
+      "missingCostEntries": 0
+    },
+    {
+      "date": "2026-02-28",
+      "input": 8192,
+      "output": 434,
+      "cacheRead": 0,
+      "cacheWrite": 0,
+      "totalTokens": 8626,
+      "totalCost": 0,
+      "inputCost": 0,
+      "outputCost": 0,
+      "cacheReadCost": 0,
+      "cacheWriteCost": 0,
+      "missingCostEntries": 0
+    },
+    {
+      "date": "2026-03-01",
+      "input": 491020,
+      "output": 925,
+      "cacheRead": 0,
+      "cacheWrite": 0,
+      "totalTokens": 491945,
+      "totalCost": 0,
+      "inputCost": 0,
+      "outputCost": 0,
+      "cacheReadCost": 0,
+      "cacheWriteCost": 0,
+      "missingCostEntries": 0
+    },
+    {
+      "date": "2026-03-02",
+      "input": 406494,
+      "output": 790,
+      "cacheRead": 0,
+      "cacheWrite": 0,
+      "totalTokens": 407284,
+      "totalCost": 0,
+      "inputCost": 0,
+      "outputCost": 0,
+      "cacheReadCost": 0,
+      "cacheWriteCost": 0,
+      "missingCostEntries": 0
+    },
+    {
+      "date": "2026-03-03",
+      "input": 287004,
+      "output": 1170,
+      "cacheRead": 0,
+      "cacheWrite": 0,
+      "totalTokens": 288174,
+      "totalCost": 0,
+      "inputCost": 0,
+      "outputCost": 0,
+      "cacheReadCost": 0,
+      "cacheWriteCost": 0,
+      "missingCostEntries": 0
+    },
+    {
+      "date": "2026-03-04",
+      "input": 174128,
+      "output": 2024,
+      "cacheRead": 0,
+      "cacheWrite": 0,
+      "totalTokens": 176152,
+      "totalCost": 0,
+      "inputCost": 0,
+      "outputCost": 0,
+      "cacheReadCost": 0,
+      "cacheWriteCost": 0,
+      "missingCostEntries": 0
+    },
+    {
+      "date": "2026-03-05",
+      "input": 36954,
+      "output": 39,
+      "cacheRead": 0,
+      "cacheWrite": 0,
+      "totalTokens": 36993,
+      "totalCost": 0,
+      "inputCost": 0,
+      "outputCost": 0,
+      "cacheReadCost": 0,
+      "cacheWriteCost": 0,
+      "missingCostEntries": 0
+    },
+    {
+      "date": "2026-03-06",
+      "input": 36954,
+      "output": 39,
+      "cacheRead": 0,
+      "cacheWrite": 0,
+      "totalTokens": 36993,
+      "totalCost": 0,
+      "inputCost": 0,
+      "outputCost": 0,
+      "cacheReadCost": 0,
+      "cacheWriteCost": 0,
+      "missingCostEntries": 0
+    }
+  ],
+  "aggregates": {
+    "messages": {
+      "total": 176,
+      "user": 72,
+      "assistant": 104,
+      "toolCalls": 30,
+      "toolResults": 0,
+      "errors": 23
+    },
+    "tools": {
+      "totalCalls": 30,
+      "uniqueTools": 4,
+      "tools": [
+        {
+          "name": "read",
+          "count": 22
+        },
+        {
+          "name": "write",
+          "count": 4
+        },
+        {
+          "name": "web_search",
+          "count": 2
+        },
+        {
+          "name": "exec",
+          "count": 2
+        }
+      ]
+    },
+    "byModel": [
+      {
+        "provider": "ollama",
+        "model": "qwen3:14b-fast",
+        "count": 82,
+        "totals": {
+          "input": 1424362,
+          "output": 3255,
+          "cacheRead": 0,
+          "cacheWrite": 0,
+          "totalTokens": 1427617,
+          "totalCost": 0,
+          "inputCost": 0,
+          "outputCost": 0,
+          "cacheReadCost": 0,
+          "cacheWriteCost": 0,
+          "missingCostEntries": 0
+        }
+      },
+      {
+        "provider": "ollama",
+        "model": "gpt-oss:20b",
+        "count": 11,
+        "totals": {
+          "input": 36864,
+          "output": 2964,
+          "cacheRead": 0,
+          "cacheWrite": 0,
+          "totalTokens": 39828,
+          "totalCost": 0,
+          "inputCost": 0,
+          "outputCost": 0,
+          "cacheReadCost": 0,
+          "cacheWriteCost": 0,
+          "missingCostEntries": 0
+        }
+      },
+      {
+        "provider": "ollama",
+        "model": "qwen3:14b",
+        "count": 7,
+        "totals": {
+          "input": 8192,
+          "output": 434,
+          "cacheRead": 0,
+          "cacheWrite": 0,
+          "totalTokens": 8626,
+          "totalCost": 0,
+          "inputCost": 0,
+          "outputCost": 0,
+          "cacheReadCost": 0,
+          "cacheWriteCost": 0,
+          "missingCostEntries": 0
+        }
+      },
+      {
+        "provider": "ollama",
+        "model": "gemma3:12b",
+        "count": 2,
+        "totals": {
+          "input": 0,
+          "output": 0,
+          "cacheRead": 0,
+          "cacheWrite": 0,
+          "totalTokens": 0,
+          "totalCost": 0,
+          "inputCost": 0,
+          "outputCost": 0,
+          "cacheReadCost": 0,
+          "cacheWriteCost": 0,
+          "missingCostEntries": 0
+        }
+      },
+      {
+        "provider": "openclaw",
+        "model": "gateway-injected",
+        "count": 2,
+        "totals": {
+          "input": 0,
+          "output": 0,
+          "cacheRead": 0,
+          "cacheWrite": 0,
+          "totalTokens": 0,
+          "totalCost": 0,
+          "inputCost": 0,
+          "outputCost": 0,
+          "cacheReadCost": 0,
+          "cacheWriteCost": 0,
+          "missingCostEntries": 0
+        }
+      }
+    ],
+    "byProvider": [
+      {
+        "provider": "ollama",
+        "count": 102,
+        "totals": {
+          "input": 1469418,
+          "output": 6653,
+          "cacheRead": 0,
+          "cacheWrite": 0,
+          "totalTokens": 1476071,
+          "totalCost": 0,
+          "inputCost": 0,
+          "outputCost": 0,
+          "cacheReadCost": 0,
+          "cacheWriteCost": 0,
+          "missingCostEntries": 0
+        }
+      },
+      {
+        "provider": "openclaw",
+        "count": 2,
+        "totals": {
+          "input": 0,
+          "output": 0,
+          "cacheRead": 0,
+          "cacheWrite": 0,
+          "totalTokens": 0,
+          "totalCost": 0,
+          "inputCost": 0,
+          "outputCost": 0,
+          "cacheReadCost": 0,
+          "cacheWriteCost": 0,
+          "missingCostEntries": 0
+        }
+      }
+    ],
+    "byAgent": [
+      {
+        "agentId": "main",
+        "totals": {
+          "input": 1469418,
+          "output": 6653,
+          "cacheRead": 0,
+          "cacheWrite": 0,
+          "totalTokens": 1476071,
+          "totalCost": 0,
+          "inputCost": 0,
+          "outputCost": 0,
+          "cacheReadCost": 0,
+          "cacheWriteCost": 0,
+          "missingCostEntries": 0
+        }
+      }
+    ],
+    "byChannel": [
+      {
+        "channel": "heartbeat",
+        "totals": {
+          "input": 36954,
+          "output": 39,
+          "cacheRead": 0,
+          "cacheWrite": 0,
+          "totalTokens": 36993,
+          "totalCost": 0,
+          "inputCost": 0,
+          "outputCost": 0,
+          "cacheReadCost": 0,
+          "cacheWriteCost": 0,
+          "missingCostEntries": 0
+        }
+      },
+      {
+        "channel": "webchat",
+        "totals": {
+          "input": 0,
+          "output": 0,
+          "cacheRead": 0,
+          "cacheWrite": 0,
+          "totalTokens": 0,
+          "totalCost": 0,
+          "inputCost": 0,
+          "outputCost": 0,
+          "cacheReadCost": 0,
+          "cacheWriteCost": 0,
+          "missingCostEntries": 0
+        }
+      }
+    ],
+    "latency": {
+      "count": 102,
+      "avgMs": 115798.49019607843,
+      "minMs": 14,
+      "maxMs": 599997,
+      "p95Ms": 599991
+    },
+    "dailyLatency": [
+      {
+        "date": "2026-02-22",
+        "count": 6,
+        "avgMs": 9058.666666666666,
+        "minMs": 21,
+        "maxMs": 34752,
+        "p95Ms": 34752
+      },
+      {
+        "date": "2026-02-23",
+        "count": 5,
+        "avgMs": 17778.4,
+        "minMs": 12545,
+        "maxMs": 24302,
+        "p95Ms": 24302
+      },
+      {
+        "date": "2026-02-28",
+        "count": 7,
+        "avgMs": 3829.1428571428573,
+        "minMs": 14,
+        "maxMs": 14461,
+        "p95Ms": 14461
+      },
+      {
+        "date": "2026-03-01",
+        "count": 30,
+        "avgMs": 144185.46666666667,
+        "minMs": 5559,
+        "maxMs": 599997,
+        "p95Ms": 599993
+      },
+      {
+        "date": "2026-03-02",
+        "count": 17,
+        "avgMs": 140931.35294117648,
+        "minMs": 13512,
+        "maxMs": 599987,
+        "p95Ms": 599987
+      },
+      {
+        "date": "2026-03-03",
+        "count": 17,
+        "avgMs": 43585.64705882353,
+        "minMs": 978,
+        "maxMs": 599986,
+        "p95Ms": 599986
+      },
+      {
+        "date": "2026-03-04",
+        "count": 16,
+        "avgMs": 254640.4375,
+        "minMs": 15637,
+        "maxMs": 599955,
+        "p95Ms": 599955
+      },
+      {
+        "date": "2026-03-05",
+        "count": 2,
+        "avgMs": 32401.5,
+        "minMs": 31737,
+        "maxMs": 33066,
+        "p95Ms": 33066
+      },
+      {
+        "date": "2026-03-06",
+        "count": 2,
+        "avgMs": 19997.5,
+        "minMs": 16877,
+        "maxMs": 23118,
+        "p95Ms": 23118
+      }
+    ],
+    "modelDaily": [
+      {
+        "date": "2026-02-22",
+        "provider": "ollama",
+        "model": "gpt-oss:20b",
+        "tokens": 8444,
+        "cost": 0,
+        "count": 4
+      },
+      {
+        "date": "2026-02-22",
+        "provider": "ollama",
+        "model": "gemma3:12b",
+        "tokens": 0,
+        "cost": 0,
+        "count": 2
+      },
+      {
+        "date": "2026-02-23",
+        "provider": "ollama",
+        "model": "gpt-oss:20b",
+        "tokens": 21460,
+        "cost": 0,
+        "count": 5
+      },
+      {
+        "date": "2026-02-25",
+        "provider": "openclaw",
+        "model": "gateway-injected",
+        "tokens": 0,
+        "cost": 0,
+        "count": 1
+      },
+      {
+        "date": "2026-02-28",
+        "provider": "ollama",
+        "model": "qwen3:14b",
+        "tokens": 8626,
+        "cost": 0,
+        "count": 7
+      },
+      {
+        "date": "2026-03-01",
+        "provider": "ollama",
+        "model": "qwen3:14b-fast",
+        "tokens": 491945,
+        "cost": 0,
+        "count": 30
+      },
+      {
+        "date": "2026-03-02",
+        "provider": "ollama",
+        "model": "qwen3:14b-fast",
+        "tokens": 407284,
+        "cost": 0,
+        "count": 17
+      },
+      {
+        "date": "2026-03-02",
+        "provider": "openclaw",
+        "model": "gateway-injected",
+        "tokens": 0,
+        "cost": 0,
+        "count": 1
+      },
+      {
+        "date": "2026-03-03",
+        "provider": "ollama",
+        "model": "qwen3:14b-fast",
+        "tokens": 288174,
+        "cost": 0,
+        "count": 17
+      },
+      {
+        "date": "2026-03-04",
+        "provider": "ollama",
+        "model": "gpt-oss:20b",
+        "tokens": 9924,
+        "cost": 0,
+        "count": 2
+      },
+      {
+        "date": "2026-03-04",
+        "provider": "ollama",
+        "model": "qwen3:14b-fast",
+        "tokens": 166228,
+        "cost": 0,
+        "count": 14
+      },
+      {
+        "date": "2026-03-05",
+        "provider": "ollama",
+        "model": "qwen3:14b-fast",
+        "tokens": 36993,
+        "cost": 0,
+        "count": 2
+      },
+      {
+        "date": "2026-03-06",
+        "provider": "ollama",
+        "model": "qwen3:14b-fast",
+        "tokens": 36993,
+        "cost": 0,
+        "count": 2
+      }
+    ],
+    "daily": [
+      {
+        "date": "2026-02-22",
+        "tokens": 8444,
+        "cost": 0,
+        "messages": 12,
+        "toolCalls": 0,
+        "errors": 4
+      },
+      {
+        "date": "2026-02-23",
+        "tokens": 21460,
+        "cost": 0,
+        "messages": 10,
+        "toolCalls": 0,
+        "errors": 0
+      },
+      {
+        "date": "2026-02-25",
+        "tokens": 0,
+        "cost": 0,
+        "messages": 1,
+        "toolCalls": 0,
+        "errors": 0
+      },
+      {
+        "date": "2026-02-28",
+        "tokens": 8626,
+        "cost": 0,
+        "messages": 14,
+        "toolCalls": 0,
+        "errors": 5
+      },
+      {
+        "date": "2026-03-01",
+        "tokens": 491945,
+        "cost": 0,
+        "messages": 53,
+        "toolCalls": 7,
+        "errors": 6
+      },
+      {
+        "date": "2026-03-02",
+        "tokens": 407284,
+        "cost": 0,
+        "messages": 27,
+        "toolCalls": 8,
+        "errors": 1
+      },
+      {
+        "date": "2026-03-03",
+        "tokens": 288174,
+        "cost": 0,
+        "messages": 25,
+        "toolCalls": 9,
+        "errors": 1
+      },
+      {
+        "date": "2026-03-04",
+        "tokens": 176152,
+        "cost": 0,
+        "messages": 28,
+        "toolCalls": 4,
+        "errors": 6
+      },
+      {
+        "date": "2026-03-05",
+        "tokens": 36993,
+        "cost": 0,
+        "messages": 3,
+        "toolCalls": 1,
+        "errors": 0
+      },
+      {
+        "date": "2026-03-06",
+        "tokens": 36993,
+        "cost": 0,
+        "messages": 3,
+        "toolCalls": 1,
+        "errors": 0
+      }
+    ]
+  }
+}

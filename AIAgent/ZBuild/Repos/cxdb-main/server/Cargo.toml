@@ -1,0 +1,41 @@
+[package]
+name = "cxdb-server"
+version = "0.1.0"
+edition = "2021"
+license = "Apache-2.0"
+description = "CXDB binary protocol server - AI Context Store with Turn DAG and Blob CAS"
+authors = ["StrongDM <opensource@strongdm.com>"]
+repository = "https://github.com/strongdm/cxdb"
+homepage = "https://github.com/strongdm/cxdb"
+readme = "README.md"
+keywords = ["ai", "context", "dag", "storage", "blob"]
+categories = ["database", "development-tools"]
+publish = true
+
+[dependencies]
+blake3 = "1.5"
+byteorder = "1.5"
+crc32fast = "1.4"
+ctrlc = "3.4"
+hex = "0.4"
+thiserror = "1.0"
+zstd = "0.13"
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+rmpv = "1.0"
+base64 = "0.22"
+tiny_http = "0.12"
+url = "2.5"
+chrono = { version = "0.4", default-features = false, features = ["clock"] }
+sysinfo = "0.30"
+libc = "0.2"
+regex = "1.10"
+tracing = "0.1"
+
+# AWS SDK for S3 sync (optional feature for production deployments)
+aws-config = { version = "1.5", features = ["behavior-version-latest"] }
+aws-sdk-s3 = "1.65"
+tokio = { version = "1", features = ["rt-multi-thread", "time", "sync", "macros"] }
+
+[dev-dependencies]
+tempfile = "3.10"

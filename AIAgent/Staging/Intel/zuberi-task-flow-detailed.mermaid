@@ -1,0 +1,142 @@
+%%{init: {'theme': 'dark', 'themeVariables': {'primaryColor': '#1a1a2e', 'primaryTextColor': '#e0e0e0', 'primaryBorderColor': '#00d4aa', 'lineColor': '#00d4aa', 'secondaryColor': '#16213e', 'tertiaryColor': '#0f3460'}}}%%
+
+flowchart TD
+    classDef ready fill:#0f3460,stroke:#00d4aa,color:#e0e0e0,stroke-width:2px
+    classDef partial fill:#1a1a2e,stroke:#f0a500,color:#e0e0e0,stroke-width:2px,stroke-dasharray: 5 5
+    classDef blocked fill:#1a1a2e,stroke:#e74c3c,color:#e0e0e0,stroke-width:2px,stroke-dasharray: 10 5
+    classDef human fill:#2c003e,stroke:#bb86fc,color:#e0e0e0,stroke-width:2px
+    classDef kilo fill:#1b4332,stroke:#40916c,color:#e0e0e0,stroke-width:2px
+    classDef ceg fill:#3d0814,stroke:#e76f51,color:#e0e0e0,stroke-width:2px
+    classDef tool fill:#0a3d62,stroke:#48cae4,color:#e0e0e0,stroke-width:1px
+    classDef future fill:#1a1a2e,stroke:#555,color:#888,stroke-width:1px,stroke-dasharray: 3 3
+
+    JAMES["🧑 JAMES<br/>'Build a YouTube channel that generates<br/>revenue for a SaaS I also want built'"]:::human
+
+    JAMES --> ZUBERI
+
+    subgraph KILO_NODE["🖥️ KILO — Brain + Interface (100.127.23.52)"]
+        direction TB
+        ZUBERI["🤖 ZUBERI<br/>qwen3:14b-fast via Ollama<br/>OpenClaw v2026.2.26<br/>Gateway-level exec"]:::kilo
+
+        subgraph KILO_TOOLS["KILO Tools"]
+            direction LR
+            OL_READ["📖 read<br/>Workspace files"]:::tool
+            OL_WRITE["✏️ write<br/>New files to workspace"]:::tool
+            OL_EXEC["⚡ exec<br/>Gateway-level curl"]:::tool
+            OL_VISION["👁️ qwen3-vl:8b<br/>Vision via Ollama<br/>🟡 skill not built"]:::partial
+        end
+    end
+
+    subgraph CEG_NODE["🔧 CEG — Toolbox + Storage (100.100.101.1)"]
+        direction TB
+        subgraph CEG_SERVICES["Active Services"]
+            direction LR
+            SEARX["🔍 SearXNG<br/>:8888<br/>Web search"]:::ceg
+            N8N["⚙️ n8n<br/>:5678<br/>Workflow automation"]:::ceg
+            CXDB["💾 CXDB<br/>:9010<br/>Context memory"]:::ceg
+            KANBAN["📋 Kanban<br/>:3001<br/>Task board"]:::ceg
+        end
+        subgraph CEG_FUTURE["Future (blocked)"]
+            direction LR
+            CCODE["🤖 ccode CLI<br/>Coding sub-agent<br/>⛔ No auth"]:::blocked
+            SANDBOX["📦 Sandbox<br/>Build environment<br/>⛔ No image"]:::blocked
+        end
+    end
+
+    %% ===== PHASE 1: RESEARCH =====
+    subgraph P1["📋 PHASE 1: RESEARCH"]
+        direction TB
+        P1_START["Zuberi reads AGENTS.md<br/>Identifies task as multi-phase<br/>Checks MEMORY.md for prior context"]
+
+        P1_S1["exec: curl -s<br/>'http://100.100.101.1:8888/search<br/>?q=SaaS+market+gaps+2026&format=json'"]
+        P1_S1_R["← JSON results from 4 engines"]
+
+        P1_S2["exec: curl -s<br/>'http://100.100.101.1:8888/search<br/>?q=YouTube+channel+monetization<br/>+strategies&format=json'"]
+        P1_S2_R["← JSON results"]
+
+        P1_S3["exec: curl -s<br/>'http://100.100.101.1:8888/search<br/>?q=best+SaaS+niches+low+competition<br/>&format=json&time_range=month'"]
+        P1_S3_R["← JSON results"]
+
+        P1_SYNTH["qwen3:14b-fast synthesizes<br/>all search results into<br/>structured research brief"]
+
+        P1_SAVE["exec: curl -s -X POST<br/>'http://100.100.101.1:9010/v1/contexts'<br/>→ creates context<br/><br/>exec: curl -s -X POST<br/>'http://100.100.101.1:9010/v1/<br/>contexts/CTX_ID/turns'<br/>→ stores research as Note"]
+
+        P1_START --> P1_S1 --> P1_S1_R --> P1_S2 --> P1_S2_R --> P1_S3 --> P1_S3_R --> P1_SYNTH --> P1_SAVE
+    end
+
+    %% ===== PHASE 2: STRATEGY =====
+    subgraph P2["🎯 PHASE 2: STRATEGY & DESIGN"]
+        direction TB
+        P2_PLAN["qwen3:14b-fast generates:<br/>• Niche recommendation + rationale<br/>• SaaS product definition<br/>• YouTube content strategy<br/>• Revenue model"]
+
+        P2_WRITE1["write: /workspace/projects/<br/>mission-aegis/youtube-strategy.md<br/><br/>Content calendar, SEO keywords,<br/>video topics, upload schedule"]
+
+        P2_WRITE2["write: /workspace/projects/<br/>mission-aegis/saas-spec.md<br/><br/>Feature spec, tech stack,<br/>MVP scope, user stories"]
+
+        P2_WRITE3["write: /workspace/projects/<br/>mission-aegis/financial-model.md<br/><br/>Revenue projections, costs,<br/>break-even analysis<br/>🟡 Markdown only, no xlsx"]
+
+        P2_CONFIRM["⏸️ MUST CONFIRM<br/>Presents strategy to James<br/>Waits for go/no-go<br/>(AGENTS.md Section 2)"]
+
+        P2_KANBAN["exec: curl -s -X POST<br/>'http://100.100.101.1:3001/<br/>api/v1/tasks'<br/>→ creates task cards for<br/>each workstream"]
+
+        P2_PLAN --> P2_WRITE1 --> P2_WRITE2 --> P2_WRITE3 --> P2_CONFIRM --> P2_KANBAN
+    end
+
+    %% ===== PHASE 3: BUILD =====
+    subgraph P3["⚒️ PHASE 3: BUILD"]
+        direction TB
+
+        P3_SAAS["💻 Code the SaaS<br/>⛔ BLOCKED<br/><br/>Would need: ccode on CEG<br/>+ ANTHROPIC_API_KEY<br/>+ Node/Python in sandbox<br/>+ external API access"]
+
+        P3_YT["🎬 YouTube Content<br/>⛔ BLOCKED<br/><br/>Would need: image gen model<br/>+ TTS/audio model<br/>+ video editing tools<br/>+ browser for upload"]
+
+        P3_DEPLOY["🌐 Deploy SaaS<br/>⛔ BLOCKED<br/><br/>Would need: external hosting<br/>+ domain registration<br/>+ CI/CD pipeline<br/>+ SSL/DNS config"]
+
+        P3_SCRIPTS["📝 What Zuberi CAN do:<br/>✅ Write all code to workspace<br/>✅ Write deployment scripts<br/>✅ Write Dockerfiles<br/>✅ Write CI/CD configs<br/>✅ Write README/docs<br/><br/>But cannot execute any of it"]
+
+        P3_SAAS --> P3_SCRIPTS
+        P3_YT --> P3_SCRIPTS
+        P3_DEPLOY --> P3_SCRIPTS
+    end
+
+    %% ===== PHASE 4: AUTOMATE =====
+    subgraph P4["🔄 PHASE 4: AUTOMATE"]
+        direction TB
+
+        P4_N8N1["exec: curl -s -H 'X-N8N-API-KEY:...'<br/>'http://100.100.101.1:5678/<br/>api/v1/workflows'<br/>→ list existing workflows"]
+
+        P4_N8N2["⏸️ MUST CONFIRM<br/>Proposes workflow designs:<br/>• Daily content reminder<br/>• Weekly metrics check<br/>• Backup automation<br/>• Health monitoring"]
+
+        P4_N8N3["exec: curl -s -X POST<br/>'http://100.100.101.1:5678/<br/>webhook/health-check'<br/>→ triggers health workflow"]
+
+        P4_CXDB["exec: curl -s<br/>'http://100.100.101.1:9010/<br/>v1/contexts/CTX_ID/turns'<br/>→ retrieves progress data<br/>for weekly review"]
+
+        P4_EXT["📡 External Integrations<br/>⛔ BLOCKED<br/><br/>Cannot access:<br/>• YouTube Analytics API<br/>• Stripe/payment APIs<br/>• Email (AgentMail pending)<br/>• Any external webhook"]
+
+        P4_N8N1 --> P4_N8N2 --> P4_N8N3 --> P4_CXDB --> P4_EXT
+    end
+
+    %% ===== CONNECTIONS =====
+    ZUBERI --> P1
+    P1 --> P2
+    P2 --> P3
+    P3 --> P4
+
+    %% Tool connections (dotted)
+    P1_S1 -.->|"exec/curl<br/>via Tailscale"| SEARX
+    P1_S2 -.->|"exec/curl"| SEARX
+    P1_S3 -.->|"exec/curl"| SEARX
+    P1_SAVE -.->|"exec/curl"| CXDB
+    P2_KANBAN -.->|"exec/curl"| KANBAN
+    P4_N8N1 -.->|"exec/curl"| N8N
+    P4_N8N3 -.->|"exec/curl"| N8N
+    P4_CXDB -.->|"exec/curl"| CXDB
+
+    %% ===== SUMMARY =====
+    subgraph SUMMARY["📊 CAPABILITY SUMMARY FOR THIS TASK"]
+        direction TB
+        S1["✅ CAN DO (today):<br/>Research, strategy, planning,<br/>writing docs/specs/code,<br/>task tracking, internal automation,<br/>memory persistence"]:::ready
+        S2["🟡 PARTIAL:<br/>Financial modeling (no xlsx),<br/>analytics (no external APIs),<br/>notifications (no email)"]:::partial
+        S3["⛔ BLOCKED:<br/>Execute code, build SaaS,<br/>create media, deploy,<br/>access external services,<br/>upload to YouTube"]:::blocked
+        S4["🔑 UNLOCKS NEEDED:<br/>1. ccode on CEG (API key)<br/>2. Custom sandbox (Phase 2B)<br/>3. External APIs (Phase 2D)<br/>4. Browser tool (Phase 2C)"]:::future
+    end

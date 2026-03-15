@@ -1,0 +1,418 @@
+﻿Local Shell Execution Service Architecture for Autonomous AI Agents
+Introduction and Contextual Framework
+The deployment of autonomous Artificial Intelligence (AI) agents within localized, isolated computing environments introduces profound architectural challenges, particularly concerning the secure execution of operating system commands. As AI systems evolve from passive conversational interfaces into active, localized administrators capable of autonomous file manipulation, service orchestration, and package management, the underlying execution infrastructure must be rigorously re-engineered. This report provides an exhaustive architectural blueprint for a lightweight, highly secure, and fully autonomous HTTP shell execution service, specifically engineered for an AI agent operating within a constrained Ubuntu Server environment over a Tailscale Virtual Private Network (VPN).
+The operational context dictates that the AI agent, hosted on a distinct Windows-based node, must interact with a secondary Linux-based node (a Lenovo M710q constrained by limited CPU and memory resources). The agent's interactions with this secondary node currently lack the capacity for arbitrary shell execution, relying instead on manual human intervention via Secure Shell (SSH) or external cloud-based coding wrappers. The architectural mandate is to entirely deprecate external Application Programming Interface (API) dependencies, eliminating per-invocation costs and ensuring pure local autonomy. The resulting service must operate without third-party frameworks, remain strictly within the standard Python 3 library, provide concurrent request handling, enforce rigid process isolation, and maintain an append-only audit trail. This report dissects the required concurrency models, process isolation techniques, blocklist methodologies, and system service configurations to deliver a robust, production-ready implementation.
+Architectural Paradigm: Minimizing Dependencies in Local Environments
+The foundational requirement to replace a cloud-dependent execution wrapper with a purely local HTTP service necessitates a granular evaluation of Python's web server ecosystem. The objective is to construct a minimal-footprint server capable of concurrent request handling without relying on third-party frameworks, thereby minimizing the attack surface and reducing maintenance overhead in a heavily restricted environment.
+Comparative Analysis of Python HTTP Servers
+The ecosystem of Python HTTP servers spans from standard library modules to highly optimized asynchronous frameworks. For an unattended, localized agent tool designed to run continuously, the dependencies introduced by external frameworks present unacceptable operational risks. A comparative analysis elucidates the technical trade-offs inherent in these varied approaches.
+
+
+Server Framework
+	Execution Model
+	External Dependencies
+	Suitability for Constrained Autonomous Agents
+	FastAPI + Uvicorn
+	Asynchronous (ASGI)
+	Extensive (starlette, pydantic, uvicorn)
+	Highly unsuitable due to heavy dependency tree, despite exceptional API performance and native validation.1
+	Flask + Waitress
+	Synchronous (WSGI)
+	Moderate (werkzeug, jinja2, waitress)
+	Unsuitable due to reliance on external libraries and lack of native asynchronous concurrency out-of-the-box.1
+	aiohttp
+	Asynchronous
+	Minimal (aiohttp, multidict, yarl)
+	Suboptimal due to the requirement to structure the entire application around the asyncio event loop and external installation requirements.1
+	http.server + ThreadingHTTPServer
+	Synchronous (Threaded)
+	None (Standard Library)
+	Optimal. Provides native multi-threading for concurrent requests without requiring external packages or complex asynchronous state management.
+	FastAPI is widely recognized for its exceptional performance, frequently rivaling Node.js and Go for API workloads, and includes built-in data validation via Pydantic.1 However, deploying FastAPI requires a substantial dependency tree, including an ASGI server like Uvicorn or Hypercorn.2 This directly violates the strict zero external dependencies constraint. Similarly, aiohttp, while operating as a robust asynchronous client and server and powering high-concurrency environments, requires external installation and necessitates that the entire application be structured around asyncio event loops.1 For a service tasked primarily with waiting on blocking operating system subprocesses, the architectural overhead of an asynchronous event loop introduces unnecessary complexity.
+The optimal architectural decision is to utilize the native http.server module, specifically leveraging ThreadingHTTPServer. Historically, standard library HTTP servers were single-threaded, rendering them unsuitable for production environments due to blocking I/O.1 However, the introduction of ThreadingHTTPServer mitigates this by delegating each incoming request to a newly spawned thread. When the AI agent dispatches an HTTP POST request via curl across the Tailscale network, the server must process the command, initiate a subprocess, and wait for its completion up to a configurable timeout of 120 seconds. If a single-threaded server were utilized, a long-running command would block the main thread, causing subsequent health checks or parallel commands to time out. ThreadingHTTPServer resolves this by relying on OS-level thread context switching. Because the primary workload of this service is waiting on OS-level process execution, the Python Global Interpreter Lock (GIL) does not present a performance bottleneck. The threads spend the majority of their lifecycle blocked on subprocess.Popen.communicate(), which releases the GIL, allowing the server to seamlessly handle concurrent agent requests.4
+Tailscale Network Isolation as a Security Boundary
+Security in a perimeter-less paradigm relies heavily on robust micro-segmentation. The Tailscale VPN operates on the 100.64.0.0/10 Carrier-Grade NAT (CGNAT) IP space, creating an encrypted, peer-to-peer WireGuard mesh. By explicitly binding the Python HTTP server socket to the machine's specific Tailscale IP address rather than 0.0.0.0, the service inherently and cryptographically rejects packets originating from the physical local area network, the loopback interface, or the public internet.
+This topology leverages the Tailscale interface as a definitive cryptographic boundary. In this model, mutual TLS (mTLS) or external authentication headers within the HTTP payload become mathematically redundant. The mere arrival of a packet on the Tailscale interface guarantees it originated from a cryptographically verified node within the localized tailnet. Consequently, the HTTP API can remain unauthenticated at the application layer, dramatically simplifying the client-side curl logic required by the AI agent while maintaining a mathematically rigorous defense against unauthorized execution.
+Process Isolation and Resource Bounding Strategies
+Permitting an autonomous AI agent to execute arbitrary shell commands introduces severe security vectors, including unpredictable access patterns, unintended privilege escalation, and operational goal drift.6 The self-directed nature of the agent dictates that protective mechanisms must operate deterministically, prioritizing process isolation, input sanitization, and strict resource bounding over mere contextual filtering.7
+The Command Injection and shell=True Dilemma
+The Python subprocess module is responsible for spawning operating system-level processes. A fundamental architectural tension lies in whether to execute commands directly via system calls using shell=False or by invoking an intermediate shell environment using shell=True.8
+When shell=False is employed, the developer must pass an array of arguments to the underlying execution engine. This methodology entirely mitigates traditional shell injection attacks, as metacharacters like semicolons, pipes, and logical operators are treated as literal string arguments to the executable rather than control operators evaluated by the shell.8 Conversely, utilizing the shell=True argument propagates current shell settings and processes special shell features like glob patterns and environment variables before the command is run, which is widely recognized as a primary source of vulnerability.8
+However, an autonomous AI agent attempting to administer a Linux system frequently requires advanced shell logic to function effectively. Operations such as piping output between utilities, redirecting standard error streams into files, and utilizing variable expansion are critical for system administration. Because the mandate is to provide the agent with absolute local autonomy, utilizing shell=True is an unavoidable operational necessity. This decision introduces the risk of Unix wildcard poisoning and arbitrary command injection if the agent is subjected to a prompt injection attack from an external data source.8
+While functions like shlex.quote() can properly escape whitespace and special shell characters to prevent unintended execution, applying this to the entire command string would neuter the agent's ability to use pipes and redirects.11 To counterbalance the inherent risks of shell=True, security must be enforced rigidly at the process and system levels rather than exclusively relying on lexical parsing or sanitization.
+Process Group Isolation and Timeout Enforcement
+A critical vulnerability in naive shell execution services is the handling of long-running, hanging, or recursive commands. AI agents may inadvertently generate scripts that contain infinite loops or initiate interactive commands that wait indefinitely for standard input, thereby causing the execution thread to hang.14
+The standard subprocess.run() function accepts a timeout argument. However, if this timeout expires, the Python interpreter only sends a termination signal to the immediate child process.5 When shell=True is utilized, Python's immediate child is the /bin/sh instance. If the shell script has spawned subsequent descendant processes, terminating the parent shell leaves the grandchildren running as orphaned processes.14 Over time, these orphaned processes lead to process table exhaustion and profound system instability. Furthermore, relying on subprocess.run() without careful stream management can result in deadlocks if the child process generates massive amounts of output that exceed the OS pipe buffer limits.15
+The architecturally sound solution is to employ POSIX process groups. By passing start_new_session=True to the subprocess.Popen constructor, the operating system assigns the new shell and all its subsequent descendants to a novel process group ID (PGID).17 When the 120-second timeout is reached, the Python service captures the TimeoutExpired exception and issues a SIGTERM signal to the entire process group utilizing os.killpg(os.getpgid(proc.pid), signal.SIGTERM).17 This mechanism guarantees the absolute annihilation of the runaway execution tree, preventing the AI agent from accidentally spawning zombie processes or background tasks that outlive the HTTP request lifecycle. Additionally, to prevent interactive commands from hanging the system, the subprocess is instantiated with stdin=subprocess.DEVNULL, immediately crashing any command that attempts to wait for human input.5
+Resource Bounding for Fork Bomb Prevention
+Given the constrained hardware resources of the target deployment machine, an AI agent executing recursive scripts could trigger a fork bomb. A fork bomb is a runaway recursive process that causes the system to rapidly exhaust its process table, leading to kernel panics or complete system lockups.18
+To mitigate resource exhaustion natively without relying on external containerization daemons, the architecture incorporates the standard library's resource module. This is achieved by utilizing the preexec_fn parameter within the subprocess.Popen call.4 The preexec_fn accepts a callable that executes exclusively within the context of the newly forked child process, immediately after the fork() system call but crucially before the exec() call replaces the process image.4 Within this isolated context, resource.setrlimit() is invoked to enforce strict hard and soft limits on the isolated process.
+The following table details the specific resource limits enforced to ensure systemic stability:
+
+
+Resource Limit Type
+	Enforcement Mechanism
+	Architectural Rationale
+	RLIMIT_NPROC
+	resource.setrlimit(resource.RLIMIT_NPROC, (128, 128))
+	Restricts the maximum number of concurrent threads or processes the user can spawn, mathematically isolating fork bombs and preventing process table saturation.18
+	RLIMIT_CPU
+	resource.setrlimit(resource.RLIMIT_CPU, (timeout, timeout + 5))
+	Imposes a hard limit on the absolute CPU seconds the process can consume. This acts as an infallible, kernel-level secondary fail-safe to the Python wall-clock timeout, guaranteeing process termination even if the Python daemon crashes.4
+	RLIMIT_FSIZE
+	resource.setrlimit(resource.RLIMIT_FSIZE, (500MB, 500MB))
+	Caps the maximum size of files the process can create. This prevents the agent from inadvertently exhausting the host's disk space through infinite logging loops, unconstrained wget downloads, or malicious dd operations.
+	This defense-in-depth approach ensures that even if the AI generates a wildly inefficient or accidentally destructive script, the Linux kernel will forcibly throttle and terminate the execution long before it impacts the stability of the host machine or other localized services.
+Command Execution Mechanics and Output Buffering
+The handling of long-running commands and their associated output streams requires careful orchestration to prevent memory exhaustion and deadlocks. When an autonomous agent executes a command, the service must capture both standard output (stdout) and standard error (stderr) streams to return them within the JSON response payload.
+Buffered Execution vs. Streaming Interactivity
+The architectural decision between streaming output in real-time versus buffering the output until completion is governed by the stateless nature of the HTTP protocol. Streaming output provides real-time feedback to the caller but inherently requires maintaining persistent connections via WebSockets or Server-Sent Events (SSE). This approach breaks the architectural constraint requiring simple, stateless HTTP curl invocations. Therefore, a buffered execution model is implemented, where the server waits for the process to complete (or time out) before packaging the entirety of the output into the HTTP response.
+However, naive buffering utilizing subprocess.PIPE can lead to deadlocks if the child process generates output exceeding the operating system's internal pipe buffer (typically 64KB on Linux systems). If the pipe buffer fills, the child process blocks on its next write() system call, waiting for the parent process to read the data.15 If the parent Python script is simultaneously waiting for the child to finish via wait(), a permanent deadlock ensues.
+To circumvent this, the architecture utilizes subprocess.Popen.communicate(), which operates asynchronously under the hood, continuously draining both the stdout and stderr pipes into memory until the process terminates.5 To protect the Python service from MemoryError exceptions caused by an agent accidentally dumping gigabytes of data (e.g., executing cat /dev/urandom), the output streams captured by communicate() are strictly truncated to the first 10,000 characters before being serialized into the JSON response and audit log.
+Semantic Filtering and Blocklist Implementation
+While robust process isolation protects the systemic stability of the host machine, semantic filtering is strictly required to protect data integrity and prevent unauthorized system state alterations. A deterministic blocklist engine must intercept commands matching explicitly dangerous patterns before they are handed off to the subprocess engine.10
+The Denylist vs. Allowlist Tradeoff
+In traditional cybersecurity paradigms, allowlists (which explicitly permit only known-good operations) are objectively superior to denylists (which block known-bad operations) because attackers continually invent novel obfuscations to bypass denylists.10 A regular expression-based denylist can frequently be circumvented through trivial shell manipulation; for example, bypassing a block on rm -rf / by executing r\m -r\f /, utilizing base64 encoded payloads, or leveraging shell expansion tricks.20
+However, the operational parameters of a generalized autonomous AI agent mandate profound flexibility. Implementing a strict allowlist would paralyze the agent, forcing human intervention every time an unanticipated but entirely benign command is required for a new task. Because the agent must explore the system, build directories, compile code, and interact with dynamic services, a carefully curated denylist represents the optimal compromise.10
+As established by researchers analyzing deterministic AI security layers, while agents can be tricked into generating malicious payloads via prompt injection, the ultimate actions executed by the agent remain finite and highly predictable.22 A deterministic action auditor—in this case, the blocklist—does not need to understand the AI's internal reasoning or the context of the prompt; it merely acts as a strict gatekeeper inspecting the final execution artifact. If an attacker tricks the AI into wanting to delete the filesystem using a complex poem, the final tool call still resolves to a deletion command, which the gatekeeper intercepts.22
+Recommended Starter Blocklist Configuration
+The blocklist is configured via an externalized JSON or YAML representation, evaluated sequentially against the incoming command string. It targets four primary threat categories based on forensic analysis of typical insider threats and agentic failure modes: File Destruction, System Modification, Package Management, and Privilege Escalation.23
+
+
+Threat Category
+	Target Command Patterns
+	Architectural Rationale
+	Destructive Operations
+	rm -rf /, rm -rf *, mkfs, dd, wipefs, shred, truncate
+	Prevents catastrophic, unrecoverable data loss, partition formatting, and systemic filesystem obliteration.23
+	System Modification
+	shutdown, reboot, halt, systemctl stop, chown -R, chmod -R
+	Ensures the agent cannot take the host machine offline, disrupt core networking services, or alter global permission hierarchies.23
+	Privilege Escalation
+	sudo, su, doas, pkexec, visudo
+	Expressly prevents any attempts to bypass the non-root execution constraints or alter the sudoers file.23
+	Package Management
+	apt, dpkg, snap, yum, pacman
+	Mitigates the installation of unauthorized toolchains, network scanners, or malicious binaries that expand the agent's capabilities beyond its intended scope.23
+	To implement this efficiently within the constraints of a minimal codebase, the Python service verifies if any string defined in the blocklist array exists as a literal substring within the requested command payload. While rudimentary compared to full Abstract Syntax Tree (AST) parsing, when combined with the lack of sudo privileges and strict systemd sandboxing, this approach provides a highly robust defense-in-depth posture that effectively neutralizes the most severe risks of local execution.
+Telemetry, Observability, and Audit Logging
+For autonomous systems operating without continuous human oversight, comprehensive audit trails are not an optional feature; they are a critical requisite for debugging, forensic analysis, and ensuring the agent's actions remain aligned with human intent. The standard approach of utilizing unstructured text logging is wholly inadequate for automated, machine-readable analysis and fails to capture the necessary operational context.27
+The architecture mandates the use of JSON Lines (JSONL) as the definitive storage format for the audit log. JSONL ensures that every log entry is a self-contained, valid JSON object separated by a newline character.28 This strictly append-only format guarantees uniform structure, prevents multiline log injection vulnerabilities, and enables rapid ingestion into Security Information and Event Management (SIEM) systems. Crucially, JSONL allows the AI agent itself to directly parse and query its own historical execution context if it experiences memory truncation or needs to verify the outcome of a previous operation.29
+Audit Log Schema Definition
+Following established best practices for structured logging in AI execution frameworks, the audit log must capture exhaustive execution telemetry.28 Timestamps adhere strictly to the ISO 8601 standard (YYYY-MM-DDTHH:MM:SSZ) to ensure global consistency across distributed nodes.28
+The finalized JSONL schema captures the following specific fields for every invocation:
+
+
+Schema Field
+	Data Type
+	Description and Purpose
+	timestamp
+	String (ISO 8601)
+	The exact UTC initiation time of the command execution.28
+	command
+	String
+	The raw, unmodified shell command requested by the agent payload.
+	status
+	String
+	A categorical indicator of the execution result (success, failure, timeout, blocked).29
+	exit_code
+	Integer
+	The exact OS-level return code of the process (e.g., 0 for success, 124 for timeout).
+	duration_ms
+	Integer
+	Execution time measured in milliseconds, vital for identifying performance degradation or identifying hanging commands.29
+	stdout_truncated
+	String
+	The standard output stream, strictly truncated to 10,000 characters to prevent log bloat.
+	stderr_truncated
+	String
+	The standard error stream, strictly truncated to 10,000 characters.
+	To ensure data integrity, the file writing mechanism utilizes an operating system-level file lock, abstracted via the Python threading.Lock wrapper. This prevents race conditions and corrupted JSON objects when multiple threads attempt to append to the JSONL file simultaneously during periods of high concurrency.
+Comparative Analysis of Existing AI Execution Frameworks
+When architecting a novel execution service, it is highly instructive to examine how existing local-first AI tooling frameworks approach the problem of shell execution, identifying patterns to borrow and systemic mistakes to avoid.
+Frameworks such as Open Interpreter utilize an interactive, stateful architecture that is heavily dependent on Python's interactive shells, continuous while-loops, and WebSocket connections for bidirectional communication.32 While this stateful approach allows for complex multi-step processes and continuous input streams, it requires heavy, complex infrastructure including FastAPI, Uvicorn, and LiteLLM.33 Furthermore, Open Interpreter is fundamentally designed to run locally on the developer's primary laptop with an assumption of implicit trust, frequently lacking strict process isolation or resource limits, allowing an agent to accidentally crash the host machine.32
+Similarly, agents like AutoGPT and Aider construct localized shell wrappers using subprocess.Popen but frequently fail to implement comprehensive process group cleanup, timeout annihilations, or system-level resource limits.14 Their design philosophy assumes the agent operates within a highly disposable, ephemeral Docker container. However, within the specific context of the Zuberi deployment, while the agent logic resides within a container on the Windows node, it is manipulating a bare-metal Ubuntu server. A bare-metal host requires significantly tighter process lifecycle management than a disposable container. By enforcing os.killpg, process group isolation, and systemd namespace hardening, this proposed architecture successfully merges the autonomy provided by frameworks like AutoGPT with the strict security demands of bare-metal systems administration.
+System Configuration and Privilege Reduction
+To maintain execution persistence across host reboots and ensure the service operates with absolute minimal privileges, the application is deployed as a systemd user service rather than a global system daemon.35 Unlike global systemd services residing in /etc/systemd/system/ that execute as the root user by default and possess total system control, user services are managed on a per-user basis within the ~/.config/systemd/user/ directory and execute strictly with the unprivileged user's specific access rights and environment variables.36
+This provides a vital layer of implicit security and privilege reduction. Any shell command executed by the Python application inherits the environment and permission limits of the non-root user account associated with the systemd session.36 Even if the Python service is compromised, the attacker cannot read files owned by other users or modify system binaries.
+Systemd Security Hardening
+The systemd unit file incorporates Linux kernel-level sandboxing features, providing a defense layer entirely independent of the Python application logic:
+* ProtectSystem=strict: Mounts the entire OS hierarchy (including /usr, /boot, and /etc) as read-only for the service and its children. The agent cannot modify system configurations even if file permissions inadvertently allow it.
+* ReadWritePaths=/opt/zuberi: Explicitly whitelists the agent's designated working directory, allowing modifications only within this isolated enclave.
+* NoNewPrivileges=true: Ensures that the service and its descendants cannot gain new privileges through setuid or setgid binaries. This fundamentally neutralizes attempts by the agent to exploit a vulnerable sudo binary to escalate privileges.4
+* PrivateTmp=true: Allocates a unique, isolated /tmp and /var/tmp directory to the service. This hides the host's actual temporary files from the agent, preventing temporary file hijacking or information leakage.
+Source Code Implementation
+The following Python script satisfies all explicitly defined architectural constraints: absolute zero external dependencies, strict Python 3 standard library compatibility, a highly optimized footprint of under 150 lines of code, ThreadingHTTPServer for unblocked concurrency, JSON payload handling, and rigorous process group timeout enforcement.
+
+
+Python
+
+
+
+
+#!/usr/bin/env python3
+"""
+Zuberi Autonomous Shell Execution Service
+A minimal, dependency-free HTTP server for local AI agent shell execution.
+"""
+import json
+import os
+import signal
+import subprocess
+import time
+import resource
+import threading
+from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+
+# Core Configuration Directives
+CONFIG = {
+   "host": "100.100.101.1",  # Cryptographic boundary: Bind strictly to Tailscale interface
+   "port": 3003,
+   "timeout": 120,
+   "workdir": "/opt/zuberi",
+   "log_file": "/opt/zuberi/audit.jsonl",
+   "blocklist": ["sudo ", "su ", "rm -rf /", "mkfs", "dd ", "shutdown", "reboot", "apt ", "pacman"]
+}
+
+# Thread-safe lock ensuring atomic writes to the append-only audit log
+log_lock = threading.Lock()
+
+def restrict_resources():
+   """
+   Executes exclusively in the forked child process pre-exec.
+   Enforces strict kernel-level resource bounds to prevent systemic exhaustion.
+   """
+   # Soft limit: 120s, Hard limit: 130s. Prevents infinite CPU loops.
+   resource.setrlimit(resource.RLIMIT_CPU, (CONFIG["timeout"], CONFIG["timeout"] + 10))
+   # Cap maximum concurrent threads/processes to mitigate fork bombs.
+   resource.setrlimit(resource.RLIMIT_NPROC, (128, 128))
+   # Restrict file creation to 500MB to prevent disk exhaustion.
+   resource.setrlimit(resource.RLIMIT_FSIZE, (500 * 1024 * 1024, 500 * 1024 * 1024))
+
+def write_audit_log(entry):
+   """Safely appends a structured JSON record to the persistent audit log."""
+   with log_lock:
+       with open(CONFIG["log_file"], "a", encoding="utf-8") as f:
+           f.write(json.dumps(entry) + "\n")
+
+class AgentExecutionHandler(BaseHTTPRequestHandler):
+   """Handles concurrent HTTP requests from the AI agent over the Tailnet."""
+   
+   def send_json(self, status_code, payload):
+       """Utility method to format and dispatch JSON HTTP responses."""
+       self.send_response(status_code)
+       self.send_header('Content-Type', 'application/json')
+       self.end_headers()
+       self.wfile.write(json.dumps(payload).encode('utf-8'))
+
+   def do_GET(self):
+       """Provides a simple health check endpoint for orchestration polling."""
+       if self.path == '/health':
+           self.send_json(200, {"status": "ok", "service": "zuberi-executor"})
+       else:
+           self.send_json(404, {"error": "Endpoint not found."})
+
+   def do_POST(self):
+       """Processes incoming command execution requests."""
+       if self.path!= '/command':
+           return self.send_json(404, {"error": "Endpoint not found. Use /command."})
+
+       try:
+           length = int(self.headers.get('Content-Length', 0))
+           body = self.rfile.read(length)
+           req = json.loads(body)
+           cmd = req.get("command", "").strip()
+       except Exception:
+           return self.send_json(400, {"error": "Invalid JSON payload structure."})
+
+       if not cmd:
+           return self.send_json(400, {"error": "Command string is strictly required."})
+
+       # Deterministic Semantic Blocklist Verification
+       if any(bad_cmd in cmd for bad_cmd in CONFIG["blocklist"]):
+           write_audit_log({
+               "timestamp": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+               "command": cmd,
+               "status": "blocked",
+               "duration_ms": 0
+           })
+           return self.send_json(403, {"error": "Command violates execution blocklist policy."})
+
+       start_time = time.time()
+       timeout_occurred = False
+       out, err = "", ""
+       exit_code = -1
+
+       try:
+           # Spawn isolated process group with resource limits and detached stdin
+           proc = subprocess.Popen(
+               cmd,
+               shell=True,
+               cwd=CONFIG["workdir"],
+               stdout=subprocess.PIPE,
+               stderr=subprocess.PIPE,
+               stdin=subprocess.DEVNULL, # Prevent interactive hanging/deadlocks
+               start_new_session=True,   # Isolate into novel process group
+               preexec_fn=restrict_resources,
+               text=True,
+               encoding='utf-8',
+               errors='replace'          # Prevent decode crashes on binary output
+           )
+
+           try:
+               # Asynchronously drain pipes until completion or timeout
+               out, err = proc.communicate(timeout=CONFIG["timeout"])
+               exit_code = proc.returncode
+           except subprocess.TimeoutExpired:
+               timeout_occurred = True
+               # Annihilate the entire process group, including all descendants
+               os.killpg(os.getpgid(proc.pid), signal.SIGTERM)
+               out, err = proc.communicate()
+               exit_code = 124 # Standard POSIX timeout exit code
+       except Exception as e:
+           err = str(e)
+           exit_code = 1
+
+       duration_ms = int((time.time() - start_time) * 1000)
+       
+       # Truncate outputs to prevent HTTP payload ballooning and memory errors
+       out = out[:10000]
+       err = err[:10000]
+       
+       # Determine strict categorical status for the audit log
+       status_flag = "timeout" if timeout_occurred else ("success" if exit_code == 0 else "failure")
+
+       log_entry = {
+           "timestamp": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+           "command": cmd,
+           "status": status_flag,
+           "exit_code": exit_code,
+           "duration_ms": duration_ms,
+           "stdout_truncated": out,
+           "stderr_truncated": err
+       }
+       write_audit_log(log_entry)
+
+       self.send_json(200, {
+           "ok": exit_code == 0 and not timeout_occurred,
+           "exit_code": exit_code,
+           "duration_ms": duration_ms,
+           "stdout": out,
+           "stderr": err,
+           "timeout": timeout_occurred
+       })
+
+if __name__ == "__main__":
+   os.makedirs(CONFIG["workdir"], exist_ok=True)
+   # Instantiate the threaded server for unblocked concurrent request handling
+   server = ThreadingHTTPServer((CONFIG["host"], CONFIG["port"]), AgentExecutionHandler)
+   print(f"Agent Execution Service running on {CONFIG['host']}:{CONFIG['port']}")
+   server.serve_forever()
+
+Systemd User Unit File Implementation
+Create the following configuration file at ~/.config/systemd/user/zuberi-shell.service. This file defines the exact execution environment, restart logic, and system-level sandboxing parameters.
+
+
+Ini, TOML
+
+
+
+
+[Unit]
+Description=Zuberi AI Autonomous Shell Execution Service
+After=network.target
+
+
+Type=simple
+# Ensure the working directory strictly matches the Python script location
+WorkingDirectory=/opt/zuberi
+# Execute the Python script directly using the absolute path to the system binary
+ExecStart=/usr/bin/python3 /opt/zuberi/executor.py
+Restart=always
+RestartSec=5
+
+# Enhance security by restricting specific system calls and directories at the kernel level
+ProtectSystem=strict
+ReadWritePaths=/opt/zuberi
+ProtectHome=read-only
+NoNewPrivileges=true
+PrivateTmp=true
+
+[Install]
+WantedBy=default.target
+
+To deploy and activate the service without requiring elevated root access, the operator executes the following sequence:
+
+
+Bash
+
+
+
+
+# Reload the user's systemd daemon to recognize the newly created unit file
+systemctl --user daemon-reload
+
+# Enable the service to start automatically upon user login or boot
+systemctl --user enable zuberi-shell.service
+
+# Start the service immediately without rebooting
+systemctl --user start zuberi-shell.service
+
+# Ensure the user's services launch at system boot, even if the user is not actively logged in
+sudo loginctl enable-linger $USER
+
+Security Assessment and Policy Engine Upgrade Path
+While the v1 architecture described herein successfully delivers localized autonomy and entirely eliminates reliance on external APIs, certain residual risks mandate consideration. Furthermore, planning for the integration of advanced policy engines ensures the architecture remains scalable.
+Residual Risk Assessment
+1. Network Pivot Vulnerabilities: Because the agent possesses the capability to execute commands like curl and wget to interact with localized CEG services, an external adversary who successfully compromises the agent's prompt could utilize the agent as a proxy. This would allow the attacker to scan or attack other local services on the CEG machine, effectively bypassing Tailscale boundary firewalls.26
+2. Resource Contention: While the ulimit implementation strictly prevents exponential fork bombs, an agent running legitimate but heavily unoptimized data processing scripts could still consume its allotted 120 seconds of CPU time, saturating the CEG machine's limited processor and causing thermal throttling or latency for other services hosted on the node.4
+3. Blind Interactive Execution: The agent cannot natively perceive streaming output in this stateless design. If a command (e.g., an apt install operation not caught by the blocklist) prompts for interactive configuration mid-execution, the process will hang silently until the 120-second timeout inevitably annihilates it, resulting in an opaque failure state.14
+Upgrade Path: The Gatekeeper Pattern and Decoupled Authorization
+Future iterations of the autonomous agent will necessitate a graduated enforcement layer. This involves migrating from a rigid, primitive string-matching blocklist to contextual, identity-aware authorization policies (such as AWS Cedar-style rules or Open Policy Agent implementations). This evolution will allow for graduated enforcement, shifting from logging-only audits to strict blocking based on context.
+To ensure the v1 service accommodates this paradigm shift without requiring a systemic architectural rewrite, the codebase implicitly adheres to the Gatekeeper Pattern.38 The Gatekeeper Pattern fundamentally decouples the authorization engine from the underlying execution logic.38
+In the current Python implementation, the policy evaluation logic is contained entirely within a single, isolated functional block (if any(bad_cmd in cmd...)). Because the HTTP parsing (acting as the façade) and the subprocess invocation (acting as the host execution engine) are distinct, replacing the string-matching blocklist with a highly sophisticated policy engine involves modifying exactly one isolated abstraction layer.39
+When deploying a Cedar-style engine or a robust Policy as Code (PaC) system in the future, the v1 architecture can be updated simply to invoke a discrete policy evaluator function prior to calling subprocess.Popen.39 The evaluator will consume the incoming command, the cryptographic identity of the caller (available via Tailscale's local API), and the current system state, ultimately returning a deterministic boolean authorization decision.
+This strict decoupling ensures that the highly intricate execution sandbox—which encompasses the process group isolations, resource bounding limits, and timeout signal routing—remains entirely oblivious to the authorization layer.41 This preserves the architectural integrity, security, and stability of the underlying execution system as the AI agent scales in operational complexity.
+Works cited
+1. FastAPI vs aiohttp vs httpx: A Comparative Guide - DEV Community, accessed March 13, 2026, https://dev.to/piyushatghara/fastapi-vs-aiohttp-vs-httpx-a-comparative-guide-3kib
+2. Choosing your Python REST API framework - Speakeasy, accessed March 13, 2026, https://www.speakeasy.com/blog/choosing-your-framework-python
+3. Comparing HTTP Clients in Python: requests, aiohttp, and httpx | by Jayant Nehra, accessed March 13, 2026, https://python.plainenglish.io/comparing-http-clients-in-python-requests-aiohttp-and-httpx-a9ffa1caab9a
+4. resources - Python: ulimit and nice for subprocess.call / subprocess ..., accessed March 13, 2026, https://stackoverflow.com/questions/1689505/python-ulimit-and-nice-for-subprocess-call-subprocess-popen
+5. subprocess — Subprocess management — Python 3.14.3 documentation, accessed March 13, 2026, https://docs.python.org/3/library/subprocess.html
+6. The 4 Most Common AI Agent Deployment Patterns And What They Mean for Identity Security - Aembit, accessed March 13, 2026, https://aembit.io/blog/ai-agent-architectures-identity-security/
+7. 5 Essential Security Patterns for Robust Agentic AI - MachineLearningMastery.com, accessed March 13, 2026, https://machinelearningmastery.com/5-essential-security-patterns-for-robust-agentic-ai/
+8. Command Injection in Python | Semgrep, accessed March 13, 2026, https://semgrep.dev/docs/cheat-sheets/python-command-injection
+9. Secure Python Code: safe usage of the subprocess module - Codiga, accessed March 13, 2026, https://www.codiga.io/blog/python-subprocess-security/
+10. AI Agent Vulnerability Raises New Security Questions for Autonomous Tool Frameworks, accessed March 13, 2026, https://www.enterprisesecuritytech.com/post/ai-agent-vulnerability-raises-new-security-questions-for-autonomous-tool-frameworks
+11. Subprocesses — Python 3.14.3 documentation, accessed March 13, 2026, https://docs.python.org/3/library/asyncio-subprocess.html
+12. Unsafe execution of shell commands - Datadog Docs, accessed March 13, 2026, https://docs.datadoghq.com/security/code_security/static_analysis/static_analysis_rules/python-security/asyncio-subprocess-create-shell/
+13. PEP 787 – Safer subprocess usage using t-strings - Python Enhancement Proposals, accessed March 13, 2026, https://peps.python.org/pep-0787/
+14. Issue 37424: subprocess.run timeout does not function if shell=True and capture_output=True - Python tracker, accessed March 13, 2026, https://bugs.python.org/issue37424
+15. python subprocess with timeout and large output (>64K) - Stack Overflow, accessed March 13, 2026, https://stackoverflow.com/questions/3575554/python-subprocess-with-timeout-and-large-output-64k
+16. Using subprocess.Popen for Process with Large Output - Stack Overflow, accessed March 13, 2026, https://stackoverflow.com/questions/1180606/using-subprocess-popen-for-process-with-large-output
+17. Kill a Python subprocess and its children when a timeout is reached | Alexandra Zaharia, accessed March 13, 2026, https://alexandra-zaharia.github.io/posts/kill-subprocess-and-its-children-on-timeout-python/
+18. How to Limit Process Resources with ulimit - Interserver Tips, accessed March 13, 2026, https://www.interserver.net/tips/kb/how-to-limit-process-resources-with-ulimit/
+19. Preventing Fork Bomb on Linux - CS Technical Services and Support, accessed March 13, 2026, https://resources.cs.rutgers.edu/docs/preventing-fork-bomb-on-linux/
+20. Preventing deadly/fatal commands from being run [duplicate] - Ask Ubuntu, accessed March 13, 2026, https://askubuntu.com/questions/814051/preventing-deadly-fatal-commands-from-being-run
+21. How can I block a certain set of commands from being executed in linux? - Super User, accessed March 13, 2026, https://superuser.com/questions/468236/how-can-i-block-a-certain-set-of-commands-from-being-executed-in-linux
+22. I built a deterministic security layer for AI agents that blocks attacks before execution - Reddit, accessed March 13, 2026, https://www.reddit.com/r/cybersecurity/comments/1royp5h/i_built_a_deterministic_security_layer_for_ai/
+23. lukehinds/nono: A secure, kernel-enforced capability sandbox for AI agents - GitHub, accessed March 13, 2026, https://github.com/lukehinds/nono
+24. 8 Risky Commands in Unix | Proofpoint US, accessed March 13, 2026, https://www.proofpoint.com/us/blog/insider-threat-management/8-risky-commands-unix
+25. Most deadly Linux commands - Reddit, accessed March 13, 2026, https://www.reddit.com/r/linux/comments/19b0asa/most_deadly_linux_commands/
+26. Linux Commands & Utilities Commonly Used by Attackers - Uptycs, accessed March 13, 2026, https://www.uptycs.com/blog/threat-research-report-team/linux-commands-and-utilities-commonly-used-by-attackers
+27. Log Formatting in Production: 9 Best Practices | Better Stack Community, accessed March 13, 2026, https://betterstack.com/community/guides/logging/log-formatting/
+28. Log Formatting Guide: Best Practices for Structured Logging - Middleware.io, accessed March 13, 2026, https://middleware.io/blog/log-formatting/
+29. Audit Logging Skill - LobeHub, accessed March 13, 2026, https://lobehub.com/en/skills/hezzicode-personal-ai-employee-audit-logging
+30. Log Files - Inspect, accessed March 13, 2026, https://inspect.aisi.org.uk/eval-logs.html
+31. safedep/gryph: The AI coding agent audit trail tool - GitHub, accessed March 13, 2026, https://github.com/safedep/gryph
+32. mayzyo/open-interpreter-web: OpenAI's Code Interpreter running locally, as a service via WebSocket - GitHub, accessed March 13, 2026, https://github.com/mayzyo/open-interpreter-web
+33. open-interpreter/docs/server/usage.mdx at main · openinterpreter ..., accessed March 13, 2026, https://github.com/OpenInterpreter/open-interpreter/blob/main/docs/server/usage.mdx
+34. openinterpreter/open-interpreter: A natural language interface for computers - GitHub, accessed March 13, 2026, https://github.com/openinterpreter/open-interpreter
+35. Creating and Managing Custom systemd Services on Ubuntu - DEV Community, accessed March 13, 2026, https://dev.to/edgaras/creating-and-managing-custom-systemd-services-on-ubuntu-dkh
+36. Running Systemd Service as User Rather Than Root - Ask Ubuntu, accessed March 13, 2026, https://askubuntu.com/questions/1371102/running-systemd-service-as-user-rather-than-root
+37. A tutorial for writing a systemd service in Python - GitHub, accessed March 13, 2026, https://github.com/torfsen/python-systemd-tutorial
+38. Gatekeeper pattern - Azure Architecture Center | Microsoft Learn, accessed March 13, 2026, https://learn.microsoft.com/en-us/azure/architecture/patterns/gatekeeper
+39. Python Authorization Anti-Patterns and How to Avoid Them - DEV Community, accessed March 13, 2026, https://dev.to/permit_io/python-authorization-anti-patterns-and-how-to-avoid-them-385p
+40. Best Practices for Authorization in Python - Permit.io, accessed March 13, 2026, https://www.permit.io/blog/best-practices-for-authorization-in-python
+41. Achieving Decoupling and Simplicity in Python: Combining Factory Method and Facade Design Patterns | by Ali Moussawi | Medium, accessed March 13, 2026, https://medium.com/@moussawidev/achieving-decoupling-and-simplicity-in-python-combining-factory-method-and-facade-design-patterns-a1bddf0fe97b
+42. Clean Architecture: How to decouple the Repository from a CommandHandler?, accessed March 13, 2026, https://softwareengineering.stackexchange.com/questions/438848/clean-architecture-how-to-decouple-the-repository-from-a-commandhandler

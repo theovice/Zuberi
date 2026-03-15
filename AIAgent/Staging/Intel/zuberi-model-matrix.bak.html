@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Zuberi Home — Model Matrix</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'JetBrains Mono', 'SF Mono', 'Fira Code', monospace;
+    background: #0a0f1a;
+    color: #e2e8f0;
+    min-height: 100vh;
+    padding: 24px 16px;
+  }
+
+  .container { max-width: 1200px; margin: 0 auto; }
+
+  h1 {
+    font-size: 22px; font-weight: 700; letter-spacing: -0.02em;
+    background: linear-gradient(135deg, #10b981, #06b6d4);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .subtitle { font-size: 12px; color: #64748b; margin: 6px 0 0; }
+
+  .filters { display: flex; gap: 8px; margin: 20px 0 16px; flex-wrap: wrap; }
+
+  .filter-btn {
+    padding: 6px 14px; border-radius: 6px; border: 1px solid #1e293b;
+    background: #0f172a; color: #64748b; font-size: 12px; font-weight: 500;
+    cursor: pointer; font-family: inherit; transition: all 0.2s;
+  }
+  .filter-btn:hover { border-color: #334155; color: #94a3b8; }
+  .filter-btn.active { border-color: #10b981; background: rgba(16,185,129,0.1); color: #10b981; }
+
+  .table-wrap {
+    overflow-x: auto; border-radius: 8px; border: 1px solid #1e293b;
+    scrollbar-width: thin; scrollbar-color: #1e293b #0a0f1a;
+  }
+
+  table { width: 100%; border-collapse: collapse; font-size: 13px; min-width: 900px; }
+
+  thead th {
+    padding: 10px 12px; text-align: left; cursor: pointer; user-select: none;
+    font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em;
+    color: #64748b; border-bottom: 2px solid #1e293b; white-space: nowrap;
+    background: #0f172a; transition: all 0.15s; position: sticky; top: 0; z-index: 2;
+  }
+  thead th:hover { color: #94a3b8; }
+  thead th.sorted { color: #e2e8f0; background: #0c1322; }
+
+  tbody tr { cursor: pointer; transition: background 0.15s; }
+  tbody tr:hover { background: rgba(16,185,129,0.04); }
+
+  tbody td {
+    padding: 10px 12px; border-bottom: 1px solid #1e293b;
+    vertical-align: top;
+  }
+
+  .model-name { font-weight: 600; font-size: 13px; }
+  .model-name.highlighted { color: #10b981; }
+  .model-meta { font-size: 10px; color: #475569; margin-top: 2px; }
+
+  .notes-box {
+    margin-top: 8px; padding: 8px 10px; background: #1e293b;
+    border-radius: 6px; font-size: 11px; line-height: 1.6; color: #94a3b8;
+    display: none; animation: fadeIn 0.2s ease;
+  }
+  .notes-box.open { display: block; }
+
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: translateY(0); } }
+
+  .params { font-size: 12px; color: #94a3b8; }
+  .context { font-size: 12px; color: #94a3b8; }
+
+  .vram-badge {
+    font-size: 12px; font-weight: 600;
+    font-variant-numeric: tabular-nums;
+  }
+  .vram-green { color: #10b981; }
+  .vram-yellow { color: #f59e0b; }
+  .vram-orange { color: #f97316; }
+  .vram-red { color: #ef4444; }
+
+  .speed { font-weight: 600; font-variant-numeric: tabular-nums; }
+  .speed-fast { color: #10b981; }
+  .speed-mid { color: #f59e0b; }
+  .speed-slow { color: #f97316; }
+  .speed-na { color: #475569; font-size: 12px; font-weight: 400; }
+
+  .tool-dots { display: flex; gap: 3px; }
+  .tool-dot {
+    width: 8px; height: 8px; border-radius: 50%;
+  }
+  .tool-dot.on { background: #10b981; }
+  .tool-dot.off { background: #1e293b; border: 1px solid #334155; }
+
+  .quality-bar-wrap { display: flex; align-items: center; gap: 8px; }
+  .quality-track { width: 80px; height: 8px; background: #1e293b; border-radius: 4px; overflow: hidden; }
+  .quality-fill { height: 100%; border-radius: 4px; transition: width 0.4s ease; }
+  .quality-fill.high { background: #10b981; }
+  .quality-fill.mid { background: #f59e0b; }
+  .quality-fill.low { background: #f97316; }
+  .quality-fill.vlow { background: #ef4444; }
+  .quality-label { font-size: 11px; color: #94a3b8; font-variant-numeric: tabular-nums; }
+
+  .legend {
+    margin-top: 16px; padding: 12px 16px; background: #0f172a;
+    border-radius: 8px; border: 1px solid #1e293b;
+    font-size: 11px; color: #64748b; line-height: 1.7;
+  }
+  .legend strong { color: #94a3b8; }
+  .legend .green { color: #10b981; }
+
+  .gpu-guide {
+    margin-top: 12px; padding: 12px 16px; background: #0f172a;
+    border-radius: 8px; border: 1px solid #1e293b;
+    font-size: 11px; color: #64748b; line-height: 1.7;
+  }
+  .gpu-guide h3 { font-size: 12px; color: #94a3b8; margin-bottom: 6px; }
+  .gpu-tag { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 10px; font-weight: 600; margin: 0 4px; }
+  .gpu-tag.t12 { background: rgba(16,185,129,0.15); color: #10b981; }
+  .gpu-tag.t24 { background: rgba(245,158,11,0.15); color: #f59e0b; }
+  .gpu-tag.t48 { background: rgba(249,115,22,0.15); color: #f97316; }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <div style="margin-bottom: 24px;">
+    <h1>ZUBERI HOME — MODEL MATRIX</h1>
+    <p class="subtitle">12 models ranked for local OpenClaw agent work · Click headers to sort · Click rows to expand · Filter by VRAM tier</p>
+  </div>
+
+  <div class="filters" id="filters"></div>
+
+  <div class="table-wrap">
+    <table>
+      <thead id="thead"></thead>
+      <tbody id="tbody"></tbody>
+    </table>
+  </div>
+
+  <div class="legend">
+    <strong>Legend:</strong> t/s = tokens/second (100% GPU, estimated from community benchmarks).
+    ≈ Claude = approximate capability vs Claude Opus for agent/tool-use work.
+    VRAM = minimum for 100% GPU at default context.
+    <span class="green">Green models</span> = current or top recommended.
+    Speeds vary with quantization, context length, and background load. Click any row to see detailed notes.
+  </div>
+
+  <div class="gpu-guide">
+    <h3>Quick GPU → Model Guide</h3>
+    <span class="gpu-tag t12">12 GB (RTX 3060)</span> gpt-oss:20b (split), qwen3:14b (100% GPU)
+    &nbsp;&nbsp;
+    <span class="gpu-tag t24">24 GB (RTX 3090/4090)</span> qwen3:32b, qwen3-coder:32b, deepseek-r1:32b, llama4-scout
+    &nbsp;&nbsp;
+    <span class="gpu-tag t48">48 GB (2×3090)</span> qwen2.5:72b ← best local agent model tested
+  </div>
+</div>
+
+<script>
+const models = [
+  { name:"gpt-oss:20b", maker:"OpenAI", arch:"MoE", params:"20B (3.6B active)", vram:14, vramLabel:"14 GB", speed24:140, speed48:140, context:"8K default", toolUse:"Good", toolScore:3, quality:55, tier:"12-16 GB", notes:"Your current model. MoE with MXFP4 quantization. Fast on 16GB+, CPU spillover on 12GB. Decent tool calling, strong reasoning for its active param count.", highlighted:true },
+  { name:"gpt-oss:120b", maker:"OpenAI", arch:"MoE", params:"120B (5.1B active)", vram:70, vramLabel:"70 GB", speed24:0, speed48:25, context:"8K default", toolUse:"Good", toolScore:3, quality:75, tier:"80 GB+", notes:"The big sibling. Needs enterprise GPU (H100) or heavy multi-GPU. Not realistic for home builds. Included for reference.", highlighted:false },
+  { name:"qwen3:14b", maker:"Alibaba", arch:"Dense", params:"14B", vram:12, vramLabel:"9-12 GB", speed24:62, speed48:62, context:"32K native", toolUse:"Strong", toolScore:4, quality:50, tier:"12-16 GB", notes:"Community favorite for 12GB GPUs. Best instruction-following in its class. Thinking mode for reasoning. 100% GPU on 16GB+ cards. Great fast-model candidate.", highlighted:false },
+  { name:"qwen3:32b", maker:"Alibaba", arch:"Dense", params:"32B", vram:23, vramLabel:"20-24 GB", speed24:45, speed48:64, context:"32K native", toolUse:"Very Strong", toolScore:4, quality:65, tier:"24 GB", notes:"Sweet spot for 24GB GPUs. Reliable tool calling, strong reasoning. Fits 100% on single 3090/4090. Good balance of speed and capability.", highlighted:false },
+  { name:"qwen2.5:72b-instruct", maker:"Alibaba", arch:"Dense", params:"72B", vram:43, vramLabel:"40-48 GB", speed24:0, speed48:16, context:"32K native", toolUse:"Excellent", toolScore:5, quality:78, tier:"48 GB", notes:"The proven OpenClaw champion. Hegghammer gist: 16 t/s on 2×3090 with NVLink. Best local tool-use model tested. Q3 quant fits 48GB. Closest to Claude for agent work.", highlighted:true },
+  { name:"qwen3-coder:32b", maker:"Alibaba", arch:"MoE", params:"30.5B (3.3B active)", vram:20, vramLabel:"18-22 GB", speed24:50, speed48:50, context:"128K native", toolUse:"Very Strong", toolScore:4, quality:63, tier:"24 GB", notes:"Code-specialized MoE. Huge context window (128K). Great for dev assistant tasks. Low active params = fast inference. Community recommends as primary with glm-4.7 backup.", highlighted:false },
+  { name:"deepseek-r1:32b", maker:"DeepSeek", arch:"Dense", params:"32B", vram:23, vramLabel:"20-24 GB", speed24:38, speed48:64, context:"64K native", toolUse:"Good", toolScore:3, quality:68, tier:"24 GB", notes:"Strong reasoning model with chain-of-thought. Better at complex analysis than tool calling. 64K context. Good for research-heavy tasks.", highlighted:false },
+  { name:"deepseek-v3.2:32b", maker:"DeepSeek", arch:"MoE", params:"32B distilled", vram:20, vramLabel:"18-22 GB", speed24:38, speed48:38, context:"64K native", toolUse:"Good", toolScore:3, quality:70, tier:"24 GB", notes:"Distilled from 671B. Outperforms GPT-4 on some benchmarks. MIT license. Strong reasoning at low cost. 30-38 t/s on RTX 4090.", highlighted:false },
+  { name:"llama4-scout", maker:"Meta", arch:"MoE", params:"109B (17B active)", vram:35, vramLabel:"24-48 GB", speed24:20, speed48:30, context:"10M native", toolUse:"Good", toolScore:3, quality:62, tier:"24-48 GB", notes:"MoE with 16 experts. 10M context (industry-leading). Multimodal (text + vision). Int4 quant fits 24GB. GPT-4 class quality for its active params.", highlighted:false },
+  { name:"llama3.3:70b", maker:"Meta", arch:"Dense", params:"70B", vram:45, vramLabel:"40-48 GB", speed24:0, speed48:12, context:"128K native", toolUse:"Good", toolScore:3, quality:72, tier:"48 GB", notes:"Solid all-rounder at 70B. 128K context. Well-supported ecosystem. Slightly behind Qwen 72B for OpenClaw tool use. ~8 t/s single 3090, ~12 on dual.", highlighted:false },
+  { name:"mistral-small:24b", maker:"Mistral", arch:"Dense", params:"24B", vram:16, vramLabel:"14-18 GB", speed24:93, speed48:93, context:"32K native", toolUse:"Good", toolScore:3, quality:58, tier:"16-24 GB", notes:"Fast inference (93 t/s on 5090). Good language quality. Fits 24GB easily. Weaker at complex agent chains than Qwen equivalents.", highlighted:false },
+  { name:"glm-4.7-flash", maker:"Zhipu AI", arch:"Dense", params:"~26B", vram:25, vramLabel:"22-28 GB", speed24:0, speed48:40, context:"128K native", toolUse:"Strong", toolScore:4, quality:64, tier:"24-32 GB", notes:"Community sleeper hit for OpenClaw. Multiple users report excellent tool use. Needs ~25GB so tight on single 24GB card. Recommended backup to qwen3-coder.", highlighted:false }
+];
+
+let sortKey = "quality", sortDir = -1, vramFilter = "all", expandedRow = null;
+
+function render() {
+  // Filters
+  const filtersEl = document.getElementById("filters");
+  filtersEl.innerHTML = "";
+  [["all","All Models"],["16","≤16 GB VRAM"],["24","≤24 GB VRAM"],["48","≤48 GB VRAM"]].forEach(([val, label]) => {
+    const btn = document.createElement("button");
+    btn.className = "filter-btn" + (vramFilter === val ? " active" : "");
+    btn.textContent = label;
+    btn.onclick = () => { vramFilter = val; expandedRow = null; render(); };
+    filtersEl.appendChild(btn);
+  });
+
+  // Filter
+  let data = vramFilter === "all" ? models :
+    vramFilter === "16" ? models.filter(m => m.vram <= 16) :
+    vramFilter === "24" ? models.filter(m => m.vram <= 24) :
+    models.filter(m => m.vram <= 48);
+
+  // Sort
+  data = [...data].sort((a, b) => {
+    const av = a[sortKey], bv = b[sortKey];
+    if (typeof av === "number") return (av - bv) * sortDir;
+    return String(av).localeCompare(String(bv)) * sortDir;
+  });
+
+  // Header
+  const thead = document.getElementById("thead");
+  thead.innerHTML = "";
+  const hr = document.createElement("tr");
+  [["Model","name",160],["Params","params",120],["VRAM","vram",80],["t/s (24GB)","speed24",85],["t/s (48GB)","speed48",85],["Context","context",85],["Tool Use","toolScore",90],["≈ Claude","quality",120]].forEach(([label, field, w]) => {
+    const th = document.createElement("th");
+    th.textContent = label + (sortKey === field ? (sortDir === 1 ? " ↑" : " ↓") : "");
+    th.style.width = w + "px";
+    if (sortKey === field) th.classList.add("sorted");
+    th.onclick = () => {
+      if (sortKey === field) sortDir *= -1;
+      else { sortKey = field; sortDir = -1; }
+      expandedRow = null;
+      render();
+    };
+    hr.appendChild(th);
+  });
+  thead.appendChild(hr);
+
+  // Body
+  const tbody = document.getElementById("tbody");
+  tbody.innerHTML = "";
+  data.forEach((m, i) => {
+    const tr = document.createElement("tr");
+    tr.onclick = () => { expandedRow = expandedRow === i ? null : i; render(); };
+
+    // Model name
+    const td1 = document.createElement("td");
+    td1.innerHTML = `<div class="model-name ${m.highlighted ? 'highlighted' : ''}">${m.name}</div><div class="model-meta">${m.maker} · ${m.arch}</div>`;
+    if (expandedRow === i) td1.innerHTML += `<div class="notes-box open">${m.notes}</div>`;
+    tr.appendChild(td1);
+
+    // Params
+    const td2 = document.createElement("td");
+    td2.innerHTML = `<span class="params">${m.params}</span>`;
+    tr.appendChild(td2);
+
+    // VRAM
+    const td3 = document.createElement("td");
+    const vc = m.vram <= 16 ? "vram-green" : m.vram <= 24 ? "vram-yellow" : m.vram <= 48 ? "vram-orange" : "vram-red";
+    td3.innerHTML = `<span class="vram-badge ${vc}">${m.vramLabel}</span>`;
+    tr.appendChild(td3);
+
+    // Speed 24GB
+    const td4 = document.createElement("td");
+    if (m.speed24 === 0) td4.innerHTML = `<span class="speed-na">—</span>`;
+    else { const sc = m.speed24 >= 60 ? "speed-fast" : m.speed24 >= 30 ? "speed-mid" : "speed-slow"; td4.innerHTML = `<span class="speed ${sc}">${m.speed24}</span>`; }
+    tr.appendChild(td4);
+
+    // Speed 48GB
+    const td5 = document.createElement("td");
+    if (m.speed48 === 0) td5.innerHTML = `<span class="speed-na">—</span>`;
+    else { const sc = m.speed48 >= 60 ? "speed-fast" : m.speed48 >= 30 ? "speed-mid" : "speed-slow"; td5.innerHTML = `<span class="speed ${sc}">${m.speed48}</span>`; }
+    tr.appendChild(td5);
+
+    // Context
+    const td6 = document.createElement("td");
+    td6.innerHTML = `<span class="context">${m.context}</span>`;
+    tr.appendChild(td6);
+
+    // Tool dots
+    const td7 = document.createElement("td");
+    let dots = '<div class="tool-dots">';
+    for (let j = 1; j <= 5; j++) dots += `<div class="tool-dot ${j <= m.toolScore ? 'on' : 'off'}"></div>`;
+    dots += '</div>';
+    td7.innerHTML = dots;
+    tr.appendChild(td7);
+
+    // Quality bar
+    const td8 = document.createElement("td");
+    const qc = m.quality >= 75 ? "high" : m.quality >= 60 ? "mid" : m.quality >= 45 ? "low" : "vlow";
+    td8.innerHTML = `<div class="quality-bar-wrap"><div class="quality-track"><div class="quality-fill ${qc}" style="width:${m.quality}%"></div></div><span class="quality-label">${m.quality}%</span></div>`;
+    tr.appendChild(td8);
+
+    tbody.appendChild(tr);
+  });
+}
+
+render();
+</script>
+</body>
+</html>

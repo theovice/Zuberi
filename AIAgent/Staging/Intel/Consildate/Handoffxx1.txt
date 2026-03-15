@@ -1,0 +1,249 @@
+# SESSION 8 HANDOFF — Architect 7 → Architect 8
+**Date:** 2026-03-02
+**Sessions covered: 8, 8b, 8c
+**Architect:** 7 (Claude Opus 4.6)
+
+---
+
+## What I Delivered
+
+### Session 8 — n8n Integration + Model Router Design
+- ✅ n8n wired to Zuberi — workspace skill deployed, API tested end-to-end with X-N8N-API-KEY header auth
+- ✅ KILO specs updated across workspace files (RTX 5070 Ti 16GB, i7-13700K, 64GB DDR4)
+- ✅ Model router skill designed (RTL-020) — autonomous model selection via Ollama API delegation
+- ✅ CEG compute migration strategy decided — KILO = brain, CEG = body
+
+### Session 8b — Context Optimization
+- ✅ RTL-020: Model router skill deployed to workspace
+- ✅ RTL-021: Workspace context audit — measured all .md files, identified hogs
+- ✅ RTL-022: Bundled skills filter — reduced from ~50 to 8 allowed skills via openclaw.json `skillsFilter.allowBundled`
+- ✅ HORIZON.md and INFRASTRUCTURE.md converted from root files to on-demand skills
+- ✅ HEARTBEAT.md kept at root (autonomous process, must load every turn)
+- **Total context recovery: ~9,628 tokens per turn** (66% → 36% utilization)
+
+### Session 8c — Ccode Backend + Usage Tracking + Auth Research
+- ✅ RTL-012 backend infrastructure: ccode CLI installed on CEG (v2.1.63), usage tracker service deployed on CEG:3002 (systemd), dispatch wrapper at `/opt/zuberi/scripts/ccode-dispatch.sh`
+- ✅ AGENTS.md → v0.8.1: Sub-agents section updated, dispatch cost added to MUST CONFIRM list
+- ✅ TOOLS.md → v0.8.3: Usage tracking commands added, dispatch pattern updated
+- ✅ Ollama skill GPU references updated (RTX 3060 12GB → RTX 5070 Ti 16GB)
+- ✅ ZuberiChat usage meter UI prompt designed (`ccode-prompt-zuberimeter-ui.md`)
+- ✅ **Ccode auth decision finalized: API key only** — Pro/Max subscription credentials in OpenClaw violate Anthropic's Consumer Terms of Service
+- ✅ SSH-to-CEG container gap identified and documented
+
+---
+
+## Critical Context: The Ccode Auth Decision
+
+**Read ZUBERI-CCODE-ASSESSMENT.md in the project** — it has the full compliance analysis, cost comparison, and architecture.
+
+**The short version:**
+- Anthropic explicitly prohibits using consumer plan OAuth tokens (Free/Pro/Max) in any product other than Claude Code and claude.ai
+- OpenClaw routing requests through Max credentials = non-compliant
+- Even ACP (OpenClaw's Agent Client Protocol with acpx plugin) is in a policy gray zone with consumer credentials
+- **API key via platform.claude.com is the only compliant path**
+- James is on the Max plan at $100/month. API billing at Zuberi's projected volumes (100K–500K tokens/month) costs $1–6/month. Break-even with Max is 8.3M tokens/month on Sonnet — far beyond any projected usage.
+- $1.53 prepaid credit already on account
+
+**Sources:** GPT deep research ("Using Claude Code with an OpenClaw Personal Assistant" and "Cost Comparison" — both PDFs in Claude project), Anthropic Claude Code Legal and Compliance docs, OpenClaw Anthropic provider docs.
+
+---
+
+## What's Blocked on James
+
+### 1. API Key Setup (5 minutes)
+1. Go to platform.claude.com → API Keys → Create Key (name: `zuberi-ceg`)
+2. Add payment method if not present
+3. Set monthly spending limit: $20
+4. Set alert threshold: $15
+5. Copy key (starts with `sk-ant-...`)
+
+### 2. Configure CEG (2 minutes)
+```bash
+ssh ceg
+echo 'export ANTHROPIC_API_KEY="sk-ant-YOUR-KEY-HERE"' >> ~/.bashrc
+source ~/.bashrc
+~/.local/bin/claude -p 'Reply with only the word VERIFIED' --output-format json --max-turns 1
+```
+
+### 3. Dispatch Mechanism Decision
+Zuberi can't SSH to CEG from inside OpenClaw's Docker container (SSH key not mounted). Two options:
+
+**Option A: Mount SSH key** — Add `~/.ssh:/home/node/.ssh:ro` to docker-compose.yml. Simple but exposes key to container.
+
+**Option B: HTTP dispatch wrapper on CEG:3003 (recommended)** — Small service accepting POST with task prompt, runs ccode locally, returns JSON. Zuberi dispatches via curl. Same pattern as SearXNG, CXDB, n8n, usage tracker.
+
+**Option C: ACP (acpx plugin)** — OpenClaw's native agent delegation. Cleanest integration but needs maturity investigation on v2026.2.26. Still requires API key auth.
+
+---
+
+## What's Ready for the Next Architect
+
+### Ccode Prompts (not yet sent)
+
+| Prompt | File | Status |
+|--------|------|--------|
+| ZuberiChat Usage Meter UI | `ccode-prompt-zuberimeter-ui.md` | Ready. Meter icon in titlebar, dropdown overlay with arc gauges + budget bar. Uses mock data until backend wired. |
+| Model Router Skill | `ccode-prompt-model-router.md` | Already deployed in Session 8b. Prompt still in project for reference. |
+
+### Priority Tasks (P0)
+
+| ID | Task | Status | What to Do |
+|----|------|--------|------------|
+| RTL-012 | Ccode auth on CEG | 🟡 Infra done, auth blocked on James | Once James provides API key: configure CEG, verify, then resolve dispatch mechanism |
+| RTL-024 | ZuberiChat usage meter UI | ⬜ Prompt ready | Send `ccode-prompt-zuberimeter-ui.md` to ccode on KILO. Pure frontend, mock data, no backend dependency |
+| RTL-025 | Dispatch mechanism | ⬜ New | Build HTTP wrapper on CEG:3003, or mount SSH key, or investigate ACP. Depends on James's decision. |
+
+### Priority Tasks (P1)
+
+| ID | Task | Status |
+|----|------|--------|
+| RTL-002 | First n8n workflow via Zuberi | James testing autonomously |
+| RTL-007 | Express 5 wildcard fix commit | Quick win — fix on CEG needs commit to ZuberiChat repo |
+| RTL-005 | MEMORY.md cleanup | Stale entries, needs James |
+
+---
+
+## Current Architecture
+
+```
+KILO (Brain + Interface)              CEG (Toolbox + Storage)
+100.127.23.52                          100.100.101.1
+┌─────────────────────┐               ┌─────────────────────┐
+│ OpenClaw v2026.2.26 │               │ SearXNG     :8888   │
+│ Ollama              │    Tailscale  │ n8n         :5678   │
+│   qwen3:14b-fast    │◄────────────►│ CXDB     :9009/9010 │
+│   qwen3:14b         │               │ Kanban      :3001   │
+│   qwen3-vl:8b       │               │ Usage Track :3002   │
+│   gpt-oss:20b       │               │ ccode CLI   (local) │
+│ Dashboard :18789    │               │                     │
+│ ZuberiChat (Tauri)  │               │ Pending:            │
+│                     │               │   ccode HTTP :3003? │
+└─────────────────────┘               └─────────────────────┘
+```
+
+---
+
+## Workspace File Versions
+
+### Root files (load every turn)
+| File | Version |
+|------|---------|
+| AGENTS.md | v0.8.1 |
+| SOUL.md | v0.1.0 |
+| MEMORY.md | — (needs cleanup) |
+| TOOLS.md | v0.8.3 |
+| HEARTBEAT.md | — |
+| IDENTITY.md | — |
+| USER.md | — |
+
+### Skills (on-demand)
+horizon, infrastructure, searxng, cxdb, ollama, n8n, model-router
+
+### Context budget
+~11,500 tokens per-turn overhead. ~20,500 available for conversation (of 32K).
+
+---
+
+## Project Documents (read these first)
+
+| Document | Purpose |
+|----------|---------|
+| RTL-v0.6.0.md | Canonical roadmap — REPLACES RTL.md (v0.5.0) |
+| ZUBERI-CCODE-ASSESSMENT.md | Full ccode auth/cost/architecture analysis — **READ THIS** |
+| ccode-prompt-model-router.md | Model router skill deployment prompt (already executed) |
+| ccode-prompt-zuberimeter-ui.md | Usage meter UI prompt (ready to send) |
+
+---
+
+## Key Decisions Made This Session
+
+| Decision | Choice | Rationale |
+|----------|--------|-----------|
+| Ccode auth | API key (not subscription) | Anthropic ToS prohibits consumer OAuth in third-party products. Both Anthropic and OpenClaw docs recommend API keys. |
+| Context optimization | Root .md → skills | HORIZON.md, INFRASTRUCTURE.md converted. Recovered ~9.6K tokens/turn. |
+| Bundled skills | allowBundled filter | Reduced ~42 unused bundled skills to 8 relevant ones |
+| HEARTBEAT.md | Stays at root | Autonomous process must load every turn |
+| Dispatch mechanism | Pending — recommend HTTP wrapper | Follows curl pattern, no SSH key exposure. James decides. |
+| Spending cap | $20/month API | Matches old Pro price as ceiling. $1.53 existing balance covers initial usage. |
+
+---
+
+## James's Work Process (from Architect 6's assessment — treat as permanent)
+
+**How James operates:**
+- Makes decisive architectural calls when presented with clear options (e.g., CEG = body, API key path, allowBundled filter). Don't waffle — give clear options with tradeoffs.
+- Doesn't want to manually test things Zuberi should test itself (the n8n self-test directive was an example).
+- Prefers agents that **ship and report** rather than agents that discuss and propose.
+- Redirects quickly when an agent goes down the wrong path, but will let you explore if the direction has merit.
+- **Key signal:** When James pastes raw terminal output or screenshots without commentary, he expects the agent to interpret and act, not ask what he wants.
+
+**Watch for (self-awareness for the architect):**
+- Tendency to expand scope before shipping. Each pivot may be individually justified, but the original P0 task must ship first.
+- Leading questions like "what's next?" that pull James into new workstreams before current ones close. Finish before pivoting.
+- Security assessments must have specific gaps, concrete exploit paths, actionable hardening tasks with exact commands, and verification steps. No vague "future concerns" when something is exploitable now.
+
+---
+
+## Ccode Prompt Conventions
+
+**The pattern that works:** Detailed ccode prompts with numbered tasks, explicit file paths, verification steps, and fallback instructions.
+
+**The pattern that fails:** Vague or open-ended prompts that require ccode to make architectural decisions.
+
+**Before starting work:**
+- Kill any existing `pnpm tauri dev` process before making changes
+- Run `pnpm test` — all 13 Vitest smoke tests must pass before touching code
+- Run `git status` and `git log --oneline -5` to understand current state
+- Read the relevant source files before editing them
+
+**Prompt structure:**
+- Deliver prompts as chat code blocks, not .md files, unless the prompt needs to be saved and reused across sessions
+- Include a Context section at the top explaining what the task is and why
+- Include a "CRITICAL: Before doing anything" section with pre-flight checks
+- Include numbered tasks with explicit file paths
+- Include a "Do NOT" section listing things to avoid
+- Include a "After implementation" section with verification steps
+- Include fallback instructions if something fails
+
+**After completing work:**
+- Run `pnpm test` again — all 13 tests must still pass
+- Run `pnpm tauri dev` and visually verify the changes work
+- Clean up any temp files created during the work
+- Report a completion summary
+
+**Report format:**
+- End with a completion summary table showing task, status, and notes
+- Flag anything blocked on James separately
+- Note any test failures and whether they were fixed
+
+**General rules:**
+- No jq anywhere — OpenClaw container doesn't have it
+- No new npm dependencies unless absolutely necessary
+- Don't modify tauri.conf.json or package.json unless the task requires it
+- Don't touch Rust code unless the task requires it
+- API keys NEVER in workspace files, skill files, or version-controlled code
+
+---
+
+## Lessons / Warnings
+
+1. **No jq anywhere** — OpenClaw container doesn't have it. Skill files and TOOLS.md must use grep/sed/awk for JSON parsing.
+2. **Kill pnpm tauri dev** before any ZuberiChat ccode work. Include this instruction in every ccode prompt.
+3. **13 Vitest smoke tests** must pass before and after any ZuberiChat changes.
+4. **API key NEVER in workspace files** — store only in CEG's ~/.bashrc or ccode config. Never in skills, TOOLS.md, or version-controlled code.
+5. **Max plan = $100/month** not Pro $20/month. Cost comparisons in ZUBERI-CCODE-ASSESSMENT.md reflect this.
+6. **OpenClaw container can curl to CEG** (host network via Tailscale gateway) but **cannot SSH** (no key mounted). This is the dispatch gap.
+
+---
+
+## What I'd Do Next If I Were Continuing
+
+1. Wait for James's API key → configure CEG → verify ccode works
+2. Build HTTP dispatch wrapper on CEG:3003 (or investigate ACP if James prefers)
+3. Send `ccode-prompt-zuberimeter-ui.md` to ccode on KILO — meter UI with mock data
+4. Wire meter to real data once dispatch pipeline is live (flip MOCK_MODE = false)
+5. RTL-002 validation — James tests first n8n workflow autonomously via Zuberi
+
+---
+
+*Architect 7, signing off. It's been a productive session — n8n wired, context optimized, ccode infrastructure deployed, auth decision resolved. The next architect inherits a system that's one API key away from sub-agent capability.*

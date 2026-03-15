@@ -1,0 +1,41 @@
+name: Question
+description: Ask a question about CXDB
+labels: ["question"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Have a question about CXDB? Ask away!
+
+  - type: textarea
+    id: question
+    attributes:
+      label: Question
+      description: What would you like to know?
+      placeholder: How do I...?
+    validations:
+      required: true
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Context
+      description: What are you trying to accomplish?
+      placeholder: |
+        I'm trying to...
+        My setup is...
+
+  - type: textarea
+    id: attempted
+    attributes:
+      label: What I've Tried
+      description: What have you already attempted or researched?
+      placeholder: |
+        I read the docs at...
+        I tried...
+
+  - type: textarea
+    id: additional
+    attributes:
+      label: Additional Information
+      description: Any other relevant details

@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Zuberi Avatar — Master</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: #cc2200;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+  }
+</style>
+</head>
+<body>
+
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" width="400" height="400">
+  <defs>
+
+    <!-- Edge gradient: warm silver apex → dark amber-brown → near black base -->
+    <linearGradient id="edgeTop" x1="0" y1="0" x2="1" y2="1" gradientUnits="objectBoundingBox">
+      <stop offset="0%"   stop-color="#d8d2c8"/>
+      <stop offset="100%" stop-color="#907060"/>
+    </linearGradient>
+
+    <linearGradient id="edgeBot" x1="0" y1="0" x2="1" y2="1" gradientUnits="objectBoundingBox">
+      <stop offset="0%"   stop-color="#604030"/>
+      <stop offset="100%" stop-color="#181210"/>
+    </linearGradient>
+
+    <!-- Full edge gradient top to bottom -->
+    <linearGradient id="edgeFull" x1="200" y1="26" x2="200" y2="374" gradientUnits="userSpaceOnUse">
+      <stop offset="0%"   stop-color="#ddd8ce"/>
+      <stop offset="28%"  stop-color="#a89880"/>
+      <stop offset="58%"  stop-color="#604838"/>
+      <stop offset="100%" stop-color="#161210"/>
+    </linearGradient>
+
+    <!-- Catch light: off-center radial, upper left -->
+    <radialGradient id="catchLight" cx="38%" cy="24%" r="54%" gradientUnits="objectBoundingBox">
+      <stop offset="0%"   stop-color="#ffffff" stop-opacity="0.22"/>
+      <stop offset="40%"  stop-color="#ffffff" stop-opacity="0.08"/>
+      <stop offset="100%" stop-color="#000000" stop-opacity="0"/>
+    </radialGradient>
+
+    <!-- Deep shadow: lower right -->
+    <radialGradient id="deepShadow" cx="62%" cy="74%" r="50%" gradientUnits="objectBoundingBox">
+      <stop offset="0%"   stop-color="#000000" stop-opacity="0.6"/>
+      <stop offset="100%" stop-color="#000000" stop-opacity="0"/>
+    </radialGradient>
+
+    <!-- Ember warm tint on top facet -->
+    <radialGradient id="emberTint" cx="50%" cy="30%" r="45%" gradientUnits="objectBoundingBox">
+      <stop offset="0%"   stop-color="#f0a020" stop-opacity="0.10"/>
+      <stop offset="100%" stop-color="#f0a020" stop-opacity="0"/>
+    </radialGradient>
+
+    <!-- Crown glow: warm white/ember -->
+    <radialGradient id="crownGrad" cx="50%" cy="50%" r="50%">
+      <stop offset="0%"   stop-color="#fff8e8" stop-opacity="0.9"/>
+      <stop offset="50%"  stop-color="#f0c060" stop-opacity="0.4"/>
+      <stop offset="100%" stop-color="#f0a020" stop-opacity="0"/>
+    </radialGradient>
+
+    <!-- Apex point glow -->
+    <radialGradient id="apexGrad" cx="50%" cy="50%" r="50%">
+      <stop offset="0%"   stop-color="#ffffff"  stop-opacity="1"/>
+      <stop offset="40%"  stop-color="#fff4d0"  stop-opacity="0.7"/>
+      <stop offset="100%" stop-color="#f0a020"  stop-opacity="0"/>
+    </radialGradient>
+
+    <!-- Filters -->
+    <filter id="crownGlow" x="-60%" y="-60%" width="220%" height="220%">
+      <feGaussianBlur stdDeviation="8" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+
+    <filter id="apexGlow" x="-150%" y="-150%" width="400%" height="400%">
+      <feGaussianBlur stdDeviation="6" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+
+    <filter id="softEdge" x="-5%" y="-5%" width="110%" height="110%">
+      <feGaussianBlur stdDeviation="1.5" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+
+    <filter id="outerGlow" x="-12%" y="-12%" width="124%" height="124%">
+      <feGaussianBlur stdDeviation="5" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+
+    <!-- Clip to diamond -->
+    <clipPath id="diamondClip">
+      <polygon points="200,26 374,200 200,374 26,200"/>
+    </clipPath>
+
+  </defs>
+
+  <!-- ═══════════════════════════════════════
+       LAYER 1 — BASE OBSIDIAN FILL
+  ═══════════════════════════════════════ -->
+  <polygon points="200,26 374,200 200,374 26,200"
+           fill="#0a0908"/>
+
+  <!-- ═══════════════════════════════════════
+       LAYER 2 — SOLID FACETS
+       Each facet is a distinct dark tone
+  ═══════════════════════════════════════ -->
+
+  <!-- TOP FACET — warmest, receives most light -->
+  <polygon points="200,26 280,120 200,140 120,120"
+           fill="#38322a"/>
+
+  <!-- RIGHT FACET — medium mid-tone -->
+  <polygon points="374,200 280,120 200,140 280,253"
+           fill="#242018"/>
+
+  <!-- LEFT FACET — cooler, darker -->
+  <polygon points="26,200 120,120 200,140 120,253"
+           fill="#181614"/>
+
+  <!-- BOTTOM FACET — deepest -->
+  <polygon points="200,374 120,253 200,233 280,253"
+           fill="#0a0806"/>
+
+  <!-- BOTTOM LEFT -->
+  <polygon points="26,200 120,253 200,233 200,374"
+           fill="#0e0c0a"/>
+
+  <!-- BOTTOM RIGHT -->
+  <polygon points="374,200 280,253 200,233 200,374"
+           fill="#0c0a08"/>
+
+  <!-- ═══════════════════════════════════════
+       LAYER 3 — LIGHT & ATMOSPHERE
+  ═══════════════════════════════════════ -->
+
+  <!-- Catch light -->
+  <polygon points="200,26 374,200 200,374 26,200"
+           fill="url(#catchLight)"
+           clip-path="url(#diamondClip)"/>
+
+  <!-- Deep shadow -->
+  <polygon points="200,26 374,200 200,374 26,200"
+           fill="url(#deepShadow)"
+           clip-path="url(#diamondClip)"/>
+
+  <!-- Ember warm tint — top area -->
+  <polygon points="200,26 374,200 200,374 26,200"
+           fill="url(#emberTint)"
+           clip-path="url(#diamondClip)"/>
+
+  <!-- ═══════════════════════════════════════
+       LAYER 4 — EDGE STROKES
+       Segmented to simulate gradient stroke
+  ═══════════════════════════════════════ -->
+
+  <!-- Top edges — brightest silver, soft glow -->
+  <line x1="200" y1="26"  x2="120" y2="120"
+        stroke="#ccc6bc" stroke-width="1.8"
+        filter="url(#softEdge)"/>
+  <line x1="200" y1="26"  x2="280" y2="120"
+        stroke="#bcb6ac" stroke-width="1.8"
+        filter="url(#softEdge)"/>
+
+  <!-- Mid edges — warm grey -->
+  <line x1="120" y1="120" x2="26"  y2="200"
+        stroke="#8a7e70" stroke-width="1.5"/>
+  <line x1="280" y1="120" x2="374" y2="200"
+        stroke="#806e60" stroke-width="1.5"/>
+
+  <!-- Bottom edges — dark amber-brown -->
+  <line x1="26"  y1="200" x2="200" y2="374"
+        stroke="#3a2c20" stroke-width="1.4"/>
+  <line x1="374" y1="200" x2="200" y2="374"
+        stroke="#30241a" stroke-width="1.4"/>
+
+  <!-- ═══════════════════════════════════════
+       LAYER 5 — INTERIOR FACET LINES
+  ═══════════════════════════════════════ -->
+
+  <!-- Equator -->
+  <line x1="26"  y1="200" x2="374" y2="200"
+        stroke="rgba(190,182,165,0.45)" stroke-width="1.1"/>
+
+  <!-- Top facet sides -->
+  <line x1="200" y1="26"  x2="120" y2="120"
+        stroke="rgba(185,177,160,0.65)" stroke-width="1.0"/>
+  <line x1="200" y1="26"  x2="280" y2="120"
+        stroke="rgba(170,162,146,0.60)" stroke-width="1.0"/>
+  <line x1="120" y1="120" x2="200" y2="140"
+        stroke="rgba(150,142,126,0.50)" stroke-width="0.9"/>
+  <line x1="280" y1="120" x2="200" y2="140"
+        stroke="rgba(140,132,116,0.48)" stroke-width="0.9"/>
+
+  <!-- Waist lines -->
+  <line x1="26"  y1="200" x2="120" y2="120"
+        stroke="rgba(120,112,98,0.38)" stroke-width="0.8"/>
+  <line x1="374" y1="200" x2="280" y2="120"
+        stroke="rgba(128,120,105,0.40)" stroke-width="0.8"/>
+
+  <!-- Lower facet lines -->
+  <line x1="120" y1="253" x2="200" y2="233"
+        stroke="rgba(80,70,55,0.50)" stroke-width="0.8"/>
+  <line x1="280" y1="253" x2="200" y2="233"
+        stroke="rgba(74,64,50,0.48)" stroke-width="0.8"/>
+
+  <!-- Lower waist to corners -->
+  <line x1="26"  y1="200" x2="120" y2="253"
+        stroke="rgba(65,55,42,0.38)" stroke-width="0.7"/>
+  <line x1="374" y1="200" x2="280" y2="253"
+        stroke="rgba(70,60,46,0.40)" stroke-width="0.7"/>
+
+  <!-- Vertical axis -->
+  <line x1="200" y1="26"  x2="200" y2="374"
+        stroke="rgba(165,157,141,0.18)" stroke-width="0.7"/>
+
+  <!-- ═══════════════════════════════════════
+       LAYER 6 — OUTER GLOW (subtle)
+  ═══════════════════════════════════════ -->
+  <polygon points="200,26 374,200 200,374 26,200"
+           fill="none"
+           stroke="rgba(210,195,170,0.06)"
+           stroke-width="8"
+           filter="url(#outerGlow)"/>
+
+  <!-- ═══════════════════════════════════════
+       LAYER 7 — CROWN GLOW
+       Warm white/ember ellipse at top facet
+  ═══════════════════════════════════════ -->
+  <ellipse cx="200" cy="112" rx="34" ry="20"
+           fill="url(#crownGrad)"
+           filter="url(#crownGlow)"
+           clip-path="url(#diamondClip)"/>
+
+  <!-- ═══════════════════════════════════════
+       LAYER 8 — APEX POINT
+       Hard dot + soft halo
+  ═══════════════════════════════════════ -->
+  <!-- Outer halo -->
+  <circle cx="200" cy="26" r="18"
+          fill="url(#apexGrad)"
+          filter="url(#apexGlow)"/>
+
+  <!-- Mid ring -->
+  <circle cx="200" cy="26" r="6"
+          fill="rgba(255,248,220,0.65)"/>
+
+  <!-- Hard point -->
+  <circle cx="200" cy="26" r="2.8"
+          fill="rgba(255,255,255,0.95)"/>
+
+</svg>
+
+</body>
+</html>

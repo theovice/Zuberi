@@ -1,0 +1,83 @@
+%%{init: {'theme': 'dark', 'themeVariables': {'primaryColor': '#1a1a2e', 'primaryTextColor': '#e0e0e0', 'primaryBorderColor': '#00d4aa', 'lineColor': '#00d4aa', 'secondaryColor': '#16213e', 'tertiaryColor': '#0f3460', 'noteTextColor': '#e0e0e0', 'noteBkgColor': '#1a1a2e', 'noteBorderColor': '#00d4aa'}}}%%
+
+flowchart TD
+    classDef ready fill:#0f3460,stroke:#00d4aa,color:#e0e0e0,stroke-width:2px
+    classDef partial fill:#1a1a2e,stroke:#f0a500,color:#e0e0e0,stroke-width:2px,stroke-dasharray: 5 5
+    classDef blocked fill:#1a1a2e,stroke:#e74c3c,color:#e0e0e0,stroke-width:2px,stroke-dasharray: 10 5
+    classDef human fill:#2c003e,stroke:#bb86fc,color:#e0e0e0,stroke-width:2px
+    classDef tool fill:#0a3d62,stroke:#00d4aa,color:#e0e0e0,stroke-width:1px
+
+    JAMES["🧑 JAMES<br/>'Build a YouTube channel that<br/>generates revenue for a SaaS<br/>that I also want built'"]:::human
+
+    ZUBERI["🤖 ZUBERI (qwen3:14b-fast)<br/>Orchestrator on KILO<br/>Reads: AGENTS.md, TOOLS.md, MEMORY.md"]:::ready
+
+    JAMES --> ZUBERI
+
+    subgraph PHASE1["📋 PHASE 1: RESEARCH & STRATEGY"]
+        direction TB
+        R1["🔍 SearXNG Search<br/>exec/curl → CEG:8888<br/><br/>• SaaS market gaps 2026<br/>• YouTube channel monetization<br/>• Competitor analysis<br/>• Niche validation"]:::ready
+
+        R2["📝 Strategy Synthesis<br/>qwen3:14b-fast reasoning<br/><br/>• Niche selection<br/>• Content strategy<br/>• SaaS product definition<br/>• Revenue model<br/>• Timeline"]:::ready
+
+        R3["💾 Save to CXDB<br/>exec/curl → CEG:9010<br/><br/>• Store research findings<br/>• Store decisions<br/>• Store task breakdown"]:::ready
+
+        R1 --> R2 --> R3
+    end
+
+    subgraph PHASE2["🎨 PHASE 2: DESIGN & PLANNING"]
+        direction TB
+        D1["📄 Content Calendar<br/>Write to workspace<br/><br/>• Video topics/titles<br/>• Upload schedule<br/>• SEO keywords<br/>• Thumbnail concepts"]:::ready
+
+        D2["🏗️ SaaS Architecture Doc<br/>Write to workspace<br/><br/>• Feature spec<br/>• Tech stack recommendation<br/>• MVP scope<br/>• Database schema"]:::ready
+
+        D3["📊 Financial Model<br/>Write CSV/markdown<br/><br/>• Revenue projections<br/>• Cost estimates<br/>• Break-even analysis"]:::partial
+
+        D1 --> D3
+        D2 --> D3
+    end
+
+    subgraph PHASE3["⚒️ PHASE 3: BUILD"]
+        direction TB
+
+        B1["💻 Code the SaaS<br/>⛔ BLOCKED<br/><br/>No ccode sub-agent on CEG<br/>No package install in sandbox<br/>No external API access"]:::blocked
+
+        B2["🎬 Create Video Content<br/>⛔ BLOCKED<br/><br/>No video generation<br/>No image generation<br/>No audio/TTS<br/>No browser for YouTube upload"]:::blocked
+
+        B3["🌐 Deploy SaaS<br/>⛔ BLOCKED<br/><br/>No external hosting access<br/>No domain registration<br/>No CI/CD pipeline"]:::blocked
+
+        B1 --> B3
+    end
+
+    subgraph PHASE4["🔄 PHASE 4: AUTOMATE"]
+        direction TB
+        A1["📅 n8n Workflows<br/>exec/curl → CEG:5678<br/><br/>• Scheduled reminders<br/>• Health checks<br/>• Task tracking"]:::ready
+
+        A2["📈 Analytics Pipeline<br/>🟡 PARTIAL<br/><br/>Can search for metrics<br/>Can store in CXDB<br/>Cannot access YouTube API<br/>Cannot access Stripe API"]:::partial
+
+        A3["🔔 Notification System<br/>🟡 PARTIAL<br/><br/>n8n can schedule alerts<br/>No email (AgentMail pending)<br/>No SMS/push"]:::partial
+
+        A1 --> A2 --> A3
+    end
+
+    ZUBERI --> PHASE1
+    PHASE1 --> PHASE2
+    PHASE2 --> PHASE3
+    PHASE3 --> PHASE4
+
+    subgraph LEGEND["LEGEND"]
+        direction LR
+        L1["✅ CAN DO TODAY"]:::ready
+        L2["🟡 PARTIAL"]:::partial
+        L3["⛔ BLOCKED"]:::blocked
+        L4["🧑 HUMAN REQUIRED"]:::human
+    end
+
+    subgraph JAMES_MUST["🧑 JAMES MUST DO (Zuberi cannot)"]
+        direction TB
+        J1["Record/edit video content"]
+        J2["Create YouTube account & upload"]
+        J3["Register domain & hosting"]
+        J4["Set up payment processing"]
+        J5["Code the SaaS (or hire/use ccode)"]
+        J6["Design logos, thumbnails, brand"]
+    end

@@ -1,0 +1,377 @@
+What’s happening is pretty normal for Tauri apps:
+
+Your agent can edit code, but it cannot reliably “see” a native desktop window unless you give it a browser-accessible preview, screenshots, or an automated visual test path. The broken part in your transcript is that it kept trying to inspect a Tauri app through a plain browser, while the app depends on Tauri APIs. That makes the preview misleading.
+
+The best solution is to split your app into two modes:
+
+1. **Browser-safe UI preview mode**
+2. **Real Tauri integration mode**
+
+### The core idea
+
+Make your frontend render in a normal browser even when Tauri is absent.
+
+Right now, your UI likely does something like:
+
+* import Tauri APIs at startup
+* call `invoke(...)`
+* depend on `window.__TAURI__`
+* fail or render empty when run under Vite alone
+
+That is exactly why port 3000 originally worked, then later became unreliable as more native dependencies were added.
+
+## What you want instead
+
+Build a thin adapter layer so the UI can run in both environments:
+
+* **In browser preview**: use mocked data and no-op native functions
+* **In Tauri desktop app**: use the real Tauri APIs
+
+That gives the agent a stable UI at `localhost:3000` it can inspect visually.
+
+---
+
+# Recommended setup
+
+## 1) Create a runtime adapter
+
+Do not call Tauri directly from React components.
+
+Instead, create one file like:
+
+`src/lib/platform.ts`
+
+```ts
+type AssistantStatus = {
+  connected: boolean;
+  model: string;
+  latencyMs?: number;
+};
+
+type PlatformApi = {
+  isTauri: boolean;
+  getAssistantStatus(): Promise<AssistantStatus>;
+  openSettings(): Promise<void>;
+};
+
+function isTauriRuntime(): boolean {
+  return typeof window !== "undefined" && "__TAURI_INTERNALS__" in window;
+}
+
+async function browserApi(): Promise<PlatformApi> {
+  return {
+    isTauri: false,
+    async getAssistantStatus() {
+      return {
+        connected: true,
+        model: "Mock Model",
+        latencyMs: 120,
+      };
+    },
+    async openSettings() {
+      console.log("Browser preview: openSettings()");
+    },
+  };
+}
+
+async function tauriApi(): Promise<PlatformApi> {
+  const { invoke } = await import("@tauri-apps/api/core");
+
+  return {
+    isTauri: true,
+    async getAssistantStatus() {
+      return await invoke("get_assistant_status");
+    },
+    async openSettings() {
+      await invoke("open_settings");
+    },
+  };
+}
+
+export async function getPlatformApi(): Promise<PlatformApi> {
+  return isTauriRuntime() ? tauriApi() : browserApi();
+}
+```
+
+Then in your components, use `getPlatformApi()` instead of importing Tauri directly.
+
+---
+
+## 2) Prevent startup crashes
+
+A lot of apps fail because they do native calls during initial render. Move those calls into guarded effects.
+
+Example:
+
+```ts
+import { useEffect, useState } from "react";
+import { getPlatformApi } from "./lib/platform";
+
+export function App() {
+  const [status, setStatus] = useState<null | {
+    connected: boolean;
+    model: string;
+    latencyMs?: number;
+  }>(null);
+
+  useEffect(() => {
+    let mounted = true;
+
+    (async () => {
+      const api = await getPlatformApi();
+      const result = await api.getAssistantStatus();
+      if (mounted) setStatus(result);
+    })().catch((err) => {
+      console.error("Failed to load assistant status", err);
+    });
+
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  if (!status) return <div>Loading…</div>;
+
+  return (
+    <div>
+      <h1>ZuberiChat</h1>
+      <p>{status.connected ? "Connected" : "Disconnected"}</p>
+      <p>{status.model}</p>
+    </div>
+  );
+}
+```
+
+This is what lets the browser preview stay alive.
+
+---
+
+## 3) Add mock/demo data mode
+
+Give the agent predictable data so UI work is accurate.
+
+Use an env flag like:
+
+```env
+VITE_UI_DEMO=true
+```
+
+Then in your adapter:
+
+```ts
+const useDemo = import.meta.env.VITE_UI_DEMO === "true";
+```
+
+If `useDemo` is true, always use mock responses even inside the browser.
+
+That lets your agent work against a realistic UI state without depending on Ollama, backend timing, or Tauri IPC.
+
+---
+
+## 4) Add a “debug screen” or Storybook-style preview
+
+For UI-heavy work, the best move is to make isolated screens available in browser routes:
+
+* `/debug/chat`
+* `/debug/settings`
+* `/debug/onboarding`
+* `/debug/error-state`
+
+Each route renders a known UI state with mock data.
+
+Example:
+
+```ts
+if (import.meta.env.DEV) {
+  // expose debug routes
+}
+```
+
+This is much better than asking the agent to navigate a live app with volatile state.
+
+---
+
+## 5) Keep Tauri concerns out of layout components
+
+Try to organize like this:
+
+* `components/` → pure UI only
+* `features/` → state + view models
+* `lib/platform/` → Tauri/browser bridge
+* `mocks/` → fake data for preview
+
+That way the agent can safely edit spacing, alignment, cards, panels, buttons, typography, and layout without breaking desktop integration.
+
+---
+
+# Best workflow for Claude Code
+
+Here’s the cleanest way to work with it:
+
+## For UI changes
+
+Run:
+
+* `pnpm dev`
+* browser at `http://localhost:3000`
+* mock/demo mode enabled
+
+Then the agent can:
+
+* inspect screenshots
+* inspect DOM
+* reason about layout
+* make CSS/component changes safely
+
+## For native behavior
+
+Run separately:
+
+* `pnpm tauri dev`
+
+Use this only after the UI changes are done to verify:
+
+* system tray
+* file access
+* native commands
+* window controls
+* install/build behavior
+
+That separation is the big fix.
+
+---
+
+# Why the previous approach kept failing
+
+Because it mixed three different jobs:
+
+### Vite preview
+
+Good for:
+
+* layout
+* styling
+* component logic
+* browser rendering
+
+Bad for:
+
+* direct Tauri IPC
+* native window behavior
+
+### Tauri dev
+
+Good for:
+
+* full app integration
+* native APIs
+* real desktop runtime
+
+Bad for:
+
+* fast UI iteration
+* agent visibility
+* stable automated preview
+
+### Installed production app
+
+Good for:
+
+* final verification
+
+Bad for:
+
+* rapid edits
+* debugging
+* agent-guided UI work
+
+So the agent wasn’t wrong that it needed visibility; it just didn’t have the right target.
+
+---
+
+# The most practical solution
+
+Use this rule:
+
+**All UI work must be testable in plain browser mode without Tauri.**
+
+If a screen cannot render in the browser, it is too tightly coupled to native runtime.
+
+That single design constraint will make your app much easier to build with Claude Code.
+
+---
+
+# What to change in your repo now
+
+1. Search for all direct imports of:
+
+* `@tauri-apps/api`
+* `invoke`
+* `window.__TAURI__`
+
+2. Move them behind one adapter module.
+
+3. Ensure the app still mounts when those APIs do not exist.
+
+4. Add mock responses for every native-backed action the UI needs.
+
+5. Add debug/demo routes for the main screens.
+
+6. Use port 3000 only for UI iteration.
+
+7. Use Tauri only for final verification.
+
+---
+
+# Extra guardrails that help a lot
+
+Add an error boundary so the UI does not go blank:
+
+```ts
+import React from "react";
+
+export class ErrorBoundary extends React.Component<
+  { children: React.ReactNode },
+  { hasError: boolean; error?: Error }
+> {
+  constructor(props: { children: React.ReactNode }) {
+    super(props);
+    this.state = { hasError: false };
+  }
+
+  static getDerivedStateFromError(error: Error) {
+    return { hasError: true, error };
+  }
+
+  componentDidCatch(error: Error, info: React.ErrorInfo) {
+    console.error("UI crash", error, info);
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div style={{ padding: 16 }}>
+          <h2>Something went wrong</h2>
+          <pre>{this.state.error?.message}</pre>
+        </div>
+      );
+    }
+
+    return this.props.children;
+  }
+}
+```
+
+Then wrap your app so preview mode never silently shows a blank page.
+
+---
+
+# Best answer to your original question
+
+Yes — there is a way for the agent to “see the UI” more accurately, but the right fix is **not** trying harder to inspect the native Tauri window.
+
+The right fix is to make your UI render faithfully in a browser with mocked native dependencies.
+
+That gives the agent a stable, inspectable target and avoids the empty-screen / Tauri-IPC crashes you saw.
+
+If you want, I can turn this into a concrete Claude Code prompt plus a file-by-file refactor plan for your Tauri/Vite app.

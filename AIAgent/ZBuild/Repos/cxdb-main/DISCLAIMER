@@ -1,0 +1,32 @@
+# Disclaimer
+
+CXDB is provided "as is" without warranty of any kind, either expressed or implied, including, but not limited to, the implied warranties of merchantability and fitness for a particular purpose.
+
+## No Support Obligations
+
+StrongDM Inc makes no commitment to provide support, updates, enhancements, or modifications to CXDB. While we welcome community contributions and issue reports, we are under no obligation to address them.
+
+## Use at Your Own Risk
+
+CXDB stores conversation history and context data which may contain sensitive information. You are solely responsible for:
+- Properly configuring access controls and authentication
+- Implementing encryption at rest and in transit as appropriate for your use case
+- Managing data retention and deletion policies
+- Ensuring compliance with applicable data protection regulations
+- Securing the deployment environment and network
+
+## No Liability
+
+In no event shall StrongDM Inc be liable for any direct, indirect, incidental, special, exemplary, or consequential damages (including, but not limited to, procurement of substitute goods or services; loss of use, data, or profits; or business interruption) however caused and on any theory of liability, whether in contract, strict liability, or tort (including negligence or otherwise) arising in any way out of the use of this software, even if advised of the possibility of such damage.
+
+## Third-Party Components
+
+CXDB includes or depends on third-party open source components. See the LICENSE file and individual component licenses for their respective terms and conditions.
+
+## Security
+
+If you discover a security vulnerability, please follow the responsible disclosure process outlined in SECURITY.md. Do not disclose security issues publicly until they have been addressed.
+
+## Trademarks
+
+"StrongDM" and related marks are trademarks of StrongDM Inc. Use of these marks is subject to StrongDM's trademark policy.

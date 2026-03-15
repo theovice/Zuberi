@@ -1,0 +1,141 @@
+%%{init: {'theme': 'dark', 'themeVariables': {'primaryColor': '#1a1a2e', 'primaryTextColor': '#e0e0e0', 'primaryBorderColor': '#00d4aa', 'lineColor': '#00d4aa', 'secondaryColor': '#16213e', 'tertiaryColor': '#0f3460'}}}%%
+
+flowchart TD
+    classDef ready fill:#0f3460,stroke:#00d4aa,color:#e0e0e0,stroke-width:2px
+    classDef partial fill:#1a1a2e,stroke:#f0a500,color:#e0e0e0,stroke-width:2px,stroke-dasharray: 5 5
+    classDef blocked fill:#1a1a2e,stroke:#e74c3c,color:#e0e0e0,stroke-width:2px,stroke-dasharray: 10 5
+    classDef human fill:#2c003e,stroke:#bb86fc,color:#e0e0e0,stroke-width:2px
+    classDef kilo fill:#1b4332,stroke:#40916c,color:#e0e0e0,stroke-width:2px
+    classDef ceg fill:#3d0814,stroke:#e76f51,color:#e0e0e0,stroke-width:2px
+    classDef tool fill:#0a3d62,stroke:#48cae4,color:#e0e0e0,stroke-width:1px
+    classDef future fill:#1a1a2e,stroke:#555,color:#888,stroke-width:1px,stroke-dasharray: 3 3
+
+    JAMES["🧑 JAMES<br/>Operator — Wahwearro Holdings LLC<br/>Raises Zuberi through direct interaction"]:::human
+
+    JAMES --> ZUBERI
+
+    subgraph KILO_NODE["🖥️ KILO — Brain + Interface (100.127.23.52)"]
+        direction TB
+        ZUBERI["🤖 ZUBERI<br/>qwen3:14b-fast via Ollama<br/>OpenClaw v2026.3.1<br/>Gateway-level exec"]:::kilo
+
+        subgraph KILO_TOOLS["KILO Tools"]
+            direction LR
+            OL_READ["📖 read<br/>Workspace files"]:::tool
+            OL_WRITE["✏️ write<br/>New files to workspace"]:::tool
+            OL_EXEC["⚡ exec<br/>Gateway-level curl"]:::tool
+            OL_VISION["👁️ qwen3-vl:8b-fast<br/>Vision via Ollama<br/>🟡 skill not built yet"]:::partial
+        end
+    end
+
+    subgraph CEG_NODE["🔧 CEG — Toolbox + Storage (100.100.101.1)"]
+        direction TB
+        subgraph CEG_SERVICES["Active Services"]
+            direction LR
+            SEARX["🔍 SearXNG<br/>:8888<br/>Web search"]:::ceg
+            N8N["⚙️ n8n<br/>:5678<br/>Workflow automation"]:::ceg
+            CXDB["💾 CXDB<br/>:9010<br/>Context memory"]:::ceg
+            KANBAN["📋 Kanban<br/>:3001<br/>Task board"]:::ceg
+            MAIL["📧 AgenticMail<br/>:3100<br/>Email relay"]:::ceg
+            USAGE["📊 Usage Tracker<br/>:3002<br/>API spend monitoring"]:::ceg
+            DISPATCH["🔌 ccode Dispatch<br/>:3003 ✅ LIVE<br/>HTTP wrapper"]:::ceg
+        end
+        subgraph CEG_TRADING["Trading Stack"]
+            direction LR
+            CHROMA["🧠 Chroma<br/>36 docs indexed<br/>trading_knowledge"]:::ceg
+            INGEST["📥 Ingest Pipeline<br/>trafilatura + n8n<br/>Daily 06:00 UTC"]:::ceg
+            VENV["🐍 Python venv<br/>pandas, numpy<br/>sentence-transformers"]:::ceg
+        end
+        CCODE["🤖 ccode CLI<br/>✅ Authenticated<br/>✅ Dispatch live :3003"]:::ceg
+    end
+
+    %% ===== PHASE 1: RESEARCH =====
+    subgraph P1["📋 PHASE 1: RESEARCH"]
+        direction TB
+        P1_START["Zuberi reads AGENTS.md<br/>Identifies task as multi-phase<br/>Checks MEMORY.md for prior context"]
+
+        P1_S1["exec: curl SearXNG<br/>web search query"]
+        P1_S1_R["← JSON results from 4 engines"]
+
+        P1_CHROMA["exec: curl ccode dispatch :3003<br/>→ query Chroma trading_knowledge<br/>← semantic search results"]
+
+        P1_SYNTH["qwen3:14b-fast synthesizes<br/>web + knowledge base results<br/>into structured research brief"]
+
+        P1_SAVE["exec: curl CXDB :9010<br/>→ stores research as Note"]
+
+        P1_START --> P1_S1 --> P1_S1_R --> P1_CHROMA --> P1_SYNTH --> P1_SAVE
+    end
+
+    %% ===== PHASE 2: STRATEGY =====
+    subgraph P2["🎯 PHASE 2: STRATEGY & DESIGN"]
+        direction TB
+        P2_PLAN["qwen3:14b-fast generates:<br/>• Task/project plan<br/>• Strategy document<br/>• Revenue model"]
+
+        P2_WRITE1["write: workspace docs<br/>Strategy, specs, financial model"]
+
+        P2_CONFIRM["⏸️ MUST CONFIRM<br/>Presents strategy to James<br/>Waits for go/no-go"]
+
+        P2_KANBAN["exec: curl Kanban :3001<br/>→ creates task cards"]
+
+        P2_EMAIL["exec: curl AgenticMail :3100<br/>→ emails summary to James"]
+
+        P2_PLAN --> P2_WRITE1 --> P2_CONFIRM --> P2_KANBAN --> P2_EMAIL
+    end
+
+    %% ===== PHASE 3: BUILD =====
+    subgraph P3["⚒️ PHASE 3: BUILD"]
+        direction TB
+
+        P3_DISPATCH["💻 Code execution via dispatch<br/>✅ UNBLOCKED (RTL-025 complete)<br/><br/>exec: curl :3003/dispatch<br/>→ ccode runs on CEG<br/>← result returned to Zuberi"]
+
+        P3_WRITE["✅ What Zuberi CAN do today:<br/>Write code to workspace<br/>Write deployment scripts/Dockerfiles<br/>Write CI/CD configs, docs<br/>Execute builds via ccode dispatch<br/>Email deliverables to James"]
+
+        P3_BLOCKED["⛔ Still blocked:<br/>Media creation (TTS, video, image gen)<br/>External API access<br/>Browser automation"]
+
+        P3_DISPATCH --> P3_WRITE --> P3_BLOCKED
+    end
+
+    %% ===== PHASE 4: AUTOMATE =====
+    subgraph P4["🔄 PHASE 4: AUTOMATE"]
+        direction TB
+
+        P4_N8N["exec: curl n8n :5678<br/>→ manage workflows"]
+
+        P4_CONFIRM["⏸️ MUST CONFIRM<br/>Proposes workflow designs"]
+
+        P4_MONITOR["exec: curl Usage Tracker :3002<br/>→ checks API spend vs budget<br/><br/>exec: curl CXDB :9010<br/>→ retrieves progress data"]
+
+        P4_EMAIL["exec: curl AgenticMail :3100<br/>→ emails weekly report to James"]
+
+        P4_EXT["📡 External Integrations<br/>⛔ BLOCKED<br/><br/>Cannot access:<br/>• External APIs<br/>• YouTube Analytics<br/>• Payment APIs"]
+
+        P4_N8N --> P4_CONFIRM --> P4_MONITOR --> P4_EMAIL --> P4_EXT
+    end
+
+    %% ===== CONNECTIONS =====
+    ZUBERI --> P1
+    P1 --> P2
+    P2 --> P3
+    P3 --> P4
+
+    %% Tool connections (dotted)
+    P1_S1 -.->|"exec/curl via Tailscale"| SEARX
+    P1_CHROMA -.->|"exec/curl"| DISPATCH
+    P1_SAVE -.->|"exec/curl"| CXDB
+    P2_KANBAN -.->|"exec/curl"| KANBAN
+    P2_EMAIL -.->|"exec/curl"| MAIL
+    P3_DISPATCH -.->|"exec/curl"| DISPATCH
+    P4_N8N -.->|"exec/curl"| N8N
+    P4_MONITOR -.->|"exec/curl"| USAGE
+    P4_MONITOR -.->|"exec/curl"| CXDB
+    P4_EMAIL -.->|"exec/curl"| MAIL
+    DISPATCH -.->|"spawns"| CCODE
+    INGEST -.->|"feeds"| CHROMA
+
+    %% ===== SUMMARY =====
+    subgraph SUMMARY["📊 CAPABILITY SUMMARY"]
+        direction TB
+        S1["✅ CAN DO (today):<br/>Research via SearXNG + Chroma knowledge base<br/>Strategy, planning, writing docs/specs/code<br/>Execute builds via ccode dispatch (:3003)<br/>Task tracking, email delivery<br/>Usage monitoring, memory persistence<br/>Internal automation via n8n"]:::ready
+        S2["🟡 PARTIAL:<br/>Financial modeling (markdown only, no xlsx)<br/>Vision/OCR (model ready, skill not built)<br/>Trading backtesting (tools installed, no skill)"]:::partial
+        S3["⛔ BLOCKED:<br/>Media creation (TTS, video, image gen)<br/>External API access<br/>Browser automation<br/>Deploy to external hosting"]:::blocked
+        S4["🔑 NEXT UNLOCKS:<br/>1. RTL-007: Express 5 wildcard fix (Kanban)<br/>2. Vision skill (qwen3-vl:8b-fast ready)<br/>3. External APIs (future phase)"]:::future
+    end

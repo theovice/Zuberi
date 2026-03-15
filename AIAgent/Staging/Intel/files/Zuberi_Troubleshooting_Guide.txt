@@ -1,0 +1,515 @@
+# Zuberi Troubleshooting Guide
+**Updated:** 2026-03-06 (Session 12)
+
+---
+
+## Zuberi Not Responding (typing indicator spins indefinitely)
+
+**Symptoms:** Message sent, typing indicator shows, no response after 2+ minutes.
+
+**Check 1: Is Ollama alive?**
+```powershell
+curl -UseBasicParsing http://localhost:11434/api/ps
+```
+If no response, restart Ollama from system tray or `ollama serve`. If it shows a model loaded, Ollama is fine.
+
+**Check 2: Is OpenClaw healthy?**
+```powershell
+docker ps --format "table {{.Names}}\t{{.Status}}"
+```
+Should show `(healthy)`. If unhealthy or restarting, see "OpenClaw Container Down" below.
+
+**Check 3: Stuck session loop?**
+```powershell
+docker logs --tail 10 openclaw-openclaw-gateway-1
+```
+If you see repeated `embedded run timeout` entries with the same session ID — the gateway is stuck in a loop. Fix:
+```powershell
+docker restart openclaw-openclaw-gateway-1
+```
+This was a known issue in v2026.2.26. The v2026.3.1 update added a 30-minute hard-expiry backstop, but if it recurs, restart clears it.
+
+**Check 4: Model stuck mid-inference?**
+```powershell
+$body = '{"model":"qwen3:14b-fast","prompt":"","stream":false,"keep_alive":"0"}'
+Invoke-RestMethod -Method Post -Uri http://localhost:11434/api/generate -Body $body -ContentType "application/json"
+```
+This unloads the model and clears any stuck inference. It reloads automatically on next prompt (~3-5s).
+
+**Check 5: VRAM exhaustion?**
+If the model was recently swapped (e.g., qwen3-vl:8b for vision) and not unloaded before loading the primary model, both may be competing for the 16GB VRAM budget. Unload all models:
+```powershell
+# Check what's loaded:
+curl -UseBasicParsing http://localhost:11434/api/ps
+# Unload specific model:
+$body = '{"model":"MODEL_NAME","prompt":"","stream":false,"keep_alive":"0"}'
+Invoke-RestMethod -Method Post -Uri http://localhost:11434/api/generate -Body $body -ContentType "application/json"
+```
+qwen3:14b-fast uses ~9.3GB. Only one large model fits at a time on the RTX 5070 Ti (16GB).
+
+---
+
+## OpenClaw Container Down or Crash Loop
+
+**Symptoms:** Dashboard unreachable at localhost:18789, container shows "Restarting" in Docker Desktop.
+
+**Fix:**
+```powershell
+cd C:\Users\PLUTO\github\openclaw
+docker compose down
+docker compose up -d
+```
+`docker compose down` force-removes stuck containers. `up -d` recreates them cleanly.
+
+**If `docker compose up -d` fails with "cannot join network namespace":**
+A previous container is stuck restarting. Always `down` first, then `up`.
+
+**If it keeps crashing after restart:**
+Check the config for invalid values:
+```powershell
+docker logs --tail 30 openclaw-openclaw-gateway-1
+```
+Look for JSON parse errors or invalid config keys. The config file is at `C:\Users\PLUTO\openclaw_config\openclaw.json` on the host and `/home/node/.openclaw/openclaw.json` inside the container.
+
+**Known crash causes:**
+- Setting `sandbox.docker.network` to `"host"` crashes the compose stack. It MUST stay `"none"`.
+- Invalid JSON in openclaw.json (trailing commas, unquoted keys). Use JSONC-aware editors only.
+
+---
+
+## "NO" Prefix on Responses
+
+**Symptoms:** Zuberi's responses start with "NO" before the actual answer.
+
+**Cause:** qwen3:14b-fast model template leaking thinking decision tokens.
+
+**Fix applied (Session 10):** Removed `/no_think` directive from modelfile, kept pre-filled empty `<think></think>` as sole suppression mechanism. Modelfile at `C:\Users\PLUTO\Modelfile.qwen3-14b-fast`.
+
+**If it recurs after a model update:**
+```powershell
+ollama create qwen3:14b-fast -f C:\Users\PLUTO\Modelfile.qwen3-14b-fast
+docker restart openclaw-openclaw-gateway-1
+```
+
+**Also verify OpenClaw config has thinking disabled:**
+```powershell
+docker exec openclaw-openclaw-gateway-1 grep "thinkingDefault" /home/node/.openclaw/openclaw.json
+```
+Should show `"thinkingDefault": "off"`.
+
+---
+
+## Sandbox Restrictions (Zuberi can't reach CEG)
+
+**Symptoms:** Zuberi says "sandbox restrictions" or "cannot check services on CEG."
+
+**Cause:** Exec tool not routed through gateway, or config missing `tools.exec.host`.
+
+**Verify config:**
+```powershell
+docker exec openclaw-openclaw-gateway-1 grep -A2 '"exec"' /home/node/.openclaw/openclaw.json
+```
+Should show:
+```json
+"exec": {
+    "host": "gateway"
+}
+```
+
+**If missing, add to openclaw.json** under the `tools` section and restart:
+```powershell
+docker restart openclaw-openclaw-gateway-1
+```
+
+**Verify gateway can reach CEG:**
+```powershell
+docker exec openclaw-openclaw-gateway-1 curl -s http://100.100.101.1:3002/health
+```
+Any JSON response means the network path works.
+
+**Important:** `sandbox.docker.network` must stay `"none"`. Gateway-level exec (not sandbox networking) is the correct path for CEG access. The webchat interface runs at gateway level, which has access to the host network including Tailscale.
+
+---
+
+## CEG Services Unreachable
+
+**Symptoms:** Curl to CEG IPs times out from KILO or from OpenClaw container.
+
+**Check 1: Is CEG online?**
+```powershell
+ping 100.100.101.1
+```
+
+**Check 2: Is Tailscale connected?**
+```powershell
+tailscale status
+```
+Both KILO and CEG should show as connected.
+
+**Check 3: Are services running on CEG?**
+```powershell
+ssh ceg 'systemctl --user status ccode-usage-tracker'
+ssh ceg 'systemctl --user status agenticmail'
+ssh ceg 'docker ps'
+```
+
+**Check 4: Is the specific service bound to the right address?**
+```powershell
+ssh ceg 'ss -tlnp | grep PORTNUMBER'
+```
+Services must bind to `100.100.101.1` (Tailscale IP) or `0.0.0.0` to be reachable from KILO. Services bound to `127.0.0.1` are only reachable from CEG itself.
+
+**Note on UFW:** The `ceg` user does NOT have passwordless sudo. You cannot run `sudo ufw status` via SSH. If you suspect firewall issues, James must check from a local console session or add the ceg user to sudoers.
+
+---
+
+## CEG .bashrc Corruption (Windows PATH Injection)
+
+**Symptoms:** SSH login to CEG shows `bash: syntax error near unexpected token '('`. Commands via SSH work but .bashrc additions (ANTHROPIC_API_KEY, npm-global PATH) don't load for interactive shells.
+
+**Cause:** An SSH command from KILO used double quotes instead of single quotes, causing KILO's MSYS2/Git Bash `$PATH` (containing Windows paths like `/c/Program Files (x86)/...`) to expand locally before being sent to CEG. The unquoted parentheses in `(x86)` cause a bash syntax error.
+
+**Example of the bad pattern:**
+```powershell
+# WRONG — $PATH expands on KILO, injecting Windows paths into CEG's .bashrc:
+ssh ceg "echo 'export PATH=$PATH:$HOME/.npm-global/bin' >> ~/.bashrc"
+
+# RIGHT — single quotes prevent local expansion:
+ssh ceg 'echo "export PATH=\"\$HOME/.npm-global/bin:\$PATH\"" >> ~/.bashrc'
+```
+
+**Fix:**
+1. Back up: `ssh ceg 'cp ~/.bashrc ~/.bashrc.bak.$(date +%Y%m%d)'`
+2. Check what's wrong: `ssh ceg 'bash -n ~/.bashrc'` — will report the error line
+3. Truncate to stock content (lines 1-117 on Ubuntu 24.04 default):
+   `ssh ceg 'head -n 117 ~/.bashrc > ~/.bashrc.clean && mv ~/.bashrc.clean ~/.bashrc'`
+4. Re-append only the needed additions (use heredoc with quoted delimiter):
+```powershell
+ssh ceg bash -c 'cat >> ~/.bashrc << '"'"'EOF'"'"'
+
+# Zuberi additions
+export ANTHROPIC_API_KEY="THE_KEY_HERE"
+export PATH="$HOME/.npm-global/bin:$PATH"
+EOF'
+```
+5. Verify: `ssh ceg 'bash -n ~/.bashrc'` — should exit 0
+
+**Prevention:** Always use single quotes for SSH commands that contain `$` variables intended for the remote side. This is the #1 recurring SSH scripting mistake on this system.
+
+---
+
+## AgenticMail Port Conflict / Systemd Crash Loop
+
+**Symptoms:** AgenticMail systemd service fails with `"Port 3100 is already in use"`. Journal shows repeated restart attempts hitting `StartLimitBurst`.
+
+**Cause:** A stale node process (from a previous `agenticmail start` interactive session or a manual start via SSH that orphaned when the SSH session disconnected) is holding port 3100. The systemd service can't bind because the orphaned process has ppid=1.
+
+**Diagnosis:**
+```powershell
+ssh ceg 'ss -tlnp | grep 3100'
+```
+If it shows a `node` process, note the PID.
+```powershell
+ssh ceg 'ps -p PID -o pid,ppid,cmd --no-headers'
+```
+If ppid=1, it's an orphaned process.
+
+**Fix:**
+```powershell
+# Kill the orphan:
+ssh ceg 'kill PID'
+# Reset the failed service counter and restart:
+ssh ceg 'systemctl --user reset-failed agenticmail && systemctl --user start agenticmail'
+# Verify:
+ssh ceg 'systemctl --user status agenticmail --no-pager'
+```
+
+**Prevention:** Never run `agenticmail start` manually via SSH — it launches an interactive shell that creates an orphaned node process when SSH disconnects. Always use the systemd service: `systemctl --user start agenticmail`.
+
+---
+
+## AgenticMail Not Reachable from KILO
+
+**Symptoms:** `curl http://100.100.101.1:3100/api/agenticmail/health` times out from KILO, but works from CEG via `curl http://localhost:3100/...`.
+
+**Cause:** AgenticMail API is bound to `127.0.0.1` instead of `100.100.101.1`.
+
+**Fix:** Edit the config to bind to the Tailscale IP:
+```powershell
+ssh ceg 'cat ~/.agenticmail/config.json'
+```
+Check the `api.host` field. It should be `"100.100.101.1"`. If it's `"127.0.0.1"`:
+```powershell
+ssh ceg "sed -i 's/\"host\": \"127.0.0.1\"/\"host\": \"100.100.101.1\"/' ~/.agenticmail/config.json"
+ssh ceg 'systemctl --user restart agenticmail'
+```
+
+---
+
+## ZuberiChat Multiple Instances
+
+**Symptoms:** Two ZuberiChat PIDs visible in Task Manager or `Get-Process`. UI may behave unexpectedly.
+
+**Cause:** Tauri app was launched while a previous instance was still running (possibly from a previous session crash that didn't clean up properly).
+
+**Fix (immediate):**
+```powershell
+# Kill all ZuberiChat processes:
+Get-Process | Where-Object {$_.ProcessName -like "*ZuberiChat*" -or $_.ProcessName -like "*zuberichat*"} | Stop-Process -Force
+# Or kill by port if dev server:
+Get-NetTCPConnection -LocalPort 3000 -ErrorAction SilentlyContinue | ForEach-Object { Stop-Process -Id $_.OwningProcess -Force }
+# Relaunch:
+cd C:\Users\PLUTO\github\Repo\ZuberiChat
+pnpm tauri dev
+```
+
+**Fix (permanent — applied Session 11):** `tauri-plugin-single-instance` v2.4.0 was added to `src-tauri/Cargo.toml` and `src-tauri/src/main.rs`. If a second instance is launched, it focuses the existing window instead of opening a new one.
+
+---
+
+## ZuberiChat WebSocket Render Bug
+
+**Status:** FIXED (commit ea3f94b, Session 10).
+
+**Original symptoms:** ZuberiChat desktop app sends messages (visible in devtools as `chat.send`) but responses never render. Dashboard webchat works fine.
+
+**Root cause:** Impure state updaters in the WebSocket message handler and a heartbeat crash that silently killed the connection.
+
+**If similar symptoms recur:**
+1. Open devtools (F12), check Console for errors
+2. Check Network tab → WS tab for WebSocket connection status
+3. If WS is connected but messages arrive without rendering: state management bug in `ClawdChatInterface.tsx`
+4. If WS disconnects silently: check for unhandled errors in heartbeat/ping logic
+5. Verify OpenClaw WebSocket handshake version matches: `docker logs --tail 20 openclaw-openclaw-gateway-1`
+
+---
+
+## CEG npm/Package Install Failures (EACCES)
+
+**Symptoms:** `npm install -g PACKAGE` fails with `EACCES: permission denied` on CEG.
+
+**Cause:** The `ceg` user does not have passwordless sudo access. Global npm installs default to `/usr/local/lib/node_modules/` which requires root.
+
+**Fix:** Use user-local npm prefix (already configured):
+```powershell
+ssh ceg 'npm config get prefix'
+```
+Should return `~/.npm-global`. If not:
+```powershell
+ssh ceg 'mkdir -p ~/.npm-global && npm config set prefix ~/.npm-global'
+```
+The PATH addition in `.bashrc` (`$HOME/.npm-global/bin`) makes binaries installed this way available. Verify:
+```powershell
+ssh ceg 'source ~/.bashrc && which agenticmail'
+# Should return: /home/ceg/.npm-global/bin/agenticmail
+```
+
+---
+
+## CEG Disk Space Low (LVM Under-Allocation)
+
+**Symptoms:** CEG shows only ~75GB free on a 512GB SSD. `df -h` shows `/dev/mapper/ubuntu--vg-ubuntu--lv` at 100GB total.
+
+**Cause:** Ubuntu Server 24.04 installer defaults to allocating only 100GB for the root logical volume, regardless of physical disk size. The remaining ~374GB sits unallocated in the volume group.
+
+**Diagnosis:**
+```powershell
+ssh ceg 'df -h / && sudo vgs && sudo lvs'
+```
+
+**Fix (requires sudo — James must run locally or via sudoers):**
+```bash
+# Extend LV to use all available space:
+sudo lvextend -l +100%FREE /dev/ubuntu-vg/ubuntu-lv
+# Resize filesystem:
+sudo resize2fs /dev/ubuntu-vg/ubuntu-lv
+```
+
+**Docker space recovery (no sudo needed):**
+```powershell
+# Check Docker disk usage:
+ssh ceg 'docker system df'
+# Prune unused images/containers (CONFIRM with James first):
+ssh ceg 'docker system prune -f'
+```
+
+---
+
+## ZuberiChat Titlebar Issues
+
+**Symptoms:** Black opaque bar at top of ZuberiChat cutting off the diamond icon or content below it.
+
+**Cause:** Titlebar was a flex child pushing content down instead of overlaying it.
+
+**Fix applied (Session 11):** Titlebar changed to `position: absolute` with `z-index: 9999` in `globals.css`. App container changed from flex column to relative positioning in `App.tsx`. The titlebar now floats over content as a transparent overlay.
+
+**If titlebar styling breaks after changes:**
+- Check `src/globals.css` — `.titlebar` should have `position: absolute; top: 0; left: 0; right: 0`
+- Check `src/App.tsx` — outer div should have `position: relative`, NOT `display: flex; flex-direction: column`
+- The content area should be `width: 100%; height: 100%`
+
+---
+
+## Ccode Auth on CEG Expired
+
+**Symptoms:** `ssh ceg '~/.local/bin/claude -p "test" --max-turns 1'` returns an auth error instead of a response.
+
+**Diagnosis:**
+```powershell
+ssh ceg '~/.local/bin/claude -p "Reply OK" --output-format json --max-turns 1 2>&1 | head -5'
+```
+If it returns an error about authentication or API key, the ANTHROPIC_API_KEY may have expired or rotated.
+
+**Fix:** Update the key in CEG's .bashrc:
+1. Get the new key from James
+2. Edit `.bashrc` on CEG (see "CEG .bashrc Corruption" section for safe editing pattern)
+3. Verify: `ssh -t ceg 'bash -ic "echo \$ANTHROPIC_API_KEY | head -c 12"'` — should show `sk-ant-api03-`
+
+**Note:** The ccode CLI is installed at `~/.local/bin/claude` on CEG. The dispatch wrapper is at `/opt/zuberi/scripts/ccode-dispatch.sh`.
+
+---
+
+## OpenClaw Update Procedure
+
+**Before updating, note current version:**
+```powershell
+docker logs --tail 5 openclaw-openclaw-gateway-1
+```
+
+**Update steps:**
+```powershell
+cd C:\Users\PLUTO\github\openclaw
+git fetch --tags
+git checkout v<NEW_VERSION>
+docker compose down
+docker compose build
+docker compose up -d
+```
+
+**After update, verify:**
+```powershell
+docker ps --format "table {{.Names}}\t{{.Status}}"
+docker logs --tail 10 openclaw-openclaw-gateway-1
+```
+
+**Update the changelog:**
+Add entry to `C:\Users\PLUTO\openclaw_workspace\CHANGELOG.md` with version, date, reason, and key fixes.
+
+**Known post-update issues:**
+- Config schema changes may reset or invalidate settings (happened with v2026.3.1: sandbox exec, thinking defaults)
+- Always test basic conversation + exec after any update
+- Check for "NO" prefix returning (model template may need rebuild)
+- WebSocket handshake protocol may change between versions — ZuberiChat may need a matching update
+
+---
+
+## ZuberiChat Dev Workflow
+
+**Before making changes:**
+```powershell
+cd C:\Users\PLUTO\github\Repo\ZuberiChat
+pnpm test
+```
+All 13 smoke tests must pass. If tests fail before your changes, fix them first.
+
+**After making changes:**
+```powershell
+pnpm test
+```
+All 13 tests must still pass. The test suite covers ModelSelector, ModeSelector, ChatBubble, and smoke rendering.
+
+**Key architecture notes:**
+- Native `<select>` was replaced with custom dropdown in ModelSelector.tsx (Session 11)
+- All dropdown menus share `.ctx-menu` and `.ctx-menu-item` CSS classes
+- Dropdowns open upward using `position: fixed` + `getBoundingClientRect()` + `transform: translateY(-100%)`
+- Tauri bridge uses `invoke()` for JS-to-Rust calls and `emit()`/`listen()` for events — never `fetch()`
+- Single-instance guard via `tauri-plugin-single-instance` — prevents duplicate app windows
+
+---
+
+## Quick Reference
+
+| Component | Location |
+|-----------|----------|
+| OpenClaw config (host) | `C:\Users\PLUTO\openclaw_config\openclaw.json` |
+| OpenClaw config (container) | `/home/node/.openclaw/openclaw.json` |
+| Docker compose | `C:\Users\PLUTO\github\openclaw\docker-compose.yml` |
+| Workspace | `C:\Users\PLUTO\openclaw_workspace\` |
+| Ollama API | `http://localhost:11434` |
+| OpenClaw dashboard | `http://localhost:18789` |
+| Model template | `C:\Users\PLUTO\Modelfile.qwen3-14b-fast` |
+| ZuberiChat repo | `C:\Users\PLUTO\github\Repo\ZuberiChat` |
+| CEG SSH | `ssh ceg` (alias for `ssh -i ~/.ssh/id_ed25519 ceg@100.100.101.1`) |
+| CEG .bashrc | `/home/ceg/.bashrc` (backup: `.bashrc.bak.YYYYMMDD`) |
+| AgenticMail config | `/home/ceg/.agenticmail/config.json` |
+| AgenticMail systemd | `~/.config/systemd/user/agenticmail.service` |
+| npm global prefix (CEG) | `~/.npm-global/` |
+| ccode CLI (CEG) | `~/.local/bin/claude` |
+| ccode dispatch wrapper | `/opt/zuberi/scripts/ccode-dispatch.sh` |
+
+| CEG Service | Port | Health Check |
+|-------------|------|--------------|
+| SearXNG | 8888 | `curl http://100.100.101.1:8888` |
+| n8n | 5678 | `curl http://100.100.101.1:5678/healthz` |
+| CXDB | 9009/9010 | `curl http://100.100.101.1:9010/v1/contexts` |
+| Kanban | 3001 | `curl http://100.100.101.1:3001/api/v1/tasks` |
+| Usage Tracker | 3002 | `curl http://100.100.101.1:3002/health` |
+| AgenticMail | 3100 | `curl http://100.100.101.1:3100/api/agenticmail/health` |
+
+| KILO Component | Port | Check |
+|----------------|------|-------|
+| Ollama | 11434 | `curl http://localhost:11434/api/ps` |
+| OpenClaw | 18789 | Browser: `http://localhost:18789` |
+| ZuberiChat dev | 1420 | Tauri dev server (auto on `pnpm tauri dev`) |
+
+---
+
+## Recurring Patterns / Lessons Learned
+
+1. **SSH quoting:** Always use single quotes for SSH commands targeting CEG when the command contains `$` variables. Double quotes cause KILO's MSYS2 shell to expand `$PATH`, `$HOME`, etc. locally before sending to CEG.
+
+2. **Interactive commands via SSH:** Commands that launch interactive shells (like `agenticmail start`, `agenticmail setup`) will orphan child processes when the SSH session disconnects. Always prefer systemd services or `nohup` for persistent processes.
+
+3. **Port conflicts on CEG:** Before starting a service, always check if the port is already in use: `ssh ceg 'ss -tlnp | grep PORT'`. Kill orphaned processes before restarting systemd services.
+
+4. **Service bind addresses:** New services on CEG default to `127.0.0.1`. They must be reconfigured to bind to `100.100.101.1` (Tailscale) or `0.0.0.0` to be reachable from KILO.
+
+5. **No sudo on CEG:** The `ceg` user cannot run sudo commands via SSH. All software installs must use user-local paths (`~/.npm-global`, `~/.local/bin`). System-level changes (LVM, UFW, apt) require James to log in locally.
+
+6. **ZuberiChat test discipline:** Always run `pnpm test` before AND after changes. The smoke tests catch regressions in ModelSelector, dropdowns, and component rendering.
+
+---
+
+## ZuberiChat Model Selector Shows "No Models" at Startup
+
+**Symptoms:** Model selector button shows "No models" when app first opens, even though Ollama is running.
+
+**Cause:** This is expected behavior, not a bug. The auto-refresh fetch is gated behind `handshakeComplete` (the OpenClaw WebSocket handshake). Until that handshake succeeds, models don't populate automatically.
+
+**Resolution:** Click the model selector dropdown. This calls `onOpen → fetchModels()` directly, bypassing the handshake gate. Ollama is queried at `http://localhost:11434/api/tags` and the list populates immediately.
+
+**If clicking the dropdown also shows nothing:**
+1. Verify Ollama is running: `curl -UseBasicParsing http://localhost:11434/api/tags`
+2. Verify OpenClaw WebSocket is connected (check ZuberiChat connection indicator)
+3. The parent component (`ClawdChatInterface.tsx`) wires `onOpen={fetchModels}` at line 779 — if this is somehow missing after a code change, models will never populate
+
+**Architecture note:** `ModelSelector.tsx` is a pure display component — it does not fetch models itself. The parent fetches and passes models as a prop. Upstream diagnosis completed Session 12: wiring is correct, behavior is by design.
+
+---
+
+## ZuberiChat Sidebar Items Reference
+
+**Current sidebar contents (as of commit e833d2b):**
+- New chat button → `emit('new-conversation')`
+- Settings button → `emit('open-settings')`
+- Kanban Board button → `invoke('open_url_in_browser', ...)`
+
+**Items permanently removed:** Search, Recents, "No conversations yet", Documentation, About Zuberi (from sidebar).
+
+**About Zuberi location:** Lives in `src/components/layout/ZuberiContextMenu.tsx` (right-click context menu), NOT in the sidebar. Current text: `"Zuberi v0.1.1\nWahwearro Holdings LLC"`.
+
+**If sidebar shows old items after pulling from repo:** The installed app lags the repo. Run `pnpm tauri dev` to see current repo state, or rebuild and reinstall via NSIS installer.
+
+---
+
+*Keep this in the Claude project for architect reference. Update when new issues are discovered and resolved.*

@@ -1,0 +1,165 @@
+# CXDB Open Source - Comprehensive .gitignore
+
+# Compiled binaries - NEVER commit
+**/bin/
+**/bin/*
+bin/
+*.exe
+*.dll
+*.so
+*.dylib
+!clients/rust/src/bin/
+!clients/rust/src/bin/**
+
+# Rust
+target/
+**/target/
+**/*.rs.bk
+Cargo.lock
+# Allow Cargo.lock for binary crates, ignore for libraries
+!/server/Cargo.lock
+
+# Go
+vendor/
+*.test
+*.out
+go.work
+go.work.sum
+
+# Node / Frontend
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+.pnpm-store/
+dist/
+build/
+.next/
+out/
+.turbo/
+.vercel/
+
+# Environment files - NEVER commit secrets
+.env
+.env.*
+!.env.example
+*.env
+!*.env.example
+
+# Local data directories
+data/
+/data/
+**/data/
+tmp/
+temp/
+
+# Logs
+*.log
+logs/
+*.log.*
+
+# OS files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+*~
+
+# Editor files
+*.swp
+*.swo
+*.swn
+*.bak
+*.orig
+.idea/
+.vscode/
+*.iml
+.project
+.classpath
+.settings/
+.vs/
+
+# Test coverage
+*.coverage
+coverage/
+.nyc_output/
+htmlcov/
+*.profraw
+*.profdata
+
+# Temporary files
+*.tmp
+*.temp
+*~
+
+# Build artifacts
+*.a
+*.o
+*.obj
+*.lib
+
+# Package manager caches
+.npm/
+.yarn/
+.pnpm-debug.log
+
+# Local development overrides
+docker-compose.override.yml
+*.local
+
+# Certificate files (should be external)
+*.pem
+*.key
+*.crt
+*.cer
+*.p12
+*.pfx
+
+# Database files (for local dev)
+*.db
+*.sqlite
+*.sqlite3
+
+# Backup files
+*.backup
+*.bak
+*~
+
+# IDE specific
+.fleet/
+.zed/
+
+# macOS extended attributes
+.AppleDouble
+.LSOverride
+
+# Python (for examples/agent-integration)
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+.venv/
+venv/
+ENV/
+env/
+*.egg-info/
+dist/
+build/
+
+# Ignore evidence directories from internal workflow
+.scratch/
+.tmp-cxdb-srcdata/
+frontend/playwright-report/
+frontend/test-results/
+
+# Built binaries at repo root
+/cxdb-writer
+
+# TypeScript build info
+tsconfig.tsbuildinfo
+*.tsbuildinfo

@@ -1,0 +1,337 @@
+# RTL — Roadmap to Launch
+**Version:** 0.7.0
+**Updated:** 2026-03-04
+**Author:** Architect 8 (Sessions 10–10b)
+
+---
+
+## Mission
+Zuberi: a local autonomous AI assistant for Wahwearro Holdings LLC. Complete privacy, no cloud dependencies, self-sufficient agent capable of orchestrating coding tasks, workflow automation, and business operations. Revenue target: $350K in 180 days.
+
+---
+
+## Operating Model
+
+Starting Session 10b, Architect 8 graduated to **senior advisor**. This is the permanent model going forward:
+
+- **Architect (Claude.ai):** Strategic design, prompt generation, result review, advisory
+- **Agent (ccode on KILO):** Code execution, diagnostics, implementation
+- **James:** Final decision authority and quality gate
+
+Architects design and review — the agent ships. For persistent bugs, use the **diagnose-first pattern**: send a read-only research prompt before any code changes. Two agents failed the render bug by jumping to fixes; the third succeeded by reading the code first.
+
+### Shipping Discipline — READ THIS
+
+**The workflow is: write one prompt → James pastes it → ccode executes → collect results → write the next prompt.** That's it. Do not present multi-prompt implementation plans for approval. Do not write "Prompt 2, Prompt 3, Prompt 4, Prompt 5" sequences. Ship one thing, verify it landed, then ship the next.
+
+**Anti-patterns (things that have gone wrong):**
+- Writing plans about plans instead of sending a prompt to ccode
+- Presenting a 5-step roadmap and asking "want me to proceed?" — just send the first prompt
+- Asking James to run commands manually when ccode can do it (the sudo mistake — see Lessons)
+- Expanding scope into new workstreams before P0 items are closed
+- Asking "what's next?" instead of checking the RTL and recommending the next action directly
+
+**Scope gate:** Before starting any new workstream, check the Active RTL Items below. If there are open P0s, those ship first. New work goes into P1 or lower unless James explicitly promotes it.
+
+**When the next architect session starts:** Send a context sync prompt to ccode on KILO to verify current state — the agent may have completed work after the previous session ended. Don't assume the handoff is current.
+
+---
+
+## Infrastructure Status
+
+### Nodes
+
+| Node | Role | Status | Tailscale IP |
+|------|------|--------|--------------|
+| KILO | Brain + Interface | ✅ Online | 100.127.23.52 |
+| CEG | Toolbox + Storage | ✅ Online | 100.100.101.1 |
+
+### KILO Specs
+i7-13700K (16c/24t), MSI MPG Z690 EDGE WIFI DDR4, 64GB DDR4 3600MHz, RTX 5070 Ti 16GB + Intel UHD 770, Samsung 980 PRO 1TB NVMe + 870 EVO 1TB SATA + Apacer AS340 240GB SATA, Windows 11 Pro.
+
+### CEG Services
+
+| Service | Port | Status | Purpose |
+|---------|------|--------|---------|
+| SearXNG | 8888 | ✅ Running | Web search (4 engines) |
+| n8n | 5678 | ✅ Wired | Workflow automation (API key active) |
+| CXDB | 9009/9010 | ✅ Running | Conversation memory |
+| Veritas-Kanban | 3001 | 🟡 Blank page | Task board — diagnostic in progress |
+| Usage Tracker | 3002 | ✅ Running | API usage logging + stats (systemd service) |
+| ccode CLI | — | 🟡 Installed, needs auth | v2.1.63 at ~/.local/bin/claude |
+
+### Models (Ollama on KILO)
+
+| Model | ID | Size | Role | Status |
+|-------|-----|------|------|--------|
+| Fast General | qwen3:14b-fast | 9.3GB | Primary (thinking disabled, ~1-2s) | ✅ Active |
+| Deep Thinker | qwen3:14b | 9.3GB | Reasoning (thinking enabled, ~6-11s) | ✅ Pulled |
+| Vision | qwen3-vl:8b | 5.7GB | Image analysis, OCR | ✅ Pulled |
+| Large General | gpt-oss:20b | 13GB | Fallback | ✅ Pulled |
+
+### Workspace Skills (C:\Users\PLUTO\openclaw_workspace\skills\)
+
+| Skill | Status | Purpose |
+|-------|--------|---------|
+| searxng | ✅ Deployed | Web search via CEG |
+| cxdb | ✅ Deployed | Conversation memory via CEG |
+| ollama | ✅ Deployed | Model management (GPU refs updated to 5070 Ti) |
+| n8n | ✅ Deployed | Workflow automation via CEG |
+| model-router | ✅ Deployed | Autonomous model selection |
+| horizon | ✅ Deployed | Long-term vision (converted from root .md) |
+| infrastructure | ✅ Deployed | Hardware/service specs (converted from root .md) |
+
+---
+
+## Phase Status
+
+### Phase 1: Basic Setup — ✅ COMPLETE
+### Phase 2: Networking — ✅ COMPLETE
+### Phase 3: Service Deployment — ✅ FUNCTIONALLY COMPLETE
+
+- SearXNG end-to-end: ✅ | CXDB end-to-end: ✅ | n8n wired: ✅ | Kanban: ✅
+- Usage tracker on CEG:3002: ✅
+- First n8n workflow via Zuberi: ⬜ RTL-002 (James testing)
+
+### Phase 3B: Autonomous Capabilities — IN PROGRESS
+
+- Model router skill: ✅ RTL-020 deployed
+- Context optimization: ✅ RTL-021 + RTL-022 complete
+- MEMORY.md cleanup: ✅ RTL-005 complete (Session 10)
+- OpenClaw v2026.3.1 update: ✅ (Session 10)
+- "NO" prefix fix: ✅ Modelfile corrected (Session 10)
+- ZuberiChat WebSocket handshake: ✅ Implicit token auth (Session 10b)
+- ZuberiChat UI polish: ✅ Gear menu, model selector, GPU indicator (Session 10b)
+- **ZuberiChat render bug: ✅ Fixed in commit `ea3f94b`** (Session 10b)
+- **Veritas-Kanban blank page: 🟡 Diagnostic in progress** (Session 10b)
+- Ccode on CEG: 🟡 RTL-012 — CLI installed, backend ready, auth blocked on Anthropic platform
+- ZuberiChat usage meter UI: ⬜ RTL-024 — ccode prompt ready
+- Vision skill: ⬜ Deferred
+
+### Phase 4: Mission Launch — NOT STARTED
+
+---
+
+## Capability Matrix
+
+| ID | Capability | Status | Blocker |
+|----|-----------|--------|---------|
+| C1 | Conversation | ✅ Ready | — |
+| C2 | Identity/personality | ✅ Ready | — |
+| C3 | Long-term memory | ✅ Ready | CXDB wired |
+| C4 | Web search | ✅ Ready | SearXNG wired |
+| C5 | Package install (sandbox) | ⛔ Blocked | Custom sandbox or CEG ccode |
+| C6 | Code execution | 🟡 Gateway only | No sandbox runtime |
+| C7 | Workflow automation | 🟡 Wired, no workflows | RTL-002 |
+| C8 | Spreadsheet generation | ⛔ Blocked | Needs openpyxl in sandbox or CEG |
+| C9 | Database access | ✅ Ready | CXDB wired |
+| C10 | Task tracking | 🟡 Kanban blank page | RTL-027 diagnostic in progress |
+| C11 | Model selection | ✅ Skill deployed | RTL-020 complete |
+| C12 | Vision/OCR | ⬜ Pending | Vision skill + model router validation |
+| C13 | Diagram generation | ⛔ Blocked | Needs Mermaid CLI in sandbox or CEG |
+| C14 | Browser automation | ⛔ Blocked | Phase 2C |
+| C15 | PDF/DOCX generation | ⛔ Blocked | Needs reportlab/python-docx |
+| C16 | Email | ⛔ Blocked | AgentMail not configured |
+| C17 | External API access | ⛔ Blocked | Phase 2D |
+| C18 | Sub-agent dispatch | 🟡 Infra ready, auth blocked | RTL-012 |
+| C19 | Usage monitoring | 🟡 Backend ready, UI pending | RTL-024 |
+
+---
+
+## Active RTL Items
+
+### P0 — Ship Now
+
+| ID | Task | Status | Notes |
+|----|------|--------|-------|
+| RTL-027 | Veritas-Kanban blank page | 🟡 Diagnostic sent | HTML shell loads but renders blank white page. Read-only diagnostic prompt sent to ccode. |
+| RTL-012 | Ccode auth on CEG | ⛔ Blocked on Anthropic platform | CLI installed, usage tracker running. API key path confirmed (see ZUBERI-CCODE-ASSESSMENT.md). |
+| RTL-025 | Dispatch mechanism (CEG:3003) | ⛔ Blocked on RTL-012 | HTTP wrapper recommended. Pending James decision. |
+
+### P1 — Next Up
+
+| ID | Task | Status | Notes |
+|----|------|--------|-------|
+| RTL-024 | ZuberiChat usage meter UI | ⬜ Ccode prompt ready | No dependency on CEG auth |
+| RTL-002 | First n8n workflow via Zuberi | ⬜ James testing | — |
+| RTL-007 | Express 5 wildcard fix commit | ⬜ Quick win | Fix on CEG needs commit to ZuberiChat repo |
+
+### P2 — Queued
+
+| ID | Task | Status | Notes |
+|----|------|--------|-------|
+| RTL-013 | Version consistency audit | ⬜ Partial | AGENTS.md v0.8.1, TOOLS.md v0.8.3 |
+| RTL-023 | CEG compute migration | ⬜ Design phase | Blocked on RTL-012 + RTL-025 |
+
+### P3 — Future
+
+| ID | Task | Status | Notes |
+|----|------|--------|-------|
+| RTL-014 | MISSION-AEGIS strategy | ⬜ Needs James | $350K/180-day revenue plan |
+| RTL-016 | Self-learning loop | ⬜ Needs CXDB maturity | — |
+| RTL-018 | Multi-agent dispatch | ⬜ Needs RTL-012 + RTL-025 | — |
+| RTL-019 | Gate enforcement layer | ⬜ Unblocked | — |
+
+---
+
+## Key Decisions
+
+| Decision | Choice | Session | Rationale |
+|----------|--------|---------|-----------|
+| Ccode auth | API key only | 9c | Anthropic ToS prohibits consumer OAuth in third-party products. See ZUBERI-CCODE-ASSESSMENT.md. |
+| Context optimization | Root .md → skills | 9b | HORIZON.md, INFRASTRUCTURE.md converted. Recovered ~9.6K tokens/turn. |
+| Bundled skills | allowBundled filter | 9b | Reduced ~42 unused to 8 relevant |
+| HEARTBEAT.md | Stays at root | 9b | Must load every turn |
+| Dispatch mechanism | Pending — recommend HTTP wrapper | 9c | Follows curl pattern, no SSH key exposure |
+| Spending cap | $20/month API | 9c | $1.53 existing balance covers initial usage |
+| OpenClaw update | v2026.3.1 | 10 | Session loop fix, thinking defaults |
+| "NO" prefix fix | Remove /no_think, keep empty think tags | 10 | Template leak from model directive |
+| Architect model | Architect = advisor, Agent = executor | 10b | Ship-and-report over discuss-and-propose |
+| Render bug approach | Diagnose first, fix second | 10b | Two prior agents failed by jumping to code changes |
+
+---
+
+## Architecture
+
+```
+KILO (Brain + Interface)              CEG (Toolbox + Storage)
+100.127.23.52                          100.100.101.1
+┌─────────────────────┐               ┌─────────────────────┐
+│ OpenClaw v2026.3.1  │               │ SearXNG     :8888   │
+│ Ollama              │    Tailscale  │ n8n         :5678   │
+│   qwen3:14b-fast    │◄────────────►│ CXDB     :9009/9010 │
+│   qwen3:14b         │               │ Kanban      :3001   │
+│   qwen3-vl:8b       │               │ Usage Track :3002   │
+│   gpt-oss:20b       │               │ ccode CLI   (local) │
+│ Dashboard :18789    │               │                     │
+│ ZuberiChat (Tauri)  │               │ Pending:            │
+│                     │               │   ccode HTTP :3003? │
+└─────────────────────┘               └─────────────────────┘
+```
+
+---
+
+## Architecture Gap: Zuberi → CEG Dispatch
+
+Zuberi runs inside OpenClaw's Docker container on KILO. The container has host network access at gateway level (how curl to CEG services works). But SSH to CEG requires the private key at `C:\Users\PLUTO\.ssh\id_ed25519`, which is NOT mounted into the container.
+
+**Option A: Mount SSH key** — Add `~/.ssh:/home/node/.ssh:ro` to docker-compose.yml. Simple but exposes key to container.
+
+**Option B: HTTP dispatch wrapper on CEG:3003 (recommended)** — Small service accepting POST with task prompt, runs ccode locally, returns JSON. Same curl pattern as every other CEG service.
+
+**Option C: ACP (acpx plugin)** — OpenClaw's native agent delegation. Cleanest integration but needs maturity investigation on v2026.3.1. Still requires API key auth.
+
+Decision pending from James. Recommendation: Option B.
+
+---
+
+## Workspace Files (C:\Users\PLUTO\openclaw_workspace\)
+
+### Root files (load every turn)
+| File | Version | Purpose |
+|------|---------|---------|
+| AGENTS.md | v0.8.1 | Autonomy rules, gate enforcement |
+| SOUL.md | v0.1.0 | Identity, personality |
+| MEMORY.md | ✅ Cleaned | Persistent knowledge (Session 10) |
+| TOOLS.md | v0.8.3 | Quick tool commands, architecture |
+| HEARTBEAT.md | — | Proactive check schedule |
+| IDENTITY.md | — | OpenClaw self-authored identity |
+| USER.md | — | About James |
+
+### Skill files (load on-demand)
+horizon, infrastructure, searxng, cxdb, ollama, n8n, model-router
+
+### Context budget (post-optimization)
+| Metric | Value |
+|--------|-------|
+| Root .md tokens per turn | ~11,100 |
+| Skill listing tokens | ~360 |
+| Total per-turn overhead | ~11,500 |
+| Available for conversation | ~20,500 (of 32K) |
+
+---
+
+## Session Log
+
+| Session | Architect | Key Accomplishments |
+|---------|-----------|-------------------|
+| 1-4 | Various | Foundation: OpenClaw install, Ollama, identity, ZuberiChat, basic config |
+| 5-7 | Various | CEG setup, Tailscale networking, skill deployment, context trimming fix |
+| 8 | 7 | SearXNG + CXDB end-to-end, Kanban deploy, skill discovery fix, RTL created |
+| 9 | 7 | n8n wired, KILO specs updated, model router designed, CEG compute migration decided |
+| 9b | 7 | Context optimization: ~9.6K tokens recovered. Model router skill deployed. Bundled skills filtered. |
+| 9c | 7 | Ccode CLI on CEG, usage tracker (CEG:3002), dispatch wrapper. Auth decision: API key only. |
+| 10 | 8 | OpenClaw v2026.3.1 update. "NO" prefix fix. MEMORY.md cleanup. TROUBLESHOOTING.md created. |
+| 10b | 8 + Agent 9 | WebSocket handshake fix, gear menu overlay, model selector live loading, GPU indicator. Render bug root cause diagnosed. Fix prompt sent to ccode. |
+| 10b (cont.) | 8 + Agent 9 | RTL-026 render bug fixed (commit `ea3f94b`). Three bugs: impure updater, JSON.stringify crash, heartbeat ref clearing. Kanban blank page discovered — diagnostic prompt sent (RTL-027). |
+
+---
+
+## ZuberiChat Render Bug — Technical Reference (RTL-026) — ✅ FIXED
+
+**Fixed in commit `ea3f94b`.** Kept here as institutional knowledge for future React work.
+
+Root cause: `ClawdChatInterface.tsx` mutates `streamingMessageIdRef.current` inside a `setMessages()` updater callback. React 19 StrictMode (confirmed in `main.tsx`) double-invokes updaters. First call mutates the ref and returns array with new message. Second call sees mutated ref, takes wrong branch, returns unchanged array. Message never enters state.
+
+**Three interacting bugs:**
+
+**Bug A (PRIMARY) — Impure state updater:** `streamingMessageIdRef.current = id` assigned inside `setMessages` updater. StrictMode double-invoke causes second pass to miss the message. Introduced in commit `2b902e6`.
+
+**Bug B (CRASH) — `JSON.stringify(undefined).slice()`:** Heartbeat finals arrive as `{state:"final"}` with no `message` property. `JSON.stringify(undefined)` returns primitive `undefined`, not a string. `.slice()` throws TypeError. Introduced in commit `048a7e0`.
+
+**Bug C (LATENT) — Heartbeat finals clear streaming refs:** `activeRunIdRef` and `streamingMessageIdRef` reset to null on ANY final event, including heartbeats. Would kill active streaming state if Bug B didn't crash first.
+
+**Fix applied:** Moved ref assignment outside updater. Captured as const. Used `current.some()` inside updater for pure create-vs-update logic. Guarded `JSON.stringify(x ?? null)`. Gated ref clearing on text presence or runId match.
+
+**Git history (ZuberiChat):**
+- `ea3f94b` — Render bug fix (all three bugs)
+- `4e03885` — Gear menu overlay + model selector live loading
+- `048a7e0` — WebSocket handshake fix (introduced Bug B crash logging)
+- `2b902e6` — Major rewrite (introduced Bug A impure updater)
+
+---
+
+## Blocked on James
+
+1. **RTL-012: API key setup** — platform.claude.com → API Keys → Create Key (`zuberi-ceg`). Set $20/month spending limit, $15 alert. Configure on CEG with `ANTHROPIC_API_KEY` env var.
+2. **RTL-025: Dispatch mechanism decision** — HTTP wrapper (recommended) vs SSH key mount vs ACP.
+
+---
+
+## Lessons / Warnings
+
+1. **Diagnose before fixing** — For persistent bugs, send a read-only research prompt first. The "DO NOT FIX YET" pattern works.
+2. **Never mutate refs inside React state updaters** — StrictMode exists to catch this.
+3. **OpenClaw v2026.3.1 implicit token auth** — When `?token=` is in the WebSocket URL, gateway authenticates during upgrade. No explicit `connect` RPC needed. Breaking change from v2026.2.26.
+4. **Kill pnpm tauri dev** before any ZuberiChat ccode work. Also include "relaunch pnpm tauri dev at the end" step.
+5. **13 Vitest smoke tests** must pass before and after any changes.
+6. **No jq anywhere** — OpenClaw container doesn't have it.
+7. **API key NEVER in workspace files** — store only in CEG's ~/.bashrc or ccode config.
+8. **Max plan = $100/month** not Pro $20/month.
+9. **OpenClaw container can curl to CEG** (Tailscale gateway) but **cannot SSH** (no key mounted).
+10. **All ccode prompts that change code must include an OBSTACLES LOG table** (columns: #, Obstacle, Resolution, Impact). Read-only diagnostic prompts are exempt.
+11. **Ccode prompt structure:** Must include: Context, CRITICAL: Before doing anything, numbered Tasks, Do NOT section, FINAL REPORT table. Diagnostic prompts add "DO NOT FIX YET" in Context and Do NOT section.
+12. **Bug diagnosis pattern:** For persistent bugs, send a read-only research prompt first (DO NOT FIX YET), get a structured diagnostic report, then write a targeted fix prompt.
+13. **No sudo on CEG** — The `ceg` user has no passwordless sudo. All installs must use user-local paths: `~/.npm-global/` for npm, `~/.local/bin/` for pip/pipx, `python3 -m venv` for Python environments. System-level changes (apt, LVM, UFW) require James to log in locally. Do NOT ask James to run sudo commands if a user-local path exists — check first.
+14. **Ship before expanding scope** — Do not start new workstreams (trading infra, new capabilities, etc.) while P0 items are open. Check the RTL first. If the next architect wants to build something new, it goes into P1+ unless James promotes it.
+15. **One prompt at a time** — Do not present multi-prompt implementation plans. Write one prompt, send it, collect results, then write the next. The "Prompt 2, 3, 4, 5" pattern is an anti-pattern — it's planning about planning instead of shipping.
+
+---
+
+## Project Files Inventory
+
+| File | Status | Action |
+|------|--------|--------|
+| RTL-v0_7_0.md | ✅ Current | This file — canonical roadmap + handoff |
+| RTL-v0_6_0.md | Superseded | Keep for history |
+| RTL.md (v0.5.0) | ❌ Stale | Remove from project |
+| ZUBERI-CCODE-ASSESSMENT.md | ✅ Current | Ccode auth decision |
+| TROUBLESHOOTING.md | ✅ Current | Operational runbook |
+| SESSION-8-HANDOFF.md | Historical | Keep for reference |
+| SESSION-9-HANDOFF.md | Historical | Keep for reference |
+| ccode-prompt-model-router.md | Executed | Keep for reference |
+| rtl-dashboard.jsx | Needs update | Refresh data to match v0.7.0 |
+
+---
+
+*RTL is the canonical roadmap and handoff document. Maintained in Claude project. Updated each session.*
