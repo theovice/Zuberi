@@ -1,0 +1,1009 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Zuberi RTL — Wahwearro Holdings</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg:        #0a0d12;
+    --surface:   #0f1318;
+    --border:    rgba(255,255,255,0.06);
+    --text:      #d4d8e0;
+    --muted:     #4a5060;
+    --mono:      'IBM Plex Mono', monospace;
+    --sans:      'DM Sans', sans-serif;
+
+    --complete-color:  #3ecf8e;
+    --complete-bg:     rgba(62,207,142,0.08);
+    --complete-border: rgba(62,207,142,0.22);
+
+    --active-color:  #5bc4e8;
+    --active-bg:     rgba(91,196,232,0.08);
+    --active-border: rgba(91,196,232,0.22);
+
+    --pending-color:  #e8a135;
+    --pending-bg:     rgba(232,161,53,0.08);
+    --pending-border: rgba(232,161,53,0.22);
+
+    --blocked-color:  #e85555;
+    --blocked-bg:     rgba(232,85,85,0.08);
+    --blocked-border: rgba(232,85,85,0.22);
+
+    --future-color:  #555b6a;
+    --future-bg:     rgba(85,91,106,0.06);
+    --future-border: rgba(85,91,106,0.18);
+
+    /* Priority matrix colors */
+    --p0-color:      #e85555;
+    --p0-bg:         rgba(232,85,85,0.10);
+    --p1-color:      #e8a135;
+    --p1-bg:         rgba(232,161,53,0.08);
+    --p2-color:      #3ecf8e;
+    --p2-bg:         rgba(62,207,142,0.06);
+    --p3-color:      #5b8fe8;
+    --p3-bg:         rgba(91,143,232,0.06);
+    --ongoing-color: #8b7be8;
+    --ongoing-bg:    rgba(139,123,232,0.06);
+    --done-color:    #3ecf8e;
+    --done-bg:       rgba(62,207,142,0.05);
+  }
+
+  html { background: var(--bg); }
+
+  body {
+    font-family: var(--sans);
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    padding: 32px 20px 60px;
+    line-height: 1.5;
+  }
+
+  /* Subtle grid texture */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(255,255,255,0.015) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.015) 1px, transparent 1px);
+    background-size: 32px 32px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .wrap {
+    max-width: 740px;
+    margin: 0 auto;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* ── Header ── */
+  .header { margin-bottom: 28px; }
+  .header-top {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    margin-bottom: 4px;
+  }
+  .header h1 {
+    font-family: var(--mono);
+    font-size: 20px;
+    font-weight: 600;
+    color: #e8ecf2;
+    letter-spacing: -0.3px;
+  }
+  .header-ver {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--muted);
+    background: rgba(255,255,255,0.04);
+    border: 1px solid var(--border);
+    padding: 1px 7px;
+    border-radius: 3px;
+  }
+  .header-sub {
+    font-size: 12px;
+    color: var(--muted);
+    font-family: var(--mono);
+    letter-spacing: 0.3px;
+  }
+
+  /* ── Summary Bar ── */
+  .summary {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+  }
+  .summary-chip {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    padding: 6px 12px;
+    border-radius: 5px;
+    border: 1px solid;
+    font-family: var(--mono);
+  }
+  .summary-chip .count {
+    font-size: 18px;
+    font-weight: 600;
+    line-height: 1;
+  }
+  .summary-chip .label {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    opacity: 0.75;
+  }
+  .summary-chip.complete { color: var(--complete-color); background: var(--complete-bg); border-color: var(--complete-border); }
+  .summary-chip.active   { color: var(--active-color);   background: var(--active-bg);   border-color: var(--active-border); }
+  .summary-chip.pending  { color: var(--pending-color);  background: var(--pending-bg);  border-color: var(--pending-border); }
+  .summary-chip.blocked  { color: var(--blocked-color);  background: var(--blocked-bg);  border-color: var(--blocked-border); }
+  .summary-chip.future   { color: var(--future-color);   background: var(--future-bg);   border-color: var(--future-border); }
+  .summary-chip.total    { color: #8892a0; background: rgba(255,255,255,0.03); border-color: var(--border); margin-left: auto; }
+
+  /* ── Tabs ── */
+  .tabs {
+    display: flex;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 16px;
+    gap: 0;
+  }
+  .tab-btn {
+    background: none;
+    border: none;
+    border-bottom: 2px solid transparent;
+    padding: 8px 18px;
+    font-family: var(--sans);
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--muted);
+    cursor: pointer;
+    transition: color 0.15s, border-color 0.15s;
+    text-transform: capitalize;
+    margin-bottom: -1px;
+  }
+  .tab-btn.active {
+    color: var(--active-color);
+    border-bottom-color: var(--active-color);
+  }
+  .tab-btn:hover:not(.active) { color: var(--text); }
+
+  /* ── Phase Cards ── */
+  .phase-card {
+    border-radius: 6px;
+    margin-bottom: 6px;
+    overflow: hidden;
+    border: 1px solid;
+    transition: border-color 0.2s;
+  }
+  .phase-card.complete { border-color: var(--complete-border); background: rgba(62,207,142,0.03); }
+  .phase-card.active   { border-color: var(--active-border);   background: rgba(91,196,232,0.03); }
+  .phase-card.pending  { border-color: var(--pending-border);  background: rgba(232,161,53,0.03); }
+
+  .phase-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 14px;
+    cursor: pointer;
+    user-select: none;
+    gap: 12px;
+  }
+  .phase-header:hover { background: rgba(255,255,255,0.02); }
+
+  .phase-left {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    flex-shrink: 0;
+  }
+
+  .phase-arrow {
+    font-size: 10px;
+    color: var(--muted);
+    transition: transform 0.2s;
+    display: inline-block;
+    width: 12px;
+  }
+  .phase-arrow.open { transform: rotate(90deg); }
+
+  .phase-name {
+    font-size: 13px;
+    font-weight: 600;
+    color: #cdd2dc;
+  }
+
+  /* Status badge */
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 1px 7px;
+    border-radius: 3px;
+    font-family: var(--mono);
+    font-size: 10px;
+    font-weight: 500;
+    border: 1px solid;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+  .badge.complete { color: var(--complete-color); background: var(--complete-bg); border-color: var(--complete-border); }
+  .badge.active   { color: var(--active-color);   background: var(--active-bg);   border-color: var(--active-border); }
+  .badge.pending  { color: var(--pending-color);  background: var(--pending-bg);  border-color: var(--pending-border); }
+  .badge.blocked  { color: var(--blocked-color);  background: var(--blocked-bg);  border-color: var(--blocked-border); }
+  .badge.future   { color: var(--future-color);   background: var(--future-bg);   border-color: var(--future-border); }
+
+  /* Progress bar */
+  .progress-wrap {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex: 1;
+    min-width: 80px;
+    max-width: 160px;
+  }
+  .progress-track {
+    flex: 1;
+    height: 4px;
+    border-radius: 2px;
+    background: rgba(255,255,255,0.06);
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    border-radius: 2px;
+    transition: width 0.4s ease;
+  }
+  .progress-fill.full { background: var(--complete-color); }
+  .progress-fill.partial { background: linear-gradient(90deg, var(--active-color), var(--complete-color)); }
+  .progress-pct {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--muted);
+    min-width: 30px;
+    text-align: right;
+  }
+  .progress-pct.done { color: var(--complete-color); }
+
+  /* Phase items */
+  .phase-items {
+    padding: 0 14px 10px 36px;
+    border-top: 1px solid rgba(255,255,255,0.04);
+    display: none;
+  }
+  .phase-items.open { display: block; }
+
+  .phase-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    padding: 5px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.03);
+  }
+  .phase-item:last-child { border-bottom: none; }
+
+  .item-icon { font-size: 11px; margin-top: 1px; flex-shrink: 0; }
+  .item-name {
+    font-size: 12px;
+    flex: 1;
+  }
+  .item-name.complete { color: #4a8a6a; text-decoration: line-through; opacity: 0.65; }
+  .item-name.pending  { color: var(--text); }
+  .item-name.blocked  { color: #7a4545; }
+  .item-name.future   { color: var(--muted); }
+  .item-name.active   { color: var(--text); }
+
+  .item-note {
+    font-size: 10px;
+    font-family: var(--mono);
+    opacity: 0.6;
+    margin-top: 1px;
+    display: block;
+  }
+  .item-note.complete { color: var(--complete-color); }
+  .item-note.pending  { color: var(--pending-color); }
+  .item-note.active   { color: var(--active-color); }
+  .item-note.future   { color: var(--muted); }
+
+  /* ── Capability Grid ── */
+  .cap-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(175px, 1fr));
+    gap: 5px;
+    display: none;
+  }
+  .cap-grid.active { display: grid; }
+
+  .cap-card {
+    padding: 8px 10px;
+    border-radius: 4px;
+    border: 1px solid;
+    display: flex;
+    align-items: flex-start;
+    gap: 7px;
+  }
+  .cap-card.complete { color: var(--complete-color); background: var(--complete-bg); border-color: var(--complete-border); }
+  .cap-card.active   { color: var(--active-color);   background: var(--active-bg);   border-color: var(--active-border); }
+  .cap-card.pending  { color: var(--pending-color);  background: var(--pending-bg);  border-color: var(--pending-border); }
+  .cap-card.blocked  { color: var(--blocked-color);  background: var(--blocked-bg);  border-color: var(--blocked-border); }
+  .cap-card.future   { color: var(--future-color);   background: var(--future-bg);   border-color: var(--future-border); }
+
+  .cap-icon { font-size: 11px; margin-top: 1px; flex-shrink: 0; }
+  .cap-name { font-size: 12px; font-weight: 500; line-height: 1.3; }
+  .cap-note { font-size: 10px; opacity: 0.6; font-family: var(--mono); margin-top: 2px; display: block; }
+
+  /* ── Priority Matrix ── */
+  .priority-panel { display: none; }
+  .priority-panel.active { display: block; }
+
+  .priority-guide {
+    padding: 10px 14px;
+    margin-bottom: 16px;
+    background: rgba(91,196,232,0.04);
+    border: 1px solid rgba(91,196,232,0.12);
+    border-radius: 6px;
+    font-size: 11px;
+    color: #7a8494;
+    font-family: var(--mono);
+    line-height: 1.6;
+  }
+  .priority-guide strong { color: #9aa4b4; }
+
+  .priority-legend {
+    display: flex;
+    gap: 14px;
+    flex-wrap: wrap;
+    margin-bottom: 14px;
+    padding: 0 2px;
+  }
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 11px;
+    font-family: var(--mono);
+    color: var(--muted);
+  }
+  .legend-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 2px;
+    flex-shrink: 0;
+  }
+
+  .priority-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  .priority-table thead th {
+    text-align: left;
+    padding: 8px 10px;
+    font-size: 11px;
+    font-weight: 600;
+    font-family: var(--mono);
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+  }
+  .priority-table thead th.center { text-align: center; }
+
+  .priority-table tbody tr {
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+    transition: background 0.1s;
+  }
+  .priority-table tbody tr:hover { background: rgba(255,255,255,0.02); }
+  .priority-table tbody tr:last-child { border-bottom: none; }
+
+  .priority-table td {
+    padding: 7px 10px;
+    font-size: 12px;
+    vertical-align: middle;
+  }
+  .priority-table td.center { text-align: center; }
+
+  .pri-num {
+    font-family: var(--mono);
+    font-weight: 500;
+    color: var(--muted);
+    width: 32px;
+  }
+  .pri-task { color: var(--text); }
+  .pri-task.done {
+    text-decoration: line-through;
+    opacity: 0.5;
+  }
+  .pri-rtl {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--muted);
+    opacity: 0.7;
+    margin-left: 4px;
+  }
+  .pri-status {
+    font-size: 11px;
+    color: #7a8494;
+  }
+  .pri-status.info { color: var(--active-color); }
+  .pri-status.success { color: var(--complete-color); }
+
+  /* Priority pills */
+  .pri-pill {
+    display: inline-block;
+    padding: 1px 10px;
+    border-radius: 3px;
+    font-family: var(--mono);
+    font-size: 10px;
+    font-weight: 600;
+    color: #fff;
+    letter-spacing: 0.3px;
+  }
+  .pri-pill.done    { background: var(--done-color); font-weight: 500; }
+  .pri-pill.p0      { background: var(--p0-color); }
+  .pri-pill.p1      { background: var(--p1-color); }
+  .pri-pill.p2      { background: var(--p2-color); }
+  .pri-pill.p3      { background: var(--p3-color); }
+  .pri-pill.ongoing { background: var(--ongoing-color); }
+
+  /* Done rows get subtle green background */
+  .priority-table tbody tr.row-done {
+    background: rgba(62,207,142,0.04);
+  }
+  .priority-table tbody tr.row-done:hover {
+    background: rgba(62,207,142,0.06);
+  }
+
+  /* ── Footer ── */
+  .footer {
+    text-align: center;
+    margin-top: 28px;
+    font-family: var(--mono);
+    font-size: 10px;
+    color: #2e3340;
+    letter-spacing: 0.3px;
+  }
+
+  /* Tab panels */
+  #phases-panel { display: block; }
+  #enlightenment-panel { display: block; }
+  #capabilities-panel { display: none; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- Header -->
+  <div class="header">
+    <div class="header-top">
+      <h1>⬡ Zuberi RTL</h1>
+      <span class="header-ver">v1.4.0</span>
+    </div>
+    <div class="header-sub">Roadmap to Launch — Wahwearro Holdings LLC</div>
+  </div>
+
+  <!-- Summary Bar -->
+  <div class="summary" id="summary-bar"></div>
+
+  <!-- Tabs -->
+  <div class="tabs">
+    <button class="tab-btn" onclick="switchTab('priorities', this)">Priorities</button>
+    <button class="tab-btn active" onclick="switchTab('phases', this)">Phases</button>
+    <button class="tab-btn" onclick="switchTab('capabilities', this)">Capabilities</button>
+  </div>
+
+  <!-- Priority Matrix Panel -->
+  <div id="priorities-panel" class="priority-panel">
+    <!--
+    ╔══════════════════════════════════════════════════════════════════════╗
+    ║  PRIORITY MATRIX — ARCHITECT REFERENCE                             ║
+    ╠══════════════════════════════════════════════════════════════════════╣
+    ║                                                                    ║
+    ║  PURPOSE:                                                          ║
+    ║  Quick-reference priority view for the current session. Unlike     ║
+    ║  the Phases tab (which tracks the full historical RTL), this tab   ║
+    ║  shows only what matters NOW — ranked by priority, with status.    ║
+    ║                                                                    ║
+    ║  HOW TO UPDATE:                                                    ║
+    ║  1. Edit the PRIORITIES array in the <script> block below.         ║
+    ║  2. Each item has: num, task, rtl (optional RTL ID), priority      ║
+    ║     (done/p0/p1/p2/p3/ongoing), status text, and statusType       ║
+    ║     (plain/info/success) for color coding.                         ║
+    ║  3. Done items use num: "—" and get the strikethrough + green bg.  ║
+    ║  4. Keep items in priority order (done first, then p0→ongoing).    ║
+    ║  5. When a task ships, move it to the done group at the top and    ║
+    ║     set priority: "done". Remove it after 2 sessions.             ║
+    ║  6. Update the footer date/session/architect on each session.      ║
+    ║                                                                    ║
+    ║  RELATIONSHIP TO PHASES TAB:                                       ║
+    ║  Phases = full historical record of all RTL work (append-only).    ║
+    ║  Priorities = current working queue (editable, reorderable).       ║
+    ║  Both should reflect the same reality. If a task ships, mark it    ║
+    ║  complete in BOTH the Phases data AND the Priorities data.         ║
+    ║                                                                    ║
+    ║  RELATIONSHIP TO PROJECT REFERENCE:                                ║
+    ║  ZUBERI-PROJECT-REFERENCE.md > Active RTL Items is the canonical   ║
+    ║  source of truth. This matrix is a visual rendering of that data.  ║
+    ║  If they conflict, the project reference wins.                     ║
+    ║                                                                    ║
+    ╚══════════════════════════════════════════════════════════════════════╝
+    -->
+    <div class="priority-guide">
+      <strong>Session working queue.</strong> Ranked by priority. Updated each session by the architect.
+      Canonical source: ZUBERI-PROJECT-REFERENCE.md &gt; Active RTL Items.
+    </div>
+    <div class="priority-legend" id="priority-legend"></div>
+    <table class="priority-table">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Task</th>
+          <th class="center">Priority</th>
+          <th class="center">Status</th>
+        </tr>
+      </thead>
+      <tbody id="priority-body"></tbody>
+    </table>
+  </div>
+
+  <!-- Phases Panel -->
+  <div id="phases-panel"></div>
+
+  <!-- Enlightenment Panel (rendered separately, below phases) -->
+  <div id="enlightenment-panel"></div>
+
+  <!-- Capabilities Panel -->
+  <div id="capabilities-panel">
+    <div class="cap-grid active" id="cap-grid"></div>
+  </div>
+
+  <!-- Footer -->
+  <div class="footer">Updated 2026-03-14 · Session 21 · Architect 21 · Priority matrix integrated into RTL. Session 20 completions: shell exec service, AGENTS.md v1.3.0, UFW hardened, Ollama/OpenClaw tuned, CXDB adapter mapping. ZuberiChat v1.0.17.</div>
+
+</div>
+
+<script>
+// ══════════════════════════════════════════════════════════════════════
+// DATA — Edit these arrays to update the dashboard.
+// ══════════════════════════════════════════════════════════════════════
+
+const STATUS = {
+  complete: { icon: '✅', label: 'Complete' },
+  active:   { icon: '🔄', label: 'Active'   },
+  pending:  { icon: '⬜', label: 'Pending'  },
+  blocked:  { icon: '⛔', label: 'Blocked'  },
+  future:   { icon: '🔮', label: 'Future'   },
+};
+
+// ── Priority Matrix ────────────────────────────────────────────────
+// Quick-reference priority queue. See HTML comment above for update guide.
+//
+// Fields:
+//   num:        Display number ("—" for done items)
+//   task:       Task name
+//   rtl:        Optional RTL ID (e.g. "RTL-065") — shown as subtle label
+//   priority:   "done" | "p0" | "p1" | "p2" | "p3" | "ongoing"
+//   status:     Freeform status text
+//   statusType: "plain" | "info" | "success" — controls status text color
+
+const PRIORITIES = [
+  // ── Shipped (Session 20) ──
+  { num: "—", task: "Shell execution service (CEG:3003)",      priority: "done", status: "Shipped",          statusType: "success" },
+  { num: "—", task: "AGENTS.md v1.3.0",                       priority: "done", status: "Shipped",          statusType: "success" },
+  { num: "—", task: "CEG UFW hardening (Phase 1)",             priority: "done", status: "Active — 443 gap", statusType: "success" },
+  { num: "—", task: "Ollama + OpenClaw stream stability tuning", priority: "done", status: "Shipped",        statusType: "success" },
+  { num: "—", task: "CXDB adapter mapping document",           priority: "done", status: "94 lines on CEG",  statusType: "success" },
+
+  // ── P0 — Ship Now ──
+  { num: "1",  task: "ContextEngine plugin — build CXDB adapters",       priority: "p0", status: "Design complete, build next", statusType: "info" },
+  { num: "2",  task: "Cancel/interrupt turn in ZuberiChat",  rtl: "RTL-065", priority: "p0", status: "Problem identified, no design", statusType: "plain" },
+
+  // ── P1 — Next Up ──
+  { num: "3",  task: "Squid SNI proxy on KILO (closes 443 gap)",         priority: "p1", status: "Research done",              statusType: "plain" },
+  { num: "4",  task: "tldraw mural (CEG:3004)",                          priority: "p1", status: "Ready — Zuberi can install",  statusType: "success" },
+  { num: "5",  task: "Rotate Azure credentials + M365 skill",            priority: "p1", status: "Queued",                     statusType: "plain" },
+  { num: "6",  task: "Shell service file-write endpoint",                priority: "p1", status: "Greenfield",                 statusType: "plain" },
+
+  // ── P2 — Queued ──
+  { num: "7",  task: "Office I/O skill deployment on CEG",               priority: "p2", status: "Designed",                   statusType: "plain" },
+  { num: "8",  task: "Gate enforcement layer",               rtl: "RTL-019", priority: "p2", status: "Queued",                 statusType: "plain" },
+  { num: "9",  task: "n8n ↔ Zuberi wiring",                              priority: "p2", status: "Queued",                     statusType: "plain" },
+  { num: "10", task: "ClawHub skill discovery",              rtl: "RTL-063", priority: "p2", status: "Blocked on RTL-019",      statusType: "plain" },
+
+  // ── P3 — Future ──
+  { num: "11", task: "GUI workstation — Playwright",         rtl: "RTL-064", priority: "p3", status: "Concept",                statusType: "plain" },
+  { num: "12", task: "Monospace CSS fix",                                 priority: "p3", status: "Queued",                     statusType: "plain" },
+  { num: "13", task: "YouTube transcript service (CEG:9011)",             priority: "p3", status: "Plan approved",              statusType: "plain" },
+  { num: "14", task: "RTL-058 Phase 3 — autonomous routing",             priority: "p3", status: "Needs production data",      statusType: "plain" },
+  { num: "15", task: "ZuberiChat approval card reliability",              priority: "p3", status: "Queued",                     statusType: "plain" },
+  { num: "16", task: "Workspace cleanup (stale files)",                   priority: "p3", status: "narrative, CHANGELOG, HEARTBEAT", statusType: "plain" },
+
+  // ── Ongoing ──
+  { num: "17", task: "Mission Ganesha ($25K/month)",         rtl: "RTL-014", priority: "ongoing", status: "Active",            statusType: "info" },
+];
+
+// ── Phases ─────────────────────────────────────────────────────────
+const PHASES = [
+  {
+    name: "Phase 1: Basic Setup", status: "complete",
+    items: [
+      { name: "OpenClaw installed", status: "complete" },
+      { name: "Ollama serving local disciplines", status: "complete", note: "3 disciplines: gpt-oss:20b, qwen2.5-coder:14b, qwen3-vl:8b" },
+      { name: "Zuberi identity configured", status: "complete" },
+      { name: "Dashboard webchat functional", status: "complete" },
+      { name: "Workspace docs established", status: "complete" },
+    ]
+  },
+  {
+    name: "Phase 2: Networking", status: "complete",
+    items: [
+      { name: "EDUP WiFi adapter on CEG", status: "complete" },
+      { name: "CEG on Tailscale", status: "complete" },
+      { name: "KILO ↔ CEG confirmed", status: "complete" },
+      { name: "SSH alias configured", status: "complete" },
+    ]
+  },
+  {
+    name: "Phase 3: Service Deployment", status: "complete",
+    items: [
+      { name: "SearXNG end-to-end", status: "complete" },
+      { name: "CXDB end-to-end", status: "complete" },
+      { name: "n8n wired", status: "complete" },
+      { name: "Veritas-Kanban deployed", status: "complete" },
+      { name: "Usage Tracker (CEG:3002)", status: "complete" },
+      { name: "Chroma server (CEG:8000)", status: "complete", note: "Vector DB for routing feedback — router_records collection" },
+      { name: "Routing shim (CEG:8100)", status: "complete", note: "FastAPI logging service — CXDB-first + Chroma semantic write, idempotent" },
+    ]
+  },
+  {
+    name: "Phase 3B: Autonomous Capabilities", status: "complete",
+    items: [
+      { name: "Discipline router skill (RTL-020)", status: "complete" },
+      { name: "Context optimization (RTL-021/022)", status: "complete" },
+      { name: "MEMORY.md cleanup (RTL-005)", status: "complete" },
+      { name: "Ccode auth on CEG (RTL-012)", status: "complete" },
+      { name: "HTTP dispatch :3003 (RTL-025)", status: "complete" },
+      { name: "Usage meter UI (RTL-024)", status: "complete" },
+      { name: "ZuberiChat render bug (RTL-026)", status: "complete" },
+      { name: "ZuberiChat UI fixes (RTL-028)", status: "complete" },
+      { name: "ZuberiChat sidebar + model selector (RTL-032)", status: "complete" },
+      { name: "AgenticMail + email skill (RTL-016b)", status: "complete" },
+      { name: "n8n bidirectional integration (RTL-002)", status: "complete" },
+      { name: "Visual analysis skill", status: "future" },
+    ]
+  },
+  {
+    name: "Phase 3C: Stability & Disciplines", status: "complete",
+    items: [
+      { name: "Ollama auto-launch (RTL-039)", status: "complete" },
+      { name: "Self-healing startup (RTL-040)", status: "complete" },
+      { name: "NO prefix Modelfile fix (RTL-041)", status: "complete" },
+      { name: "Heartbeat disabled (RTL-042a)", status: "complete" },
+      { name: "Workspace .md framing (RTL-042b)", status: "complete" },
+      { name: "Memory flush diagnosis (RTL-042c)", status: "complete" },
+      { name: "Compaction tuned for 32K (RTL-042d)", status: "complete" },
+      { name: "Model catalog sync (RTL-043)", status: "complete" },
+      { name: "Discipline stack upgrade + native API (RTL-052)", status: "complete", note: "Native Ollama API, 131K context" },
+      { name: "Full stack reset (Session 15)", status: "complete", note: "gemma3 + qwen3 removed; 3 disciplines: gpt-oss:20b + qwen2.5-coder:14b + qwen3-vl:8b" },
+      { name: "Gateway token mismatch fix (RTL-052b/c)", status: "complete", note: "Exec unblocked, ZuberiChat auth restored" },
+      { name: "Capability awareness backfill (RTL-050)", status: "complete", note: "CXDB turns 10-22, AGENTS.md v0.8.4" },
+      { name: "Discipline state sync (RTL-057)", status: "complete", note: "Backend modelOverride is source of truth; localStorage demoted to hint" },
+      { name: "Workspace context audit (RTL-056)", status: "complete", note: "Root files 8.7% of 131K — healthy" },
+      { name: "HEARTBEAT.md demoted to skill", status: "complete", note: "Disabled feature was burning 1,703 tokens/turn" },
+      { name: "Orphaned models cleaned", status: "complete", note: "qwen3:14b + qwen3:14b-fast removed, ~17.2GB reclaimed" },
+      { name: "Ollama context slider fixed", status: "complete", note: "Was 4K default, set to 128K" },
+      { name: "Nomenclature update", status: "complete", note: "Models→disciplines, AGENTS v0.9.0, TOOLS v0.9.0, MEMORY v0.8.0" },
+    ]
+  },
+  {
+    name: "Phase 3D: ZuberiChat Features", status: "complete",
+    items: [
+      { name: "One-click update system (RTL-034)", status: "complete" },
+      { name: "ccode browser preview (RTL-045)", status: "complete" },
+      { name: "Color token polish (RTL-046)", status: "complete" },
+      { name: "Permission selector Phase 1 (RTL-047)", status: "complete" },
+      { name: "Markdown + structured blocks (RTL-048)", status: "complete" },
+      { name: "UI polish — font, layout, colors (RTL-049)", status: "complete" },
+      { name: "Sentinel leakage fix (RTL-051)", status: "complete", note: "isSentinelOutput() filter, 3 locations" },
+      { name: "Message alignment + copy button (v1.0.1)", status: "complete", note: "Left-aligned, CopyButton.tsx, 155 tests" },
+      { name: "Permission selector Phase 2 (RTL-047)", status: "complete", note: "ToolApprovalCard inline in ZuberiChat — Allow Once/Always/Deny, countdown timer, auto-deny" },
+      { name: "Context meter in toolbar (RTL-060b)", status: "complete", note: "Inline token usage bar — polls OpenClaw session via WS RPC. Color gradient: muted→ember→ember-deep→send-bg" },
+    ]
+  },
+  {
+    name: "Phase 4: Mission Launch", status: "active",
+    items: [
+      { name: "Mission-Aegis research sprint", status: "complete", note: "Revenue + competitive landscape, CXDB turn 23" },
+      { name: "Discipline state sync (RTL-057)", status: "complete", note: "Backend source of truth, stale ID guard" },
+      { name: "gemma3:12b tool support (RTL-055)", status: "complete", note: "Hard registry limitation — model removed" },
+      { name: "Discipline routing Phase 1 (RTL-058)", status: "complete", note: "5 task-type triggers: image, code, tools, deep analysis+think:true, fallback." },
+      { name: "Discipline routing Phase 2 (RTL-058)", status: "complete", note: "Chroma server CEG:8000 + routing shim CEG:8100. CXDB authoritative (context 11), Chroma semantic index. Idempotency hardened." },
+      { name: "TOOLS.md streamline (RTL-059)", status: "complete", note: "Root files ~9,637→~5,916 tokens/turn (38.6% reduction). 5 new skills created. Horizon deleted. Zero content lost." },
+      { name: "OpenClaw upgrade (RTL-060a)", status: "complete", note: "v2026.3.1-beta.1 → v2026.3.8 via ghcr.io. Context shows 131072 (not 4096). Backup tagged." },
+      { name: "Token tracking verified (RTL-060b)", status: "complete", note: "46,052/131,072 confirmed in dashboard. Context meter added to ZuberiChat toolbar. v1.0.8." },
+      { name: "RTL-007 closed", status: "complete", note: "Artifact from early planning — no work needed." },
+      { name: "Read auto-approval (RTL-061)", status: "complete", note: "ZuberiChat surface fix. Read-category exec approvals auto-resolved via frontend policy, cached by backend. v1.0.9." },
+      { name: "Skill description hardening (RTL-062)", status: "complete", note: "All 15 skill descriptions rewritten with diagnostic/troubleshooting triggers. TOOLS.md v1.1.0 fallback loading. No restart needed." },
+      { name: "SearXNG skill coaching", status: "complete", note: "Behavioral fix — Zuberi now searches correctly using TOOLS.md fallback path. Three rules coached." },
+      { name: "Exec approval RPC fix (v1.0.11)", status: "complete", note: "WS message queue + 15s retry timer. Gateway now receives resolve RPCs." },
+      { name: "Streaming message fix (v1.0.12)", status: "complete", note: "Unconditional streamingMessageIdRef clear + separate agentStreamingMessageIdRef. Final messages render after tool sequences." },
+      { name: "Duplicate message fix (v1.0.13)", status: "complete", note: "Preserve ref on finalize, clear only on new user message/conversation. Regression from v1.0.12 resolved." },
+      { name: "Live screenshot capture (RTL-045b)", status: "complete", note: "capture-window.ps1 replaces mock preview. PowerShell/.NET, deterministic targeting, proper exit codes." },
+      { name: "Internal monologue leakage", status: "pending", note: "gpt-oss:20b Harmony format. Diminishing through natural use. Fix deferred. Full analysis in STREAMING-PIPELINE-AUDIT.md." },
+      { name: "Approval card dedup + RPC cleanup (v1.0.15)", status: "complete", note: "Command signature dedup, stale UUID auto-deny, 15s timer removed, expiry sends deny, cards auto-remove. Needs live test." },
+      { name: "Auto-scroll + UX (v1.0.16)", status: "complete", note: "Auto-scroll on send+streaming, scroll-to-bottom button, pinned input. userHasScrolledUp respects manual scroll." },
+      { name: "Approval card root cause fix (v1.0.17)", status: "complete", note: "Connect RPC scope fix — operator.approvals now requested. LIVE TESTED. P1 CLOSED." },
+      { name: "Exec tool behavioral fix (AGENTS.md v1.1.0)", status: "complete", note: "STOP-and-WAIT instruction added to Section 11. Partially tested — Zuberi waited on one attempt but still retries." },
+      { name: "Streaming pipeline audit", status: "complete", note: "STREAMING-PIPELINE-AUDIT.md — Harmony format, pipeline map, token survival analysis." },
+      { name: "CCODE-HANDOFF rebuild", status: "complete", note: "14 sections, BOM-free, sidebar docs, all values verified against live system." },
+      { name: "Approval card reliability", status: "complete", note: "Root cause: missing operator.approvals scope. Fixed v1.0.17. Live tested. P1 CLOSED." },
+      // Session 20 completions
+      { name: "Shell execution service (CEG:3003)", status: "complete", note: "Python 3 stdlib, ThreadingHTTPServer, process group isolation, resource limits, JSONL audit. Replaces ccode-dispatch." },
+      { name: "AGENTS.md v1.3.0", status: "complete", note: "Output Integrity, Credential Security, CEG Shell Execution sections. Zuberi authored post-v1.1.0." },
+      { name: "CEG UFW hardening", status: "complete", note: "Default deny all. Tailscale + essential ports on wlx90de80152e3f. TCP 443 gap remains (Squid proxy pending)." },
+      { name: "Ollama + OpenClaw tuning", status: "complete", note: "q8_0 KV cache, keep_alive -1, flash_attention 1, 131K ctx. reserveTokensFloor 25000, timeoutSeconds 1800." },
+      { name: "CXDB adapter mapping deployed", status: "complete", note: "94 lines at /opt/zuberi/reference/CXDB-ADAPTER-MAPPING.md. ConversationStore + SummaryStore + LcmDependencies mapped." },
+      { name: "Dispatch skill rewrite", status: "complete", note: "Shell execution API replaces ccode-dispatch wrapper. TOOLS.md updated." },
+      { name: "ccode-dispatch retirement", status: "complete", note: "Stopped, disabled. Port 3003 reused by zuberi-shell." },
+      { name: "Zuberi CEG operational testing", status: "complete", note: "6 checks via shell service. First autonomous file write on CEG." },
+      // Remaining active/pending/future items
+      { name: "YouTube transcript service (CEG:9011)", status: "pending", note: "Plan approved. On hold." },
+      { name: "Hugging Face integration (RTL-033)", status: "pending", note: "Zuberi should know HF exists for capability gap assessment during brainstorming." },
+      { name: "Mission Ganesha (RTL-014)", status: "active", note: "Revenue target $25K/month. James setting up directly with Zuberi." },
+      { name: "First revenue task", status: "future" },
+      { name: "ClawHub skill discovery (RTL-063)", status: "future", note: "Pipeline: find-skills → skill-vetter → James approves. Needs approval card + RTL-019." },
+      { name: "Conversation persistence (Option B)", status: "future", note: "CXDB-backed sidebar + semantic search via Chroma. ContextEngine plugin is the path." },
+      { name: "ContextEngine plugin (lossless-claw)", status: "active", note: "Foundation for persistent memory. lossless-claw cloned and analyzed. Adapter mapping on CEG. Build next." },
+    ]
+  },
+];
+
+const ENLIGHTENMENT = {
+  name: "Phase Enlightenment: Self-Awareness", status: "active",
+  items: [
+    { name: "Jeremiel — Self vs. project distinction", status: "pending", note: "Zuberi should distinguish between her own infrastructure (brain, hands, disciplines) and external projects she works on (Mission Ganesha, trading). Internalize rather than monitor." },
+    { name: "Uriel — Beyond the framework", status: "future", note: "Zuberi's brain becomes her own. Replace OpenClaw with a custom gateway — context awareness, self-directed compaction, multi-skill loading, discipline switching, real-time self-monitoring. True individuality." },
+  ]
+};
+
+// ── Capabilities ───────────────────────────────────────────────────
+const CAPABILITIES = [
+  { id: "C1",  name: "Conversation",       status: "complete" },
+  { id: "C2",  name: "Identity",            status: "complete" },
+  { id: "C3",  name: "Long-term memory",    status: "complete" },
+  { id: "C4",  name: "Web search",          status: "complete" },
+  { id: "C9",  name: "Database access",     status: "complete" },
+  { id: "C10", name: "Task tracking",       status: "complete" },
+  { id: "C16", name: "Email",               status: "complete" },
+  { id: "C18", name: "Sub-agent dispatch",  status: "complete" },
+  { id: "C19", name: "Usage monitoring",    status: "complete" },
+  { id: "C20", name: "Markdown rendering",  status: "complete" },
+  { id: "C22", name: "One-click update",    status: "complete" },
+  { id: "C23", name: "n8n workflows",       status: "complete", note: "Bidirectional — Zuberi ↔ n8n" },
+  { id: "C24", name: "Exec tool calls",     status: "complete", note: "Gateway token fixed — unblocked" },
+  { id: "C11", name: "Discipline selection", status: "complete", note: "RTL-057 closed — backend is source of truth" },
+  { id: "C21", name: "Permission control",  status: "complete",  note: "Phase 2 complete — ToolApprovalCard with Allow Once/Always/Deny" },
+  { id: "C25", name: "Routing feedback",    status: "complete",  note: "RTL-058 Phase 2 — CXDB audit + Chroma semantic index, idempotent" },
+  { id: "C26", name: "Context visibility",  status: "complete",  note: "RTL-060b — inline token meter in toolbar, color-coded thresholds" },
+  { id: "C27", name: "Live UI capture",     status: "complete",  note: "RTL-045b — capture-window.ps1 replaces mock preview. ccode can see live Tauri window." },
+  { id: "C29", name: "Auto-scroll + UX",    status: "complete",  note: "v1.0.16 — auto-scroll on send+streaming, scroll-to-bottom button, pinned input." },
+  { id: "C30", name: "CEG shell execution", status: "complete",  note: "zuberi-shell on CEG:3003. Python 3 stdlib, process isolation, audit log." },
+  { id: "C28", name: "YouTube transcripts", status: "pending",   note: "CEG:9011 planned. On hold." },
+  { id: "C7",  name: "Workflow automation", status: "pending",  note: "Wired, no autonomous workflows yet" },
+  { id: "C6",  name: "Code execution",      status: "pending",  note: "Gateway only — distinct from exec tool calls" },
+  { id: "C12", name: "Visual analysis",     status: "pending",  note: "Discipline capable (qwen3-vl:8b), skill needed" },
+  { id: "C5",  name: "Package install",     status: "complete",  note: "Via shell service on CEG — apt, pip, npm unblocked" },
+  { id: "C8",  name: "Spreadsheet gen",     status: "blocked" },
+  { id: "C13", name: "Diagrams",            status: "blocked" },
+  { id: "C14", name: "Browser automation",  status: "blocked" },
+  { id: "C15", name: "PDF/DOCX gen",        status: "blocked" },
+  { id: "C17", name: "External APIs",       status: "blocked" },
+];
+
+
+// ══════════════════════════════════════════════════════════════════════
+// RENDERERS
+// ══════════════════════════════════════════════════════════════════════
+
+const PRIORITY_META = {
+  done:    { label: 'DONE',    color: '#3ecf8e', bg: 'rgba(62,207,142,0.04)'  },
+  p0:      { label: 'P0',      color: '#e85555', bg: 'transparent'            },
+  p1:      { label: 'P1',      color: '#e8a135', bg: 'transparent'            },
+  p2:      { label: 'P2',      color: '#3ecf8e', bg: 'transparent'            },
+  p3:      { label: 'P3',      color: '#5b8fe8', bg: 'transparent'            },
+  ongoing: { label: 'Ongoing', color: '#8b7be8', bg: 'transparent'            },
+};
+
+// ── Build Priority Legend ──────────────────────────────────────────
+function buildPriorityLegend() {
+  const el = document.getElementById('priority-legend');
+  Object.entries(PRIORITY_META).forEach(([key, meta]) => {
+    const item = document.createElement('span');
+    item.className = 'legend-item';
+    item.innerHTML = `<span class="legend-dot" style="background:${meta.color}"></span>${meta.label}`;
+    el.appendChild(item);
+  });
+}
+
+// ── Build Priority Table ──────────────────────────────────────────
+function buildPriorities() {
+  const body = document.getElementById('priority-body');
+  PRIORITIES.forEach(item => {
+    const isDone = item.priority === 'done';
+    const tr = document.createElement('tr');
+    if (isDone) tr.className = 'row-done';
+
+    const statusClass = item.statusType === 'info' ? ' info' : item.statusType === 'success' ? ' success' : '';
+    const rtlSpan = item.rtl ? `<span class="pri-rtl">${item.rtl}</span>` : '';
+
+    tr.innerHTML = `
+      <td class="pri-num">${item.num}</td>
+      <td class="pri-task${isDone ? ' done' : ''}">${item.task}${rtlSpan}</td>
+      <td class="center"><span class="pri-pill ${item.priority}">${PRIORITY_META[item.priority].label}</span></td>
+      <td class="center pri-status${statusClass}">${item.status}</td>
+    `;
+    body.appendChild(tr);
+  });
+}
+
+// ── Build Summary Bar ──────────────────────────────────────────────
+function buildSummary() {
+  const allItems = PHASES.flatMap(p => p.items);
+  const counts = {};
+  Object.keys(STATUS).forEach(s => counts[s] = allItems.filter(i => i.status === s).length);
+  const total = allItems.length;
+  const bar = document.getElementById('summary-bar');
+  Object.entries(counts).filter(([,v]) => v > 0).forEach(([status, count]) => {
+    const chip = document.createElement('div');
+    chip.className = `summary-chip ${status}`;
+    chip.innerHTML = `<span>${STATUS[status].icon}</span><span class="count">${count}</span><span class="label">${STATUS[status].label}</span>`;
+    bar.appendChild(chip);
+  });
+  const total_chip = document.createElement('div');
+  total_chip.className = 'summary-chip total';
+  total_chip.innerHTML = `<span class="count">${total}</span><span class="label">Total</span>`;
+  bar.appendChild(total_chip);
+}
+
+// ── Build Phase Cards ──────────────────────────────────────────────
+function buildPhases() {
+  const panel = document.getElementById('phases-panel');
+  PHASES.forEach((phase, idx) => {
+    const complete = phase.items.filter(i => i.status === 'complete').length;
+    const total = phase.items.length;
+    const pct = Math.round(complete / total * 100);
+    const isOpen = phase.status === 'active';
+
+    const card = document.createElement('div');
+    card.className = `phase-card ${phase.status}`;
+
+    card.innerHTML = `
+      <div class="phase-header" onclick="togglePhase(${idx})">
+        <div class="phase-left">
+          <span class="phase-arrow ${isOpen ? 'open' : ''}" id="arrow-${idx}">▶</span>
+          <span class="phase-name">${phase.name}</span>
+          <span class="badge ${phase.status}">${STATUS[phase.status].icon} ${STATUS[phase.status].label}</span>
+        </div>
+        <div class="progress-wrap">
+          <div class="progress-track">
+            <div class="progress-fill ${pct === 100 ? 'full' : 'partial'}" style="width:${pct}%"></div>
+          </div>
+          <span class="progress-pct ${pct === 100 ? 'done' : ''}">${pct}%</span>
+        </div>
+      </div>
+      <div class="phase-items ${isOpen ? 'open' : ''}" id="items-${idx}">
+        ${phase.items.map(item => `
+          <div class="phase-item">
+            <span class="item-icon">${STATUS[item.status].icon}</span>
+            <div>
+              <span class="item-name ${item.status}">${item.name}</span>
+              ${item.note ? `<span class="item-note ${item.status}">${item.note}</span>` : ''}
+            </div>
+          </div>
+        `).join('')}
+      </div>
+    `;
+    panel.appendChild(card);
+  });
+}
+
+// ── Build Capability Grid ──────────────────────────────────────────
+function buildCaps() {
+  const order = { complete: 0, active: 1, pending: 2, blocked: 3, future: 4 };
+  const sorted = [...CAPABILITIES].sort((a,b) => order[a.status] - order[b.status]);
+  const grid = document.getElementById('cap-grid');
+  sorted.forEach(cap => {
+    const card = document.createElement('div');
+    card.className = `cap-card ${cap.status}`;
+    card.innerHTML = `
+      <span class="cap-icon">${STATUS[cap.status].icon}</span>
+      <div>
+        <div class="cap-name">${cap.name}</div>
+        ${cap.note ? `<span class="cap-note">${cap.note}</span>` : ''}
+      </div>
+    `;
+    grid.appendChild(card);
+  });
+}
+
+// ── Build Enlightenment Panel ──────────────────────────────────────
+function buildEnlightenment() {
+  const panel = document.getElementById('enlightenment-panel');
+  const phase = ENLIGHTENMENT;
+  const complete = phase.items.filter(i => i.status === 'complete').length;
+  const total = phase.items.length;
+  const pct = Math.round(complete / total * 100);
+
+  const card = document.createElement('div');
+  card.className = `phase-card ${phase.status}`;
+
+  card.innerHTML = `
+    <div class="phase-header" onclick="toggleEnlightenment()">
+      <div class="phase-left">
+        <span class="phase-arrow" id="arrow-enlightenment">▶</span>
+        <span class="phase-name">${phase.name}</span>
+        <span class="badge ${phase.status}">${STATUS[phase.status].icon} ${STATUS[phase.status].label}</span>
+      </div>
+      <div class="progress-wrap">
+        <div class="progress-track">
+          <div class="progress-fill ${pct === 100 ? 'full' : 'partial'}" style="width:${pct}%"></div>
+        </div>
+        <span class="progress-pct ${pct === 100 ? 'done' : ''}">${pct}%</span>
+      </div>
+    </div>
+    <div class="phase-items" id="items-enlightenment">
+      ${phase.items.map(item => `
+        <div class="phase-item">
+          <span class="item-icon">${STATUS[item.status].icon}</span>
+          <div>
+            <span class="item-name ${item.status}">${item.name}</span>
+            ${item.note ? `<span class="item-note ${item.status}">${item.note}</span>` : ''}
+          </div>
+        </div>
+      `).join('')}
+    </div>
+  `;
+  panel.appendChild(card);
+}
+
+// ── Interactions ──────────────────────────────────────────────────
+function togglePhase(idx) {
+  const items = document.getElementById(`items-${idx}`);
+  const arrow = document.getElementById(`arrow-${idx}`);
+  items.classList.toggle('open');
+  arrow.classList.toggle('open');
+}
+
+function toggleEnlightenment() {
+  const items = document.getElementById('items-enlightenment');
+  const arrow = document.getElementById('arrow-enlightenment');
+  items.classList.toggle('open');
+  arrow.classList.toggle('open');
+}
+
+function switchTab(tab, btn) {
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('phases-panel').style.display       = tab === 'phases' ? 'block' : 'none';
+  document.getElementById('enlightenment-panel').style.display = tab === 'phases' ? 'block' : 'none';
+  document.getElementById('capabilities-panel').style.display  = tab === 'capabilities' ? 'block' : 'none';
+  document.getElementById('priorities-panel').className        = tab === 'priorities' ? 'priority-panel active' : 'priority-panel';
+}
+
+// ── Init ──────────────────────────────────────────────────────────
+buildSummary();
+buildPriorityLegend();
+buildPriorities();
+buildPhases();
+buildEnlightenment();
+buildCaps();
+</script>
+</body>
+</html>
