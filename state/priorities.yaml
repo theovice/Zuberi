@@ -9,15 +9,7 @@
 #   status: free text
 
 active:
-  - id: 1
-    task: "Stabilize Ed25519 device auth across gateway lifecycle"
-    rtl: "approval-cards"
-    priority: p0
-    executor: CC
-    status: "Ed25519 built (v1.0.22), signature accepted, but breaks on gateway restart + origin change (tauri.localhost vs localhost:3000). Need stable signing across restarts."
-    blocker: "device signature invalid after gateway restart with security:allowlist"
-    context: "designs/approval-cards.md"
-    note: "Reverted to dangerouslyDisableDeviceAuth=true + security:full to keep Zuberi online. Approval cards deferred until stable."
+  # Approval cards REMOVED from active queue. See deferred section below.
 
   - id: 2
     task: "ZuberiChat UI: cancel turn + conversation sidebar"
@@ -149,3 +141,22 @@ phase_enlightenment:
       topic: "Beyond the framework"
       status: future
       note: "Replace OpenClaw with custom gateway. True individuality. Triggered by architectural limitations."
+
+deferred:
+  - task: "Approval card system: Ed25519 + device auth + exec pipeline"
+    reason: "claude.ai failure — compounded config changes across 8 debug layers broke dashboard access and Zuberi connectivity. Reverted to dangerouslyDisableDeviceAuth=true + security=full + ask=off."
+    work_completed:
+      - "Ed25519 Rust crypto module (v1.0.20)"
+      - "v2 pipe-delimited signing payload (v1.0.21)"
+      - "Queue flush + nonce race fix (v1.0.22)"
+      - "Device pairing with persistent paired.json on host volume"
+      - "Session-level execAsk override discovered and documented"
+      - "tauri.localhost origin identified as issue"
+      - "Full 8-layer debug history in designs/approval-cards.md"
+    remaining:
+      - "Stabilize Ed25519 across gateway restarts with security:allowlist"
+      - "Handle tauri.localhost vs localhost:3000 origin difference"
+      - "Test with production build (not pnpm tauri dev)"
+      - "Verify exec.approval.requested event reaches ZuberiChat"
+    assigned_to: "Dedicated agent (not claude.ai)"
+    context: "designs/approval-cards.md"
