@@ -40,6 +40,18 @@ Then as needed:
 - decisions/log.yaml — why things are the way they are
 - designs/ — architecture docs for specific systems
 - research/ — deep research reports
+- state/priority-rendering-guide.md — HOW to render the priority list (Visualizer widget, not text table)
+
+## CCODE PROMPT RULES
+
+- First line: read CCODE-HANDOFF.md instruction
+- Numbered tasks with explicit file paths and verification steps
+- Kill existing pnpm/tauri processes before changes
+- Run 155 Vitest smoke tests before and after ZuberiChat changes
+- No jq; PowerShell-compatible
+- ccode must NEVER launch the app (no "pnpm tauri dev", no "Start dev server" step). ccode's job ends at: make changes → run tests → commit → push. James runs the production app separately.
+- Do not tell James to run update-local.ps1 — he knows when to rebuild.
+- Version bump: tauri.conf.json + ZuberiContextMenu.tsx + version.json
 
 ## FILE FORMAT CONVENTIONS
 
@@ -47,7 +59,7 @@ Then as needed:
 - .md files are prose documents (designs, research, handoffs).
 - Every fact appears in exactly one canonical location. If two files conflict, the one listed earlier in READ ORDER wins.
 - Timestamps are ISO 8601 UTC unless noted.
-- Session numbers are monotonically increasing. Current: 21.
+- Session numbers are monotonically increasing. Current: 22.
 - The CCODE-HANDOFF.md on KILO may be stale — always verify against state/*.yaml files in this repo.
 
 ## REPO STRUCTURE
