@@ -16,7 +16,7 @@
   lesson: "VERSION PROTOCOL: version in tauri.conf.json is single source of truth. Always query, never assume."
 
 - id: 54
-  lesson: "ZuberiChat version bump required for update detection. Include bump + update-local.ps1 in every ccode prompt."
+  lesson: "ZuberiChat version bump: tauri.conf.json + ZuberiContextMenu.tsx only. Do NOT touch version.json — it is a gitignored build artifact. ccode never launches the app or runs update-local.ps1."
 
 - id: 55
   lesson: "About Zuberi version is hardcoded in ZuberiContextMenu.tsx — must be updated manually on each bump."
@@ -28,7 +28,7 @@
   lesson: "streamingMessageIdRef must not be unconditionally cleared on final events. v1.0.13 fix."
 
 - id: 77
-  lesson: "version.json must be regenerated on every version bump."
+  lesson: "version.json is a gitignored build artifact. NEVER manually write it in ccode prompts. It is regenerated correctly by update-local.ps1 → generate-version.ps1 (all three fields: version, commit, builtAt). Manual writes with only {version} broke the update indicator for 5 sessions."
 
 - id: 79
   lesson: "ZuberiChat approval cards never worked because operator.approvals scope was never requested. Fixed v1.0.17."
