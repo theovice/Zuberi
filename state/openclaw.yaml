@@ -2,9 +2,12 @@
 # Last updated: 2026-03-15 | Session 21
 # Current gateway configuration and known behaviors.
 
-version: "v2026.3.8"
-image: "ghcr.io/openclaw/openclaw:2026.3.8"
-update_available: "v2026.3.13"
+version: "v2026.3.13"
+image: "ghcr.io/openclaw/openclaw:latest"
+image_hash: "a5a4c83b773a"
+update_available: "none"
+upgraded_from: "v2026.3.8 (Session 21)"
+upgrade_notes: "PR #41090 merged — runtime.modelAuth warning gone. Plugin-sdk bundling fixed. Windows device auth fix included."
 
 config:
   api_mode: "Native Ollama (no /v1)"

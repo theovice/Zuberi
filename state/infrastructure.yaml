@@ -18,10 +18,12 @@ nodes:
     network: "TP-Link Wi-Fi 6 PCIe (192.168.1.249)"
     services:
       openclaw_gateway:
-        version: "v2026.3.8"
+        version: "v2026.3.13"
         port: 18789
         container_name: "openclaw-openclaw-gateway-1"
-        image: "ghcr.io/openclaw/openclaw:2026.3.8"
+        image: "ghcr.io/openclaw/openclaw:latest"
+        image_hash: "a5a4c83b773a"
+        note: "Using 'latest' tag — v2026.3.13 not published as separate tag. Pin after confirming stable."
         docker_compose_path: "C:\\Users\\PLUTO\\github\\openclaw\\docker-compose.yml"
         config_path: "C:\\Users\\PLUTO\\openclaw_config\\openclaw.json"
         latest_backup: "C:\\Users\\PLUTO\\openclaw_config\\openclaw.json.bak-pre-security"
