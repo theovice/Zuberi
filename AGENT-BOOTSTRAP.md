@@ -48,6 +48,7 @@ Then as needed:
 - Every fact appears in exactly one canonical location. If two files conflict, the one listed earlier in READ ORDER wins.
 - Timestamps are ISO 8601 UTC unless noted.
 - Session numbers are monotonically increasing. Current: 21.
+- The CCODE-HANDOFF.md on KILO may be stale — always verify against state/*.yaml files in this repo.
 
 ## REPO STRUCTURE
 
@@ -58,7 +59,7 @@ state/
   priorities.yaml               — Current working queue (P0→Ongoing)
   zuberi.yaml                   — Behavioral state, fabrication log, coaching
   openclaw.yaml                 — Gateway config, plugin state, exec policy
-  zuberichat.yaml               — App version, features, active bugs
+  zuberichat.yaml               — App version, UI state, active bugs
   services.yaml                 — Every running service with health status
 rtl/
   active/                       — One file per active task with full context
@@ -71,18 +72,19 @@ lessons/
   ccode.yaml                    — Prompt engineering for ccode
   openclaw.yaml                 — OpenClaw/gateway lessons
   behavioral.yaml               — Zuberi behavioral observations
-  security.yaml                 — Security lessons
+  security.yaml                 — Security, auth, credentials, network
 decisions/
   log.yaml                      — Every key decision with context and rationale
 designs/
+  approval-cards.md             — Approval card architecture and 8-layer debug history
   cxdb-sync-layer.md            — SQLite → CXDB + Chroma sync pipeline
-  approval-cards.md             — Approval card architecture and debug history
   self-improving.md             — Corrections log design (cannibalized from ClawHub)
+  openclaw-upgrade-v2026.3.13.md — Upgrade plan and risk assessment
 research/
   streaming-pipeline-audit.md   — gpt-oss:20b Harmony format analysis
   cxdb-search-retrieval.md      — CXDB architecture and Chroma integration
-  exec-approval-flow.md         — OpenClaw exec approval pipeline deep dive
-  approval-card-rendering.md    — Client handshake requirements for approval cards
+  exec-approval-flow.md         — OpenClaw exec approval pipeline and discovery
+  approval-card-rendering.md    — Client handshake requirements (deep research)
 sessions/
   session-20.md                 — Architect 20 handoff
   session-21.md                 — This session
@@ -109,5 +111,11 @@ ZuberiChat prompts additionally require the closeout checklist:
 
 ## GIT WORKFLOW
 
-This repo (theovice/Zuberi) is the docs repo. The architect agent commits directly during sessions.
+This repo (theovice/ArchitectZuberi) is the docs repo. The architect agent commits directly during sessions.
 ZuberiChat code lives at C:\Users\PLUTO\github\Repo\ZuberiChat (theovice/ZuberiChat). Code changes go through ccode.
+
+Both repos use PAT-based auth in the remote URL for non-interactive push.
+PAT must be refreshed if expired — check with `git push origin main` and look for auth errors.
+
+GitHub PAT (fine-grained): scoped to ArchitectZuberi + ZuberiChat repos, Contents read/write.
+Token rotation is on the P2 priority queue — current PAT was exposed in Session 21.

@@ -1,0 +1,56 @@
+# LESSONS: SECURITY
+# Authentication, credentials, network, firewall
+
+- id: 29
+  lesson: "API key NEVER in workspace files."
+
+- id: 49
+  lesson: "Chroma v2 REST API requires precomputed embeddings. Python client handles via onnxruntime. Raw curl to /add won't work without embedding vectors."
+
+- id: 50
+  lesson: "Chroma API is v2, not v1. v1 paths fully deprecated in chromadb 1.5.2."
+
+- id: 79
+  lesson: "ZuberiChat approval cards never worked because operator.approvals scope was never requested. URL-token auth skipped explicit connect RPC. Fixed v1.0.17."
+
+- id: 92
+  lesson: "CEG WiFi interface is wlx90de80152e3f, NOT wlan0. USB WiFi adapters get MAC-based names. Two lockouts from wrong interface name."
+
+- id: 93
+  lesson: "Never change UFW default policies before all allow rules are added AND verified. Always use tmux rollback timer (5 min auto-disable) when configuring deny-outbound remotely."
+
+- id: 94
+  lesson: "Tailscale requires outbound: UDP 41641 (WireGuard), TCP 443 (control + DERP), UDP 3478 (STUN), UDP 53 (DNS), UDP 123 (NTP). Missing any one kills the tunnel."
+
+- id: "S21-1"
+  lesson: "Gateway dashboard token and Azure credentials were exposed in conversation during approval card debug. Gateway PAT also exposed. ALL need rotation."
+
+- id: "S21-2"
+  lesson: "dangerouslyDisableDeviceAuth=true disables the ENTIRE device identity system. Scopes are granted without verification. Required for current operation because Ed25519 breaks on restart."
+
+- id: "S21-3"
+  lesson: "Ed25519 device auth: gateway sends connect.challenge with nonce. Client signs v2 pipe-delimited payload. Without device object, scopes silently stripped to empty array even though connect returns ok:true."
+
+- id: "S21-4"
+  lesson: "v2 signing payload format: v2|{deviceId}|{clientId}|{clientMode}|{role}|{scopes}|{signedAtMs}|{token}|{nonce}. Signature over UTF-8 bytes. base64url-no-pad encoding."
+
+- id: "S21-5"
+  lesson: "paired.json must be on a bind-mounted host volume, not in the container's writable layer. docker compose down destroys the writable layer — pairing lost on every restart."
+
+- id: "S21-6"
+  lesson: "ZuberiChat client.id MUST be 'openclaw-control-ui' — gateway schema rejects custom IDs."
+
+- id: "S21-7"
+  lesson: "Session-level execAsk overrides global tools.exec.ask. Found 'execAsk: off' cached in sessions.json, silently overriding ask: always in openclaw.json. Check sessions.json when exec behavior doesn't match config."
+
+- id: "S21-8"
+  lesson: "security:full + ask:always does NOT produce approval cards — security:full bypasses the ask pipeline entirely. security:allowlist + ask:always is the correct combo, but requires stable device auth."
+
+- id: "S21-9"
+  lesson: "GitHub PAT must be embedded in git remote URL for non-interactive push: https://x-access-token:{PAT}@github.com/user/repo.git. Adding someone as contributor does not configure local credentials."
+
+exposed_tokens:
+  - "Gateway dashboard token (5722a237...) — Session 21"
+  - "Azure credentials — Session 20"
+  - "GitHub PAT (github_pat_11BZBTHMI...) — Session 21"
+  rotation_status: "PENDING — added to P2 priority queue"

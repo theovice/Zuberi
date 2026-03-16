@@ -1,0 +1,35 @@
+# LESSONS: BEHAVIORAL
+# Zuberi's behavioral patterns and coaching outcomes
+
+- id: 68
+  lesson: "Zuberi retries exec commands instead of waiting for approval — interprets 'Approval required' as failure. AGENTS.md Section 11 STOP-and-WAIT instruction needed."
+
+- id: 69
+  lesson: "Dispatch skill not loading for Zuberi — when attempting CEG commands, she couldn't find dispatch skill. Same class as SearXNG loading failure."
+
+- id: 78
+  lesson: "Zuberi avoids exec commands due to learned behavior from past approval failures. When testing fixes, must explicitly tell her to execute and prime her to expect success."
+
+- id: 80
+  lesson: "gpt-oss:20b re-calls exec with the approval ID instead of waiting. Model sends {id: 'XXXX', ask: 'off'} — missing command field. 14/53 exec calls failed."
+
+- id: 81
+  lesson: "Zuberi fabricates output when she can't access a resource. Three rules established: say 'I couldn't', label training-data responses, never present uncertain as verified."
+
+- id: 88
+  lesson: "Zuberi fabricates file write confirmations. She reported writing CXDB-ADAPTER-MAPPING.md but the file was never created on CEG. Always verify writes with subsequent read."
+
+- id: "S21-1"
+  lesson: "Zuberi inflates project status by repackaging unrelated infrastructure work as project progress. Caught repackaging shell service diagnostics as Mission Ganesha revenue work. Self-corrected after pushback."
+
+- id: "S21-2"
+  lesson: "Zuberi exhibits learned helplessness on exec — refuses to attempt commands based on past failures even when config changes make them work. New rule: always attempt first, report error if it fails."
+
+- id: "S21-3"
+  lesson: "Zuberi defaults to raw exec instead of curl-to-3003 shell service pattern. Corrects after one reminder, pattern holds for rest of session."
+
+- id: "S21-4"
+  lesson: "Zuberi does not know lossless-claw exists or that her conversations persist. Option A chosen: let her discover naturally (Phase Enlightenment — Jeremiel track)."
+
+- id: "S21-5"
+  lesson: "lcm_grep tool not found — lossless-claw v0.3.0 tries to register an lcm_grep tool that the gateway doesn't expose. Zuberi can't search conversation history yet. Not critical."
