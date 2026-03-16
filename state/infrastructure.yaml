@@ -40,8 +40,10 @@ nodes:
         port: 18790
         bind: "100.127.23.52"
         script: "C:\\Users\\PLUTO\\openclaw_config\\sync-api.py"
-        persistence: "Windows Task Scheduler (ZuberiSyncAPI, logon trigger)"
+        persistence: "Windows Task Scheduler (ZuberiSyncAPI, AtLogon trigger, hidden window)"
+        launcher: "C:\\Users\\PLUTO\\openclaw_config\\start-sync-api-bg.ps1"
         reads_from: "C:\\Users\\PLUTO\\openclaw_config\\lcm.db"
+        note: "Runs as background process. If down, ZuberiChat sidebar shows Re-sync button."
       zuberichat:
         version: "v1.0.27"
         repo: "C:\\Users\\PLUTO\\github\\Repo\\ZuberiChat"
