@@ -181,13 +181,13 @@ services_on_ceg:
 workspace:
   location: "C:\\Users\\PLUTO\\openclaw_workspace\\"
   root_files:
-    - {file: "AGENTS.md", version: "v1.3.0", tokens: "~2700"}
-    - {file: "SOUL.md", version: "v0.1.1", tokens: "~1500"}
-    - {file: "MEMORY.md", version: "v1.0.0", tokens: "~400"}
-    - {file: "TOOLS.md", version: "v1.1.0", tokens: "~800"}
-    - {file: "IDENTITY.md", tokens: "~500"}
-    - {file: "USER.md", tokens: "~700"}
-  total_root_tokens: "~5916 per turn"
+    - {file: "AGENTS.md", version: "v1.3.0"}
+    - {file: "SOUL.md", version: "v0.1.1"}
+    - {file: "MEMORY.md", version: "v1.0.0"}
+    - {file: "TOOLS.md", version: "v1.1.0"}
+    - {file: "IDENTITY.md"}
+    - {file: "USER.md"}
+  note: "Cleaned Session 21. HEARTBEAT.md deleted (was wasting ~1KB/turn). Stale dirs purged (.git, .pi, .openclaw, MD_Backups, memory, memory-recall, working, STAGE, opt). ms365_creds.txt moved to openclaw_config/."
   skills_count: 15
 
 disciplines:
