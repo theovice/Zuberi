@@ -129,5 +129,12 @@ ZuberiChat code lives at C:\Users\PLUTO\github\Repo\ZuberiChat (theovice/ZuberiC
 Both repos use PAT-based auth in the remote URL for non-interactive push.
 PAT must be refreshed if expired — check with `git push origin main` and look for auth errors.
 
+**New architect setup (run after cloning):**
+```
+cd /home/claude/zuberi-repo
+git remote set-url origin https://x-access-token:<PAT>@github.com/theovice/ArchitectZuberi.git
+```
+Ask James for the PAT if not provided in the intro prompt. GitHub Push Protection blocks PATs from being committed to the repo.
+
 GitHub PAT (fine-grained): scoped to ArchitectZuberi + ZuberiChat repos, Contents read/write.
 Token rotation is on the P2 priority queue — current PAT was exposed in Session 21.
