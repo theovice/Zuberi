@@ -111,9 +111,11 @@ services_on_ceg:
     status: running
     purpose: "Shell execution — Zuberi's hands on CEG"
     blocklist_path: "/opt/zuberi/blocklist.json"
-    blocklist_count: 21
+    blocklist_count: 19
     audit_log: "JSONL"
-    systemd: "zuberi-shell.service (user)"
+    systemd: "zuberi-shell.service (system — /etc/systemd/system/)"
+    sudo: true
+    note: "Converted from user service to system service Session 22. User services run in UID namespace that remaps root to uid 65534, breaking sudo. System service runs as User=ceg under PID 1 — no namespace, real UIDs, sudo works."
 
   searxng:
     port: 8888

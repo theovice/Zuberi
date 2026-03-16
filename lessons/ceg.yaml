@@ -1,7 +1,7 @@
 # LESSONS: CEG OPERATIONS
 
 - id: 7
-  lesson: "No sudo on CEG — ceg user has no passwordless sudo. Use user-local paths."
+  lesson: "ceg user has passwordless sudo (sudoers.d/ceg). Shell service runs as system service under PID 1 — sudo works. Previously ran as user service where UID namespace remapped root to 65534, breaking sudo."
 
 - id: 8
   lesson: "SSH quoting — always single-quote SSH commands containing $ variables"
@@ -32,3 +32,15 @@
 
 - id: 101
   lesson: "Windows schtasks /Create with /RL HIGHEST requires elevation. Use PowerShell Register-ScheduledTask for user-level tasks."
+
+- id: "S22-1"
+  lesson: "Systemd user services run in a UID namespace — root (uid 0) remaps to uid 65534 (nobody). sudo binary appears not owned by root, setuid bit stripped. This is a namespace illusion, not a real permission problem. Fix: convert to system service (/etc/systemd/system/) with User=ceg."
+
+- id: "S22-2"
+  lesson: "ProtectSystem=strict in systemd makes the entire filesystem read-only and strips setuid bits. Combined with user namespace UID remapping, makes sudo completely impossible. Removed during shell service conversion."
+
+- id: "S22-3"
+  lesson: "Shell service blocklist.json also blocked 'sudo' explicitly. Removed during Session 22 conversion. Current blocklist: 19 patterns."
+
+- id: "S22-4"
+  lesson: "Shell service is now at /etc/systemd/system/zuberi-shell.service (system service), NOT ~/.config/systemd/user/ (user service). Survives reboots without loginctl linger. Manage with: sudo systemctl restart/status zuberi-shell.service"

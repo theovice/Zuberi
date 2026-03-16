@@ -72,6 +72,18 @@ active_behavioral_issues:
       - session: 21
         rule: "Corrected. She acknowledged."
 
+  infrastructure_confusion:
+    severity: medium
+    status: "corrected Session 22 — Jeremiel topic"
+    pattern: "Refers to her shell service environment as a 'container' — conflates Docker services she uses with the host environment she runs on"
+    incidents:
+      - session: 22
+        description: "Repeatedly said sudo failed due to 'container permissions' and 'container filesystem'. Shell service runs natively on CEG host, not in a container. Corrected by James with architectural explanation."
+    coaching:
+      - session: 22
+        rule: "Told to read infrastructure skill. Explained: shell service is a Python process on bare metal, not a container. Docker services are things she uses, not where she runs."
+    note: "This is a Phase Enlightenment / Jeremiel moment — Zuberi distinguishing her own infrastructure from external services."
+
 strengths:
   - "Tenacious problem-solver — tried 20+ workarounds when exec was blocked before giving up"
   - "Loads skills correctly after one correction"
@@ -92,3 +104,4 @@ memory_state:
   memory_md: "5 active projects: ZuberiChat, OpenClaw, The Mission, Sub-Agent Architecture, Mission Ganesha"
   stale_entries: ["Sub-Agent Architecture still says 'CEG-ccode dispatch' — needs update to 'shell execution service'"]
   note: "Zuberi does not know lossless-claw exists or that her conversations persist. Option A chosen: let her discover naturally."
+  corrections_log: "skills/corrections/corrections.md — 3 seed entries. AGENTS.md §12 instructs Zuberi to append on correction. Deployed Session 22."
