@@ -1,0 +1,83 @@
+---
+name: dispatch
+description: "Delegate coding, infrastructure, or file tasks to the CEG-ccode sub-agent. Use when dispatching work to CEG, sending tasks to ccode, or asking about dispatch status. Also activates for dispatch troubleshooting: 'is ccode working,' 'dispatch failed,' 'can you run this on CEG,' or checking if CEG-ccode is reachable. Covers HTTP dispatch (CEG:3003), SSH fallback, task formatting, cost logging, and spending controls. NOT for tasks that run locally on KILO."
+---
+
+# Sub-Agent Dispatch: CEG-Ccode
+
+CEG-ccode is Zuberi's hands for coding and infrastructure tasks on CEG.
+KILO ccode is James's personal tool. They are separate.
+
+## When to use
+
+- Dispatching coding tasks to CEG (file creation, code generation, refactoring)
+- Running infrastructure work on CEG (service setup, config changes)
+- Any task that needs to execute on CEG rather than KILO
+- When James asks to "dispatch", "delegate", or "send to ccode"
+
+## HTTP Dispatch (preferred -- CEG:3003)
+
+```bash
+# Dispatch a task:
+curl -s -X POST http://100.100.101.1:3003/dispatch \
+  -H "Content-Type: application/json" \
+  -d '{"task":"TASK_HERE","max_turns":5}'
+
+# Health check:
+curl -s http://100.100.101.1:3003/health
+```
+
+- **Service:** `ccode-dispatch.service` (systemd user unit)
+- **Binding:** Tailscale IP only (100.100.101.1)
+- **Max turns:** Capped at 10
+- **Timeout:** 5 minutes
+- **Cost logging:** Automatic via usage tracker (CEG:3002)
+
+## SSH Dispatch (fallback)
+
+Use when the HTTP dispatch service is down:
+
+```bash
+ssh ceg "cd /opt/zuberi/projects/<project> && ~/.local/bin/claude -p '<task>' --output-format json --max-turns 5 --allowedTools Read,Write,Bash"
+```
+
+## Task Formatting Rules
+
+- Always include STOP conditions and verification steps in prompts
+- Be specific about expected output format
+- Include all necessary context -- the sub-agent has no memory of your conversation
+- Keep `max_turns` as low as possible for the task (default: 5)
+
+## Key Rules
+
+- **Parse JSON result** -- check for errors before reporting success to James
+- **Log to kanban** -- `/workspace/working/sub-agents/YYYY-MM-DD-kanban.md`
+- **Auth expiry** -- if auth error, report to James immediately
+- **ccode CLI** installed at `~/.local/bin/claude` on CEG (API key auth via systemd env)
+- **Never call `claude` directly on CEG** -- always use the dispatch wrapper
+
+## Spending Controls
+
+Per AGENTS.md Section 4:
+
+| Rule | Value |
+|------|-------|
+| Monthly budget | $20.00 (calendar month) |
+| Alert threshold | $15.00 (75%) |
+| Per-dispatch confirm | Dispatches estimated > $1.00 require explicit James approval |
+| Hard stop | Dispatch wrapper exits if `approval_needed: true` from tracker `/limits` |
+| Sub-agent cap | 10 dispatches per session |
+
+**Before dispatching:** Check `/limits` on the usage tracker if budget may be close.
+**If tracker is unreachable:** Do NOT dispatch. Report to James.
+
+## Important
+
+- Each dispatch costs ~$0.10 against $20/month budget
+- Kanban card auto-updated after every dispatch (task ID in `/opt/zuberi/data/usage/kanban-task-id.txt`)
+- CEG-ccode dispatch requires CONFIRM per AGENTS.md Section 2
+
+## Known Issues
+
+- Anthropic Consumer ToS prohibits OAuth tokens in third-party products. API key only.
+- `execFile` + ccode hangs without TTY. Use `spawn` with `stdio: ["ignore","pipe","pipe"]`.

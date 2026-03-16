@@ -1,0 +1,89 @@
+---
+name: cxdb
+description: Store and retrieve conversation context using CXDB. Use when you need to save important information for later, recall previous context, or manage persistent memory across sessions.
+---
+
+# CXDB Context Memory
+
+Persistent AI context store running on CEG. Use this to save and retrieve structured context across conversations.
+
+## When to use
+
+- User asks you to "remember this" or "save this for later"
+- You need to store important decisions, preferences, or facts
+- You need to recall context from a previous session
+- User asks "what did we discuss about X"
+- You want to persist structured data between conversations
+
+## API Endpoint
+
+Base URL: `http://100.100.101.1:9010`
+
+## Operations
+
+### List all contexts
+
+```bash
+curl -s "http://100.100.101.1:9010/v1/contexts"
+```
+
+### Create a new context
+
+```bash
+curl -s -X POST "http://100.100.101.1:9010/v1/contexts"
+```
+
+Returns: `{"context_id": <id>, "head_turn_id": 0}`
+
+### Get a specific context
+
+```bash
+curl -s "http://100.100.101.1:9010/v1/contexts/<CONTEXT_ID>"
+```
+
+### Add a turn to a context
+
+```bash
+curl -s -X POST "http://100.100.101.1:9010/v1/contexts/<CONTEXT_ID>/turns" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "type_id": "zuberi.memory.Note",
+    "type_version": 1,
+    "payload": {
+      "role": "assistant",
+      "text": "Content to remember"
+    }
+  }'
+```
+
+### Get turns in a context
+
+```bash
+curl -s "http://100.100.101.1:9010/v1/contexts/<CONTEXT_ID>/turns"
+```
+
+## Type Descriptors
+
+All types are registered in CXDB via bundle `zuberi-2026-02-28`. Each type has `type_version: 1` and two fields: `role` (string) and `text` (string).
+
+| type_id | Purpose | When to use |
+|---------|---------|-------------|
+| `zuberi.memory.Note` | General notes and facts | "Remember that CEG runs on WiFi", "The API key is stored in vault" |
+| `zuberi.memory.Decision` | Decisions made during a session | "We chose systemd over netplan for WiFi", "Using local provider for memory" |
+| `zuberi.memory.Preference` | User preferences | "James prefers structured reports", "Always verify before restarting" |
+| `zuberi.memory.Task` | Task status and progress | "Docker installed on CEG", "CXDB deployment complete" |
+
+Always set `"type_version": 1` for all types. The `payload` must include both `role` and `text` fields.
+
+## Workflow
+
+1. **To save**: Create a context (or reuse existing), then add turns with the information
+2. **To recall**: List contexts, find the relevant one, read its turns
+3. **To update**: Add a new turn to an existing context with updated information
+
+## Important
+
+- The CXDB instance is at http://100.100.101.1:9010 (Tailscale, CEG server)
+- Data persists across reboots (stored in /opt/zuberi/docker/cxdb/ on CEG)
+- Always confirm with the user before storing sensitive information
+- When recalling, summarize the stored context naturally

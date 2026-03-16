@@ -1,0 +1,79 @@
+---
+name: usage-tracking
+description: "When Zuberi needs to check API usage, spending limits, budget status, or log dispatch costs. Covers the usage tracker on CEG:3002 \u2014 health checks, stats queries (5h, week, month), budget limits, and cost logging. Use when checking how much has been spent, whether budget allows a dispatch, or logging a completed task's cost."
+---
+
+# API Usage Tracking
+
+Usage tracker monitors ccode dispatch costs on CEG. ZuberiChat titlebar shows live gauges.
+
+## When to use
+
+- Before dispatching to CEG-ccode: check `/limits` to confirm budget allows it
+- After a dispatch completes: log the cost (done automatically by dispatch wrapper)
+- When James asks about spending, budget, or API costs
+- When checking whether the monthly budget has been hit
+- When troubleshooting cost anomalies or reviewing dispatch history
+
+## API Base URL
+
+`http://100.100.101.1:3002`
+
+## Operations
+
+### Health check
+
+```bash
+curl -s http://100.100.101.1:3002/health
+```
+
+### Stats — recent usage
+
+```bash
+# Last 5 hours:
+curl -s http://100.100.101.1:3002/stats/5h
+
+# Last week:
+curl -s http://100.100.101.1:3002/stats/week
+
+# Current month:
+curl -s http://100.100.101.1:3002/stats/month
+```
+
+### Budget limits
+
+```bash
+curl -s http://100.100.101.1:3002/limits
+```
+
+Returns `approval_needed: true` if budget is exhausted. **If `approval_needed` is true, do NOT dispatch.** Report to James.
+
+### Log a dispatch event
+
+```bash
+curl -s -X POST http://100.100.101.1:3002/log -H "Content-Type: application/json" \
+  -d '{"model":"MODEL","input_tokens":N,"output_tokens":N,"cost_usd":N,"duration_ms":N,"task":"desc","project":"name"}'
+```
+
+Note: The dispatch wrapper (`ccode-dispatch.service` on CEG:3003) auto-logs costs. Manual logging is only needed for non-standard dispatches.
+
+## Spending Controls
+
+| Rule | Value |
+|------|-------|
+| Monthly budget | $20.00 (calendar month) |
+| Alert threshold | $15.00 (75%) |
+| Per-dispatch confirm | Dispatches estimated > $1.00 require explicit James approval |
+| Hard stop | Dispatch wrapper exits if `approval_needed: true` from `/limits` |
+
+## Service Details
+
+- **Service:** `zuberi-usage-tracker.service` on CEG
+- **Data:** `/opt/zuberi/data/usage-tracker/usage.json`
+- **CXDB context ID 6** reserved for `zuberi-api-usage` structured storage
+
+## Important
+
+- If the tracker is unreachable, do NOT dispatch. Report to James.
+- Always check `/limits` before dispatching if you suspect budget is close.
+- Summarize stats for James — do not dump raw JSON.

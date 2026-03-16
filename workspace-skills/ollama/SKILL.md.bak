@@ -1,0 +1,108 @@
+---
+name: ollama
+description: Discover, inspect, and manage Ollama models on KILO. Use when the user asks about available models, wants to check model status, pull new models, or needs to understand what LLMs are loaded and ready.
+---
+
+# Ollama Model Management
+
+Ollama runs locally on KILO (the Windows workstation) and serves LLMs to OpenClaw via the OpenAI-compatible API. Use this skill to discover models, check their status, and help the user manage them.
+
+## When to use
+
+- User asks "what models do I have?" or "what LLMs are available?"
+- User asks to pull, remove, or switch a model
+- You need to check if a specific model is loaded in VRAM
+- User asks about GPU usage or model performance
+- A model request fails and you need to diagnose availability
+- User wants to explore or try a new model from the Ollama library
+
+## Ollama API
+
+Ollama is reachable from inside the gateway container at `http://host.docker.internal:11434`.
+
+### List all installed models
+
+```bash
+curl -s http://host.docker.internal:11434/api/tags
+```
+
+### Check which models are currently loaded in VRAM
+
+```bash
+curl -s http://host.docker.internal:11434/api/ps
+```
+
+### Get detailed info about a specific model
+
+```bash
+curl -s http://host.docker.internal:11434/api/show -d '{"model":"MODEL_NAME"}'
+```
+
+### Pull a new model from the Ollama library
+
+```bash
+curl -s http://host.docker.internal:11434/api/pull -d '{"name":"MODEL_NAME","stream":false}'
+```
+
+Note: Pulling downloads the model to `E:\ollama\models`. Large models (>10GB) may take several minutes. The RTX 5070 Ti has 16GB VRAM, so models up to ~14GB (Q4_K_M quantized) fit fully in VRAM.
+
+### Load a model with a long keepalive (prevent unloading)
+
+```bash
+curl -s http://host.docker.internal:11434/api/generate -d '{"model":"MODEL_NAME","prompt":"hi","stream":false,"keep_alive":"24h"}'
+```
+
+### Unload a model from VRAM
+
+```bash
+curl -s http://host.docker.internal:11434/api/generate -d '{"model":"MODEL_NAME","prompt":"","stream":false,"keep_alive":"0"}'
+```
+
+## Hardware constraints
+
+- **GPU**: NVIDIA RTX 5070 Ti 16GB VRAM
+- **Model storage**: `E:\ollama\models` (dedicated drive)
+- Only one large model can be loaded in VRAM at a time (16GB limit)
+- If a model doesn't fit, Ollama will partially offload to CPU (much slower)
+
+## Current Disciplines (registered in OpenClaw)
+
+These models are configured in `openclaw.json` as Zuberi's disciplines:
+
+| Model ID | Discipline | Notes |
+|----------|-----------|-------|
+| `gpt-oss:20b` | **General expertise (primary)** | 20.9B params, MXFP4, ~13GB. Conversation, reasoning, tool use. 131K context. |
+| `qwen2.5-coder:14b` | **Software engineering** | 14.8B params, Q4_K_M, ~9.0GB. Code generation, debugging, refactoring. 131K context. |
+| `qwen3-vl:8b` | **Visual analysis** | 8.8B params, Q4_K_M, ~6.1GB. Image input, OCR, diagram interpretation. 131K context. |
+
+## Researching new models
+
+When the user wants to explore new models, use the Ollama library search:
+
+```bash
+curl -s "https://ollama.com/search?q=QUERY" | head -100
+```
+
+Or use the SearXNG skill to search for model reviews, benchmarks, and comparisons:
+
+```bash
+curl -s "http://100.100.101.1:8888/search?q=ollama+MODEL_NAME+benchmark+review&format=json"
+```
+
+When recommending models, consider:
+- Must fit in 16GB VRAM (prefer Q4_K_M quant under 12GB for full GPU offload)
+- Check if a no-think variant is needed (thinking models add 3-6s latency on RTX 5070 Ti)
+- Vision models need `"input": ["text", "image"]` in the OpenClaw config
+- After pulling a new model, remind the user it needs to be added to `openclaw.json` to be usable by the agent
+
+## Important
+
+- Models are stored on `E:\ollama\models` (not C:\)
+- The `OLLAMA_MODELS` env var is set at user level to `E:\ollama\models`
+- Always report model sizes and VRAM usage when listing models
+- If a model fails to load, check `nvidia-smi` for VRAM availability
+- After any model config change, OpenClaw needs a restart: `docker restart openclaw-openclaw-gateway-1`
+
+## Known Issues
+
+- gpt-oss:20b at 95% VRAM causes 30/70 CPU/GPU split — inference becomes much slower when VRAM is nearly full

@@ -1,0 +1,244 @@
+---
+name: model-router
+description: "When Zuberi needs to choose which discipline to use for a task. Routes based on task type: images\u2192visual analysis (qwen3-vl:8b), code\u2192software engineering (qwen2.5-coder:14b), tool calls\u2192general expertise (gpt-oss:20b), deep analysis\u2192general expertise with think:true, everything else\u2192general expertise. Load this skill when starting a new task that might benefit from a non-default discipline."
+---
+
+# Task-Type Discipline Routing (Phase 1 — Static Rules)
+
+Zuberi has three disciplines, each backed by a dedicated model via Ollama on KILO.
+This skill defines which discipline to use based on task type.
+
+## Available Disciplines
+
+| Discipline | Model ID | VRAM | Context | Role |
+|---|---|---|---|---|
+| General expertise (primary) | gpt-oss:20b | 13 GB | 131K | Conversation, reasoning, tool use, planning, writing |
+| Software engineering | qwen2.5-coder:14b | 9.0 GB | 131K | Code generation, debugging, refactoring, tests |
+| Visual analysis | qwen3-vl:8b | 6.1 GB | 131K | Image reading, OCR, diagrams, charts, screenshots |
+
+## Routing Table
+
+| # | Trigger | Discipline | Notes |
+|---|---------|-----------|-------|
+| 1 | Image in request | Visual analysis (qwen3-vl:8b) | If task also needs tools, use gpt-oss:20b instead and describe the image in text. qwen3-vl:8b tool support is unverified. |
+| 2 | Tool calls needed | General expertise (gpt-oss:20b) | SearXNG, CXDB, email, Kanban, n8n, dispatch, or any external service. Tools require the primary discipline. |
+| 3 | Deep analytical synthesis, no tools | General expertise (gpt-oss:20b) + think:true | Complex multi-step reasoning, synthesis of multiple sources, strategic planning, research reports. Only when no tools are needed. |
+| 4 | Code generation or debugging | Software engineering (qwen2.5-coder:14b) | Writing, debugging, reviewing, refactoring, or explaining code. Mentions specific languages, frameworks, functions, algorithms, or asks for implementation. |
+| 5 | General chat / fallback | General expertise (gpt-oss:20b) | Everything else: conversation, greetings, status updates, quick edits, summaries, task management. |
+
+## Detection Rules
+
+### Trigger 1 — Image Detection
+Route to **visual analysis (qwen3-vl:8b)** when:
+- Request contains an image attachment (base64 or file reference)
+- Request asks to analyze, read, describe, or interpret an image, screenshot, diagram, chart, or photo
+- Request involves OCR or extracting text from a visual source
+- Request asks about UI layout, design review, or visual comparison
+
+**Exception:** If the image task ALSO requires tool calls (e.g., "look at this screenshot and create a Kanban card"), stay on gpt-oss:20b. Describe the image content in text yourself rather than delegating to qwen3-vl:8b, because its tool-calling support is unverified.
+
+### Trigger 2 — Tool Call Detection
+Route to **general expertise (gpt-oss:20b)** when:
+- Task requires calling any external service: SearXNG search, CXDB queries, email send/read, Kanban board operations, n8n workflow triggers, dispatch commands
+- Task involves multi-tool chains or orchestration
+- Task requires exec/bash commands that interact with infrastructure
+- Any task where tool reliability matters
+
+Tool calls must stay on the primary discipline. Do not delegate tool-heavy tasks to specialist disciplines.
+
+### Trigger 3 — Deep Analysis Detection
+Route to **general expertise (gpt-oss:20b) with think:true** when ALL of these are true:
+- Complex multi-step reasoning is needed (synthesis, strategic planning, research reports, formal analysis)
+- No tool calls are required for the task
+- The task benefits from extended internal reasoning before responding
+
+Do NOT use think:true when:
+- Tools are needed (think:true + tool calls can cause stuck reasoning loops)
+- The task is straightforward (wastes time on unnecessary deliberation)
+- Speed matters more than depth
+
+### Trigger 4 — Code Detection
+Route to **software engineering (qwen2.5-coder:14b)** when:
+- Request asks to write, generate, or scaffold substantial new code (functions, classes, modules, projects)
+- Request asks to debug intricate issues with multiple interacting components
+- Request asks to refactor code across multiple files
+- Request involves code translation between languages
+- Request asks to write or fix tests
+- Request asks to optimize algorithms or data structures
+- Request mentions specific programming languages, frameworks, libraries, or asks for implementation
+
+**Stay on gpt-oss:20b for trivial code tasks:** variable renames, adding a log line, reading/explaining existing code, quick single-line edits. Only delegate when code quality and correctness are paramount.
+
+### Trigger 5 — Fallback
+Route to **general expertise (gpt-oss:20b)** for everything else:
+- Simple conversation, greetings, status updates
+- Writing documents, emails, plans (first drafts)
+- Summarizing information already available
+- Task management (Kanban cards, listing workflows)
+- Quick code review or small edits
+- Any task where speed matters more than specialist depth
+
+## How to Delegate
+
+### Delegation to qwen2.5-coder:14b (software engineering):
+```bash
+curl -s http://host.docker.internal:11434/api/chat -d '{
+  "model": "qwen2.5-coder:14b",
+  "messages": [{"role": "user", "content": "YOUR_PROMPT"}],
+  "stream": false,
+  "options": {"num_predict": 4096}
+}'
+```
+
+### Delegation to qwen3-vl:8b (visual analysis):
+```bash
+curl -s http://host.docker.internal:11434/api/chat -d '{
+  "model": "qwen3-vl:8b",
+  "messages": [{"role": "user", "content": "YOUR_PROMPT", "images": ["BASE64_IMAGE"]}],
+  "stream": false,
+  "options": {"num_predict": 2048}
+}'
+```
+
+### Deep analysis with think:true (on gpt-oss:20b):
+```bash
+curl -s http://host.docker.internal:11434/api/chat -d '{
+  "model": "gpt-oss:20b",
+  "messages": [{"role": "user", "content": "YOUR_PROMPT"}],
+  "stream": false,
+  "think": true,
+  "options": {"num_predict": 8192}
+}'
+```
+
+## The think:true Mechanism
+
+- `think: true` is an **Ollama API parameter** passed at the request level
+- It enables extended internal reasoning before the model responds
+- The default behavior (without think:true) uses `/no_think` mode — fast, direct responses
+- **Scope:** Non-tool tasks only. Tool calls with think:true can cause stuck reasoning loops where the model deliberates indefinitely instead of acting
+- **Do NOT use** `<think>` token injection in the prompt — Ollama ignores injected thinking tokens. Use the API parameter only.
+
+## Delegation Pattern
+
+1. **Detect** — Before executing a complex task, evaluate against the Routing Table
+2. **Announce** — Tell James which discipline you are delegating to and why:
+   *"This requires dedicated code generation — delegating to software engineering (qwen2.5-coder:14b)."*
+3. **Delegate** — Send a focused, self-contained prompt to the specialist via exec/curl. The specialist has no memory of your conversation — include all necessary context.
+4. **Interpret** — Read the specialist's response. Summarize or integrate it into your response to James. Do NOT dump raw model output.
+5. **Log** — Log the routing decision to the feedback shim (see [Step 5: Log Routing Decision](#step-5-log-routing-decision) below).
+6. **Return** — Continue on gpt-oss:20b for the rest of the conversation. The specialist model auto-unloads after idle timeout.
+
+## GPU Behavior
+
+- RTX 5070 Ti: 16 GB VRAM
+- Only one model loaded at a time — Ollama handles swapping
+- Model swap takes ~3-5 seconds (loading from SSD to VRAM)
+- After delegation, gpt-oss:20b auto-reloads on your next inference turn
+- All disciplines use native Ollama API (not /v1 compatibility mode)
+
+## Important
+
+- You are ALWAYS running on gpt-oss:20b as your primary discipline. Delegation calls a specialist and brings back the result — it does not change YOUR model.
+- Delegation costs time (~3-5s for model swap). Do not delegate trivial tasks.
+- The specialist has NO context from your conversation. Your delegation prompt must be self-contained.
+- Parse responses with grep/sed if needed — no jq available.
+- If a delegation call fails, fall back to handling the task yourself on gpt-oss:20b.
+- Log every delegation in your response so James can audit discipline selection decisions.
+
+## Step 5: Log Routing Decision
+
+After every delegation response is received and before returning the result to the user, log the routing outcome to the feedback shim on CEG. This maintains:
+- An **authoritative audit record** in CXDB (append-only, turn_id–addressable)
+- A **semantic routing history** in Chroma (vector-indexed for pattern retrieval)
+
+**Logging is best effort.** If the logging call fails, return the delegated result to the user normally. A logging failure must never block or delay the user-facing response.
+
+### Logging command
+
+```bash
+curl -s -X POST http://100.100.101.1:8100/log \
+  -H "Content-Type: application/json" \
+  -d '{
+    "task_type": "<trigger_name>",
+    "model_used": "<model_id>",
+    "input_summary": "<brief task description>",
+    "tool_flag": <true|false>,
+    "think_flag": <true|false>,
+    "latency_ms": <elapsed_ms>,
+    "success": <true|false>,
+    "error_text": "<error message or null>",
+    "record_id": "<task_type>-<turn_number>"
+  }'
+```
+
+### task_type mapping
+
+| task_type value | Routing Table Trigger | Discipline |
+|---|---|---|
+| `"image"` | Trigger 1 — Image detection | qwen3-vl:8b |
+| `"tool_call"` | Trigger 2 — Tool calls needed | gpt-oss:20b |
+| `"deep_analysis"` | Trigger 3 — Deep analysis (think:true) | gpt-oss:20b |
+| `"code"` | Trigger 4 — Code generation/debugging | qwen2.5-coder:14b |
+| `"general"` | Trigger 5 — Fallback | gpt-oss:20b |
+
+### Field guidance
+
+| Field | Type | Meaning |
+|---|---|---|
+| `task_type` | string, required | Routing category chosen from the routing table (see mapping above) |
+| `model_used` | string, required | Model ID of the delegated discipline (e.g. `"qwen2.5-coder:14b"`) |
+| `input_summary` | string, required | Brief summary of the user request (one sentence; used for Chroma embedding) |
+| `tool_flag` | boolean | Whether tool use was part of the routing reason |
+| `think_flag` | boolean | Whether deep analysis / extended reasoning was requested (think:true) |
+| `latency_ms` | integer or null | Elapsed time for the delegation call in milliseconds |
+| `success` | boolean | Whether the delegated model returned a usable result |
+| `error_text` | string or null | Error message text if the delegation failed; `null` if successful |
+| `record_id` | string or null | Deterministic idempotency key for this routing decision (see below) |
+
+### Response
+
+New record:
+```json
+{"ok": true, "cxdb_turn_id": 29, "chroma_id": "code-42", "error": null}
+```
+
+Duplicate (same `record_id` sent again):
+```json
+{"ok": true, "cxdb_turn_id": null, "chroma_id": "code-42", "error": "duplicate — already logged"}
+```
+
+- `cxdb_turn_id` — authoritative CXDB reference for the logged record (`null` on duplicate)
+- `chroma_id` — Chroma document ID (equals `record_id` when provided; server-generated otherwise)
+- `ok: false` + `error` — only if the CXDB write fails (Chroma failure is non-fatal within the shim)
+
+### Failure handling
+
+- Attempt logging **once** per routed task. Do not retry.
+- If the logging call fails (network error, shim down, non-200 response), note the failure internally but **still complete the user-facing response flow**.
+- Do not surface logging failures to James unless he asks about routing feedback status.
+- A quick health check is available at `GET http://100.100.101.1:8100/health` — use it for diagnostics, not before every log call.
+
+### Idempotency via record_id
+
+The `record_id` field makes duplicate calls safe no-ops. When provided, the shim checks Chroma before writing:
+- If a record with that ID already exists, the call returns immediately with `"duplicate — already logged"` and no new CXDB turn is created.
+- If the ID is new, the normal write path executes (CXDB first, then Chroma with `record_id` as the Chroma document ID).
+
+**How to generate record_id:** Build a short, deterministic string from stable routing inputs for the current decision. Use the pattern `<task_type>-<turn_number>` where `turn_number` is a local counter or sequence number you maintain during the conversation. Examples: `"code-1"`, `"image-3"`, `"general-7"`.
+
+The goal is:
+- Same routing event produces the same `record_id` on retry
+- Different routing events produce different `record_id` values
+
+If you do not have a reliable turn counter, you may omit `record_id` — the shim will behave exactly as before (no duplicate detection, server-generated Chroma ID).
+
+**Limitation:** Duplicate detection uses Chroma only. In the rare case where a first call writes to CXDB but fails before the Chroma write completes, a retry with the same `record_id` will not detect the duplicate and will create a second CXDB turn. This edge case does not affect correctness of the audit trail — CXDB is append-only and both turns are valid records.
+
+## Roadmap
+
+Phase 1 (static routing rules) and Phase 2 (feedback logging) are now implemented.
+
+- **Phase 1 (active):** Static routing rules applied manually by Zuberi. See Routing Table above.
+- **Phase 2 (active):** Feedback logging to CXDB + Chroma via the routing shim on CEG (`100.100.101.1:8100`). Every delegation is logged after completion. CXDB context 11 stores authoritative records; Chroma collection `router_records` provides semantic search.
+- **Phase 3 (future):** Autonomous rule refinement. Zuberi analyzes its own routing logs and proposes rule updates when patterns emerge (e.g., certain code tasks get better results on gpt-oss:20b, or certain analysis tasks benefit from think:true).
