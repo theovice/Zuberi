@@ -21,12 +21,10 @@ workflows, check execution history, and trigger webhook-based automations.
 
 All API calls require the `X-N8N-API-KEY` header.
 
-```
-# SECRET — do not sync to cloud, version control, or workspace docs
-N8N_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJmZDU0ZDQxNy05ZGI0LTRhYWEtOGQ5Zi1kYWZiODNmNjFhZjEiLCJpc3MiOiJuOG4iLCJhdWQiOiJwdWJsaWMtYXBpIiwianRpIjoiZGVhYWJmZDEtMmQ1YS00ZWY2LWE2OTktZmYzMzgyZWRmMDJkIiwiaWF0IjoxNzcyNDQwMzU5fQ.pzt_ssetvuScNGmovAjWfKT7Zsh-Lh0FNoM4dcRKPLQ"
-```
+The API key is stored at /home/node/.openclaw/n8n-key.txt
+Read it before making API calls: exec cat /home/node/.openclaw/n8n-key.txt
 
-Use this key in every curl call as shown below.
+Use the key in every curl call as shown below (replace `<KEY>`).
 
 ## API Base URL
 
@@ -37,7 +35,7 @@ Use this key in every curl call as shown below.
 ### List all workflows
 
 ```bash
-curl -s -H "X-N8N-API-KEY: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJmZDU0ZDQxNy05ZGI0LTRhYWEtOGQ5Zi1kYWZiODNmNjFhZjEiLCJpc3MiOiJuOG4iLCJhdWQiOiJwdWJsaWMtYXBpIiwianRpIjoiZGVhYWJmZDEtMmQ1YS00ZWY2LWE2OTktZmYzMzgyZWRmMDJkIiwiaWF0IjoxNzcyNDQwMzU5fQ.pzt_ssetvuScNGmovAjWfKT7Zsh-Lh0FNoM4dcRKPLQ" "http://100.100.101.1:5678/api/v1/workflows"
+curl -s -H "X-N8N-API-KEY: <KEY>" "http://100.100.101.1:5678/api/v1/workflows"
 ```
 
 Returns JSON with `data` array of workflow objects. Each has `id`, `name`, `active`, `createdAt`, `updatedAt`.
@@ -45,7 +43,7 @@ Returns JSON with `data` array of workflow objects. Each has `id`, `name`, `acti
 ### Get a specific workflow
 
 ```bash
-curl -s -H "X-N8N-API-KEY: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJmZDU0ZDQxNy05ZGI0LTRhYWEtOGQ5Zi1kYWZiODNmNjFhZjEiLCJpc3MiOiJuOG4iLCJhdWQiOiJwdWJsaWMtYXBpIiwianRpIjoiZGVhYWJmZDEtMmQ1YS00ZWY2LWE2OTktZmYzMzgyZWRmMDJkIiwiaWF0IjoxNzcyNDQwMzU5fQ.pzt_ssetvuScNGmovAjWfKT7Zsh-Lh0FNoM4dcRKPLQ" "http://100.100.101.1:5678/api/v1/workflows/WORKFLOW_ID"
+curl -s -H "X-N8N-API-KEY: <KEY>" "http://100.100.101.1:5678/api/v1/workflows/WORKFLOW_ID"
 ```
 
 Replace WORKFLOW_ID with the workflow's numeric ID.
@@ -53,7 +51,7 @@ Replace WORKFLOW_ID with the workflow's numeric ID.
 ### Activate a workflow
 
 ```bash
-curl -s -X PATCH -H "X-N8N-API-KEY: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJmZDU0ZDQxNy05ZGI0LTRhYWEtOGQ5Zi1kYWZiODNmNjFhZjEiLCJpc3MiOiJuOG4iLCJhdWQiOiJwdWJsaWMtYXBpIiwianRpIjoiZGVhYWJmZDEtMmQ1YS00ZWY2LWE2OTktZmYzMzgyZWRmMDJkIiwiaWF0IjoxNzcyNDQwMzU5fQ.pzt_ssetvuScNGmovAjWfKT7Zsh-Lh0FNoM4dcRKPLQ" -H "Content-Type: application/json" -d '{"active":true}' "http://100.100.101.1:5678/api/v1/workflows/WORKFLOW_ID"
+curl -s -X PATCH -H "X-N8N-API-KEY: <KEY>" -H "Content-Type: application/json" -d '{"active":true}' "http://100.100.101.1:5678/api/v1/workflows/WORKFLOW_ID"
 ```
 
 **CONFIRM with James before activating any workflow.**
@@ -61,7 +59,7 @@ curl -s -X PATCH -H "X-N8N-API-KEY: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWI
 ### Deactivate a workflow
 
 ```bash
-curl -s -X PATCH -H "X-N8N-API-KEY: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJmZDU0ZDQxNy05ZGI0LTRhYWEtOGQ5Zi1kYWZiODNmNjFhZjEiLCJpc3MiOiJuOG4iLCJhdWQiOiJwdWJsaWMtYXBpIiwianRpIjoiZGVhYWJmZDEtMmQ1YS00ZWY2LWE2OTktZmYzMzgyZWRmMDJkIiwiaWF0IjoxNzcyNDQwMzU5fQ.pzt_ssetvuScNGmovAjWfKT7Zsh-Lh0FNoM4dcRKPLQ" -H "Content-Type: application/json" -d '{"active":false}' "http://100.100.101.1:5678/api/v1/workflows/WORKFLOW_ID"
+curl -s -X PATCH -H "X-N8N-API-KEY: <KEY>" -H "Content-Type: application/json" -d '{"active":false}' "http://100.100.101.1:5678/api/v1/workflows/WORKFLOW_ID"
 ```
 
 **CONFIRM with James before deactivating any workflow.**
@@ -69,7 +67,7 @@ curl -s -X PATCH -H "X-N8N-API-KEY: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWI
 ### List executions
 
 ```bash
-curl -s -H "X-N8N-API-KEY: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJmZDU0ZDQxNy05ZGI0LTRhYWEtOGQ5Zi1kYWZiODNmNjFhZjEiLCJpc3MiOiJuOG4iLCJhdWQiOiJwdWJsaWMtYXBpIiwianRpIjoiZGVhYWJmZDEtMmQ1YS00ZWY2LWE2OTktZmYzMzgyZWRmMDJkIiwiaWF0IjoxNzcyNDQwMzU5fQ.pzt_ssetvuScNGmovAjWfKT7Zsh-Lh0FNoM4dcRKPLQ" "http://100.100.101.1:5678/api/v1/executions?limit=10"
+curl -s -H "X-N8N-API-KEY: <KEY>" "http://100.100.101.1:5678/api/v1/executions?limit=10"
 ```
 
 Add `&status=error` to filter failed executions, or `&workflowId=ID` to filter by workflow.
@@ -77,7 +75,7 @@ Add `&status=error` to filter failed executions, or `&workflowId=ID` to filter b
 ### Get execution details
 
 ```bash
-curl -s -H "X-N8N-API-KEY: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJmZDU0ZDQxNy05ZGI0LTRhYWEtOGQ5Zi1kYWZiODNmNjFhZjEiLCJpc3MiOiJuOG4iLCJhdWQiOiJwdWJsaWMtYXBpIiwianRpIjoiZGVhYWJmZDEtMmQ1YS00ZWY2LWE2OTktZmYzMzgyZWRmMDJkIiwiaWF0IjoxNzcyNDQwMzU5fQ.pzt_ssetvuScNGmovAjWfKT7Zsh-Lh0FNoM4dcRKPLQ" "http://100.100.101.1:5678/api/v1/executions/EXECUTION_ID"
+curl -s -H "X-N8N-API-KEY: <KEY>" "http://100.100.101.1:5678/api/v1/executions/EXECUTION_ID"
 ```
 
 ### Trigger a webhook workflow

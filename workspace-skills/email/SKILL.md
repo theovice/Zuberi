@@ -23,10 +23,13 @@ Agent account: **Zuberi** (zuberi@localhost, relayed via zuberiwaweru@gmail.com)
 
 ## Authentication
 
-All requests require the agent API key in the Authorization header:
+All requests require the agent API key in the Authorization header.
+
+The API key is stored at /home/node/.openclaw/agenticmail-key.txt
+Read it before making API calls: exec cat /home/node/.openclaw/agenticmail-key.txt
 
 ```
-Authorization: Bearer ak_3c9122baa10e168e7c3c950890892e593e041c6ea8349c6a
+Authorization: Bearer <KEY>
 ```
 
 Base URL: `http://100.100.101.1:3100/api/agenticmail`
@@ -35,19 +38,19 @@ Base URL: `http://100.100.101.1:3100/api/agenticmail`
 
 ### Check inbox
 ```bash
-curl -s -H "Authorization: Bearer ak_3c9122baa10e168e7c3c950890892e593e041c6ea8349c6a" \
+curl -s -H "Authorization: Bearer <KEY>" \
   "http://100.100.101.1:3100/api/agenticmail/mail/inbox"
 ```
 
 ### Read a specific message (by UID)
 ```bash
-curl -s -H "Authorization: Bearer ak_3c9122baa10e168e7c3c950890892e593e041c6ea8349c6a" \
+curl -s -H "Authorization: Bearer <KEY>" \
   "http://100.100.101.1:3100/api/agenticmail/mail/messages/UID"
 ```
 
 ### Send an email
 ```bash
-curl -s -X POST -H "Authorization: Bearer ak_3c9122baa10e168e7c3c950890892e593e041c6ea8349c6a" \
+curl -s -X POST -H "Authorization: Bearer <KEY>" \
   -H "Content-Type: application/json" \
   "http://100.100.101.1:3100/api/agenticmail/mail/send" \
   -d '{"to":"recipient@example.com","subject":"Subject","text":"Body text","html":"<p>Optional HTML body</p>"}'
@@ -55,7 +58,7 @@ curl -s -X POST -H "Authorization: Bearer ak_3c9122baa10e168e7c3c950890892e593e0
 
 ### Search email
 ```bash
-curl -s -X POST -H "Authorization: Bearer ak_3c9122baa10e168e7c3c950890892e593e041c6ea8349c6a" \
+curl -s -X POST -H "Authorization: Bearer <KEY>" \
   -H "Content-Type: application/json" \
   "http://100.100.101.1:3100/api/agenticmail/mail/search" \
   -d '{"query":"search terms"}'
@@ -63,19 +66,19 @@ curl -s -X POST -H "Authorization: Bearer ak_3c9122baa10e168e7c3c950890892e593e0
 
 ### Mark as read
 ```bash
-curl -s -X POST -H "Authorization: Bearer ak_3c9122baa10e168e7c3c950890892e593e041c6ea8349c6a" \
+curl -s -X POST -H "Authorization: Bearer <KEY>" \
   "http://100.100.101.1:3100/api/agenticmail/mail/messages/UID/seen"
 ```
 
 ### Delete a message
 ```bash
-curl -s -X DELETE -H "Authorization: Bearer ak_3c9122baa10e168e7c3c950890892e593e041c6ea8349c6a" \
+curl -s -X DELETE -H "Authorization: Bearer <KEY>" \
   "http://100.100.101.1:3100/api/agenticmail/mail/messages/UID"
 ```
 
 ### Move a message to a folder
 ```bash
-curl -s -X POST -H "Authorization: Bearer ak_3c9122baa10e168e7c3c950890892e593e041c6ea8349c6a" \
+curl -s -X POST -H "Authorization: Bearer <KEY>" \
   -H "Content-Type: application/json" \
   "http://100.100.101.1:3100/api/agenticmail/mail/messages/UID/move" \
   -d '{"folder":"Archive"}'
@@ -85,36 +88,36 @@ curl -s -X POST -H "Authorization: Bearer ak_3c9122baa10e168e7c3c950890892e593e0
 
 ### List folders
 ```bash
-curl -s -H "Authorization: Bearer ak_3c9122baa10e168e7c3c950890892e593e041c6ea8349c6a" \
+curl -s -H "Authorization: Bearer <KEY>" \
   "http://100.100.101.1:3100/api/agenticmail/mail/folders"
 ```
 
 ### List contacts
 ```bash
-curl -s -H "Authorization: Bearer ak_3c9122baa10e168e7c3c950890892e593e041c6ea8349c6a" \
+curl -s -H "Authorization: Bearer <KEY>" \
   "http://100.100.101.1:3100/api/agenticmail/contacts"
 ```
 
 ### Drafts — list / create / send
 ```bash
 # List drafts:
-curl -s -H "Authorization: Bearer ak_3c9122baa10e168e7c3c950890892e593e041c6ea8349c6a" \
+curl -s -H "Authorization: Bearer <KEY>" \
   "http://100.100.101.1:3100/api/agenticmail/drafts"
 
 # Create a draft:
-curl -s -X POST -H "Authorization: Bearer ak_3c9122baa10e168e7c3c950890892e593e041c6ea8349c6a" \
+curl -s -X POST -H "Authorization: Bearer <KEY>" \
   -H "Content-Type: application/json" \
   "http://100.100.101.1:3100/api/agenticmail/drafts" \
   -d '{"to":"recipient@example.com","subject":"Subject","text":"Body"}'
 
 # Send a draft (by draft ID):
-curl -s -X POST -H "Authorization: Bearer ak_3c9122baa10e168e7c3c950890892e593e041c6ea8349c6a" \
+curl -s -X POST -H "Authorization: Bearer <KEY>" \
   "http://100.100.101.1:3100/api/agenticmail/drafts/DRAFT_ID/send"
 ```
 
 ### Daily digest
 ```bash
-curl -s -H "Authorization: Bearer ak_3c9122baa10e168e7c3c950890892e593e041c6ea8349c6a" \
+curl -s -H "Authorization: Bearer <KEY>" \
   "http://100.100.101.1:3100/api/agenticmail/mail/digest"
 ```
 
@@ -124,19 +127,19 @@ For multiple messages at once (token-efficient):
 
 ```bash
 # Batch mark as read:
-curl -s -X POST -H "Authorization: Bearer ak_3c9122baa10e168e7c3c950890892e593e041c6ea8349c6a" \
+curl -s -X POST -H "Authorization: Bearer <KEY>" \
   -H "Content-Type: application/json" \
   "http://100.100.101.1:3100/api/agenticmail/mail/batch/seen" \
   -d '{"uids":[1,2,3]}'
 
 # Batch delete:
-curl -s -X POST -H "Authorization: Bearer ak_3c9122baa10e168e7c3c950890892e593e041c6ea8349c6a" \
+curl -s -X POST -H "Authorization: Bearer <KEY>" \
   -H "Content-Type: application/json" \
   "http://100.100.101.1:3100/api/agenticmail/mail/batch/delete" \
   -d '{"uids":[1,2,3]}'
 
 # Batch read (fetch multiple messages at once):
-curl -s -X POST -H "Authorization: Bearer ak_3c9122baa10e168e7c3c950890892e593e041c6ea8349c6a" \
+curl -s -X POST -H "Authorization: Bearer <KEY>" \
   -H "Content-Type: application/json" \
   "http://100.100.101.1:3100/api/agenticmail/mail/batch/read" \
   -d '{"uids":[1,2,3]}'
@@ -146,18 +149,18 @@ curl -s -X POST -H "Authorization: Bearer ak_3c9122baa10e168e7c3c950890892e593e0
 
 ### Spam scoring
 ```bash
-curl -s -H "Authorization: Bearer ak_3c9122baa10e168e7c3c950890892e593e041c6ea8349c6a" \
+curl -s -H "Authorization: Bearer <KEY>" \
   "http://100.100.101.1:3100/api/agenticmail/mail/messages/UID/spam-score"
 ```
 
 ### Pending review (blocked by PII scanner)
 ```bash
 # List pending:
-curl -s -H "Authorization: Bearer ak_3c9122baa10e168e7c3c950890892e593e041c6ea8349c6a" \
+curl -s -H "Authorization: Bearer <KEY>" \
   "http://100.100.101.1:3100/api/agenticmail/mail/pending"
 
 # Approve a pending message:
-curl -s -X POST -H "Authorization: Bearer ak_3c9122baa10e168e7c3c950890892e593e041c6ea8349c6a" \
+curl -s -X POST -H "Authorization: Bearer <KEY>" \
   "http://100.100.101.1:3100/api/agenticmail/mail/pending/PENDING_ID/approve"
 ```
 

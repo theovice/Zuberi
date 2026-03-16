@@ -16,16 +16,27 @@ Fetch and extract readable text from URLs using Trafilatura on CEG.
 
 ## Fetch clean text from a URL
 
-  ssh ceg '/opt/zuberi/trading/venv/bin/python3 -c "
-import trafilatura
-url = \"URL_HERE\"
-downloaded = trafilatura.fetch_url(url)
-text = trafilatura.extract(downloaded, include_metadata=True, output_format=\"txt\")
-if text:
-  print(text[:3000])
-else:
-  print(\"EXTRACT_FAILED\")
-"'
+For simple URLs, use a one-liner via the shell service:
+
+```bash
+curl -s -X POST http://100.100.101.1:3003/command \
+  -H 'Content-Type: application/json' \
+  -d '{"command":"/opt/zuberi/trading/venv/bin/python3 -c \"import trafilatura; downloaded = trafilatura.fetch_url(\\\"URL_HERE\\\"); text = trafilatura.extract(downloaded, include_metadata=True, output_format=\\\"txt\\\"); print(text[:3000] if text else \\\"EXTRACT_FAILED\\\")\""}'
+```
+
+For complex URLs or multi-step extraction, write a script first via /write then execute:
+
+```bash
+# 1. Write the script
+curl -s -X POST http://100.100.101.1:3003/write \
+  -H 'Content-Type: application/json' \
+  -d '{"path":"/opt/zuberi/trading/fetch_url.py","content":"import trafilatura\nurl = \"URL_HERE\"\ndownloaded = trafilatura.fetch_url(url)\ntext = trafilatura.extract(downloaded, include_metadata=True, output_format=\"txt\")\nif text:\n  print(text[:3000])\nelse:\n  print(\"EXTRACT_FAILED\")","mode":"overwrite"}'
+
+# 2. Run it
+curl -s -X POST http://100.100.101.1:3003/command \
+  -H 'Content-Type: application/json' \
+  -d '{"command":"/opt/zuberi/trading/venv/bin/python3 /opt/zuberi/trading/fetch_url.py"}'
+```
 
 ## After extracting — store in Chroma
 

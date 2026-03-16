@@ -5,11 +5,11 @@ description: "Monitor API usage, spending, and budget via the usage tracker on C
 
 # API Usage Tracking
 
-Usage tracker monitors ccode dispatch costs on CEG. ZuberiChat titlebar shows live gauges.
+Usage tracker monitors API dispatch costs on CEG. ZuberiChat titlebar shows live gauges.
 
 ## When to use
 
-- Before dispatching to CEG-ccode: check `/limits` to confirm budget allows it
+- Before running CEG commands: check `/limits` to confirm budget allows it
 - After a dispatch completes: log the cost (done automatically by dispatch wrapper)
 - When James asks about spending, budget, or API costs
 - When checking whether the monthly budget has been hit
@@ -55,7 +55,7 @@ curl -s -X POST http://100.100.101.1:3002/log -H "Content-Type: application/json
   -d '{"model":"MODEL","input_tokens":N,"output_tokens":N,"cost_usd":N,"duration_ms":N,"task":"desc","project":"name"}'
 ```
 
-Note: The dispatch wrapper (`ccode-dispatch.service` on CEG:3003) auto-logs costs. Manual logging is only needed for non-standard dispatches.
+Note: The shell service (`zuberi-shell.service` on CEG:3003) can auto-log costs. Manual logging is only needed for non-standard dispatches.
 
 ## Spending Controls
 

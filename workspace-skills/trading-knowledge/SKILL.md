@@ -26,43 +26,37 @@ Every piece of trading knowledge stored in Chroma must include these metadata fi
 
 ## Storing a concept in Chroma
 
-Run on CEG via SSH:
-  ssh ceg '/opt/zuberi/trading/venv/bin/python3 -c "
-import chromadb, json
-client = chromadb.PersistentClient(path=\"/opt/zuberi/trading/knowledge\")
-col = client.get_or_create_collection(\"trading_knowledge\")
-col.add(
-  documents=[\"CONTENT_HERE\"],
-  metadatas=[{
-    \"domain\": \"DOMAIN\",
-    \"type\": \"TYPE\",
-    \"instrument\": \"INSTRUMENT\",
-    \"timeframe\": \"TIMEFRAME\",
-    \"source\": \"SOURCE\",
-    \"confidence\": \"CONFIDENCE\",
-    \"date\": \"DATE\"
-  }],
-  ids=[\"UNIQUE_ID\"]
-)
-print(\"STORED_OK\")
-"'
+Run on CEG via the shell service:
+
+```bash
+curl -s -X POST http://100.100.101.1:3003/command \
+  -H 'Content-Type: application/json' \
+  -d '{"command":"/opt/zuberi/trading/venv/bin/python3 -c \"import chromadb, json; client = chromadb.PersistentClient(path=\\\"/opt/zuberi/trading/knowledge\\\"); col = client.get_or_create_collection(\\\"trading_knowledge\\\"); col.add(documents=[\\\"CONTENT_HERE\\\"], metadatas=[{\\\"domain\\\": \\\"DOMAIN\\\", \\\"type\\\": \\\"TYPE\\\", \\\"instrument\\\": \\\"INSTRUMENT\\\", \\\"timeframe\\\": \\\"TIMEFRAME\\\", \\\"source\\\": \\\"SOURCE\\\", \\\"confidence\\\": \\\"CONFIDENCE\\\", \\\"date\\\": \\\"DATE\\\"}], ids=[\\\"UNIQUE_ID\\\"]); print(\\\"STORED_OK\\\")\""}
+```
+
+For complex scripts, prefer writing to a file first via /write, then executing:
+
+```bash
+# 1. Write the script
+curl -s -X POST http://100.100.101.1:3003/write \
+  -H 'Content-Type: application/json' \
+  -d '{"path":"/opt/zuberi/trading/store_concept.py","content":"import chromadb\nclient = chromadb.PersistentClient(path=\"/opt/zuberi/trading/knowledge\")\ncol = client.get_or_create_collection(\"trading_knowledge\")\ncol.add(\n  documents=[\"CONTENT_HERE\"],\n  metadatas=[{\"domain\": \"DOMAIN\", \"type\": \"TYPE\", \"instrument\": \"INSTRUMENT\", \"timeframe\": \"TIMEFRAME\", \"source\": \"SOURCE\", \"confidence\": \"CONFIDENCE\", \"date\": \"DATE\"}],\n  ids=[\"UNIQUE_ID\"]\n)\nprint(\"STORED_OK\")","mode":"overwrite"}'
+
+# 2. Run it
+curl -s -X POST http://100.100.101.1:3003/command \
+  -H 'Content-Type: application/json' \
+  -d '{"command":"/opt/zuberi/trading/venv/bin/python3 /opt/zuberi/trading/store_concept.py"}'
+```
 
 ## Querying Chroma by meaning
 
-  ssh ceg '/opt/zuberi/trading/venv/bin/python3 -c "
-import chromadb
-client = chromadb.PersistentClient(path=\"/opt/zuberi/trading/knowledge\")
-col = client.get_or_create_collection(\"trading_knowledge\")
-results = col.query(
-  query_texts=[\"QUERY_HERE\"],
-  n_results=5,
-  where={\"domain\": \"DOMAIN_FILTER\"}
-)
-for doc, meta in zip(results[\"documents\"][0], results[\"metadatas\"][0]):
-  print(meta[\"type\"], \"|\", meta[\"instrument\"], \"|\", doc[:120])
-"'
+```bash
+curl -s -X POST http://100.100.101.1:3003/command \
+  -H 'Content-Type: application/json' \
+  -d '{"command":"/opt/zuberi/trading/venv/bin/python3 -c \"import chromadb; client = chromadb.PersistentClient(path=\\\"/opt/zuberi/trading/knowledge\\\"); col = client.get_or_create_collection(\\\"trading_knowledge\\\"); results = col.query(query_texts=[\\\"QUERY_HERE\\\"], n_results=5); [print(m[\\\"type\\\"], \\\"|\\\", m[\\\"instrument\\\"], \\\"|\\\", d[:120]) for d, m in zip(results[\\\"documents\\\"][0], results[\\\"metadatas\\\"][0])]\""}
+```
 
-Remove the where filter to search across all domains.
+Remove the `where` parameter to search across all domains. Add `where={"domain": "DOMAIN_FILTER"}` to filter.
 
 ## Storing episodic notes in CXDB
 
