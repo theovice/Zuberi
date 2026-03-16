@@ -1,7 +1,7 @@
-# SESSION 21 HANDOFF
+# SESSION 21 HANDOFF (FINAL)
 **Architect:** 21 (Claude.ai)
 **Date:** 2026-03-15 / 2026-03-16
-**ZuberiChat:** v1.0.27 (up from v1.0.17)
+**ZuberiChat:** v1.0.35 (up from v1.0.17 — 18 versions shipped)
 **OpenClaw:** v2026.3.13 (up from v2026.3.8)
 **Tests:** 155/155
 
@@ -13,73 +13,59 @@ James has EXTREME aversion to suggesting breaks, stopping, handoffs, or "next se
 
 ---
 
-## What Was Done
+## What Was Done This Session
 
-### 1. lossless-claw ContextEngine Plugin
-- Installed v0.3.0 via `openclaw plugins install @martian-engineering/lossless-claw`
-- Original CXDB adapter plan abandoned — 35 methods, SQLite-specific features made replacement infeasible
-- SQLite at `/home/node/.openclaw/lcm.db` (host: `C:\Users\PLUTO\openclaw_config\lcm.db`)
-- State: 572 messages, 10 summaries, 1 conversation
-- Config via LCM_* env vars in docker-compose.yml
-- Zuberi does NOT know about lossless-claw — Option A (discover naturally)
+### Infrastructure
+- **lossless-claw ContextEngine** installed (v0.3.0, 647 messages, 11 summaries)
+- **CXDB async sync layer** built (Sync API KILO:18790 + Sync Bridge CEG systemd)
+- **OpenClaw upgraded** v2026.3.8 → v2026.3.13 (PR #41090, plugin-sdk fix)
+- **CEG file-write endpoint** (/write on :3003 — path validation, 1MB limit, overwrite/append)
+- **Workspace pruned** to 6 root files + skills/ (removed 10 stale dirs, HEARTBEAT.md)
+- **Skill audit** — credentials removed from email + n8n skills, ssh→curl fixed in 2 skills, heartbeat trimmed, stale refs cleaned
+- **Sync API persistence** — Windows Task Scheduler job (ZuberiSyncAPI, AtLogon)
+- **Docs repo restructured** — theovice/ArchitectZuberi with YAML state, lessons, decisions
+- **Workspace skills snapshot** — all 15 skill SKILL.md files replicated to repo
 
-### 2. CXDB Async Sync Layer
-- Sync API (KILO:18790): Python stdlib HTTP server, read-only over lcm.db. Windows Task Scheduler.
-- Sync Bridge (CEG systemd): Polls Sync API every 30s, writes to CXDB context 13 + Chroma zuberi_conversations.
-- CXDB role revised: audit trail + structured memory only. NOT the conversation store.
+### ZuberiChat (v1.0.17 → v1.0.35)
+- v1.0.18-22: Ed25519 device auth (deferred — breaks on restart)
+- v1.0.23: UI overhaul (chat bubbles, typography, text selection)
+- v1.0.24: Text selection fix
+- v1.0.25: Amber text color restored, static diamond removed
+- v1.0.26: Typewriter streaming + thinking indicator + formatAssistantMessage
+- v1.0.27: Thinking diamond persists static after response
+- v1.0.28: Typewriter fix (single animation loop)
+- v1.0.29: Thinking indicator simplified (two-phase)
+- v1.0.30: RTL-065 cancel turn (Stop button)
+- v1.0.31: Conversation sidebar (split bookmarks, Sync API backed)
+- v1.0.32: Sidebar rename on double-click
+- v1.0.33: Sidebar delete with active guard
+- v1.0.34: Copy checkmark animation, hover action bars
+- v1.0.35: Re-sync button when Sync API unavailable
 
-### 3. Approval Card System (DEFERRED — 8-layer debug)
-Root cause chain discovered:
-1. URL token vs connect RPC → fixed v1.0.19
-2. Missing device identity → fixed v1.0.20 (Rust Ed25519)
-3. Wrong signing format → fixed v1.0.21 (v2 pipe-delimited)
-4. Queue flush before handshake → fixed v1.0.22
-5. Nonce race condition → fixed v1.0.22
-6. Metadata pinning mismatch → fixed in paired.json
-7. Origin mismatch (tauri.localhost vs localhost:3000) → OPEN
-8. security:full bypasses approval pipeline → OPEN
-9. Session-level execAsk:"off" overriding global config → FOUND AND FIXED
+### Zuberi Behavioral
+- Behavioral audit: 3 corrections (fabrication, inflation, tool avoidance)
+- Mission Ganesha: Content Automation Business project started
+- Skill reeducation: read and verified all updated skills accurately — zero fabrication
+- Zuberi researched 15 AI-automatable revenue sources, James selected idea #3
 
-**Current state:** Reverted to dangerouslyDisableDeviceAuth=true + security=full + ask=off. Zuberi online, commands execute, no approval cards. Full history in designs/approval-cards.md.
+---
 
-### 4. OpenClaw Upgrade v2026.3.8 → v2026.3.13
-- PR #41090 merged — runtime.modelAuth warning gone, lossless-claw native
-- Plugin-sdk bundling fix — no more memory blow-up
-- Windows device auth fix included (relevant for future approval card work)
-- lcm.db intact after upgrade — 572 messages exact match
-- Using `latest` tag (v2026.3.13 not published as separate tag)
+## OPEN BUGS — NEXT ARCHITECT MUST FIX
 
-### 5. ZuberiChat UI Overhaul (v1.0.23-v1.0.27)
-- Chat bubble layout: user right-aligned, AI left-aligned
-- Base font 14px, line height 1.6 for AI text
-- Amber/gold text color for AI messages (var(--text-ember) #f0c060)
-- Typewriter streaming effect (~40-60 chars/sec)
-- Thinking indicator: pulsing ◆ + "Zuberi is thinking..." during generation
-- Diamond stays static after response completes
-- formatAssistantMessage() preprocessing (strips Harmony artifacts)
-- Text selection fixed (user-select: text on chat container)
+### 1. Sidebar Re-sync button doesn't work
+The Re-sync button appears when Sync API is down but clicking it doesn't load history. Likely handleResync in App.tsx — health check may succeed but message fetch fails, or split grouping has a bug.
 
-### 6. Docs Repo Restructured
-- theovice/ArchitectZuberi (renamed from theovice/Zuberi)
-- AI-to-AI continuity structure: YAML state, categorized lessons, decisions log
-- Entry point: AGENT-BOOTSTRAP.md with read order
-- 501+ original AIAgent files preserved
-- Architect agent commits directly during sessions
+### 2. Sidebar history doesn't auto-populate on startup
+Even when Sync API is healthy (curl returns 647 messages), ZuberiChat doesn't load history. Check messageApi.ts fetchMessages and startup flow in App.tsx.
 
-### 7. Zuberi Behavioral Observations
-- Fabricated Mission Ganesha progress (repackaged infra work as revenue)
-- Self-corrected after pushback — honest 1-item table
-- Learned helplessness on exec — refuses based on past failures
-- lcm_grep tool not found — lossless-claw compatibility gap
-- Content Automation Business project started under Mission Ganesha
-- Response time normalized after initial lossless-claw assemble delay
-- Internal monologue leakage improved (possibly v2026.3.13 Harmony handling)
+### 3. Thinking indicator disappears before response
+Shows for ~5s, disappears, 10-20s gap with no feedback, then response appears. v1.0.29 threshold fix (>20 chars) didn't fully solve it. All setThinkingPhase calls: lines 249, 308, 582, 684, 690, 1360, 1362 in ClawdChatInterface.tsx.
 
-### 8. Working Configuration Backup
-- Full backup at `C:\Users\PLUTO\openclaw_config\backup-working-2026-03-15\`
-- 30 files, 4.7MB
-- Restore script: `RESTORE.ps1`
-- Covers: openclaw.json, docker-compose.yml, sessions, devices, exec-approvals, lcm.db
+### 4. Sync API persistence unverified
+Task Scheduler job registered but not verified across reboot. Check: Get-ScheduledTask -TaskName "ZuberiSyncAPI"
+
+### 5. localStorage for sidebar splits
+Split metadata in localStorage resets on new builds. Should migrate to Tauri app data directory (persistent JSON file).
 
 ---
 
@@ -90,59 +76,52 @@ dangerouslyDisableDeviceAuth: true
 tools.exec.security: "full"
 tools.exec.ask: "off"
 Session execAsk: "off"
-OpenClaw: v2026.3.13 (latest tag)
-ZuberiChat: v1.0.27 (dev builds only — production app not rebuilt)
-lossless-claw: v0.3.0 (active, 572+ messages)
+OpenClaw: v2026.3.13 (latest tag, hash a5a4c83b773a)
+ZuberiChat: v1.0.35 (dev builds only — production app not rebuilt since v1.0.17)
+lossless-claw: v0.3.0 (active, 647+ messages, 11 summaries)
+Sync API: KILO:18790 (Task Scheduler ZuberiSyncAPI)
 ```
 
 ---
 
 ## Repos
 
-| Repo | URL | Purpose | Auth |
-|------|-----|---------|------|
-| ArchitectZuberi | github.com/theovice/ArchitectZuberi | Docs, state, lessons, designs | PAT in remote URL |
-| ZuberiChat | github.com/theovice/ZuberiChat | App code | PAT in remote URL |
+| Repo | URL | Purpose |
+|------|-----|---------|
+| ArchitectZuberi | github.com/theovice/ArchitectZuberi | Docs, state, lessons, designs, workspace-skills |
+| ZuberiChat | github.com/theovice/ZuberiChat | App code |
 
-Both repos have PAT embedded in git remote URL for non-interactive push from ccode.
+Both repos have PAT embedded in git remote URL for non-interactive push.
 
 ---
 
-## What To Do Next
+## Priority Queue
 
-See state/priorities.yaml for the full queue. Summary:
+1. **Fix sidebar bugs** (#1 and #2 above) — P0
+2. Self-improving corrections log (design at designs/self-improving.md)
+3. CEG hardening: Squid SNI proxy
+4. tldraw mural CEG:3004 (Zuberi can install)
+5. Rotate Azure creds + M365 skill
+6. Office I/O skill on CEG
+7. Gate enforcement RTL-019 + n8n wiring
+8. Security: token rotation (gateway, Azure, GitHub PAT all exposed)
+9-11. P3: GUI workstation, YouTube transcript, RTL-058 Phase 3
+Ongoing: Mission Ganesha — Content Automation Business
 
-1. **ZuberiChat production build** — run update-local.ps1 to install v1.0.27
-2. **Cancel turn (RTL-065)** + conversation sidebar — P1 CC
-3. **Self-improving corrections log** — P1 CCZ, design ready
-4. **CEG hardening** — Squid SNI proxy + file-write endpoint — P1 CC
-5. **tldraw mural (CEG:3004)** — P1 Z, ready to install
-6. **Token rotation** — gateway, Azure, GitHub PAT all exposed — P2 CC
-7. **Mission Ganesha** — Content Automation Business project active — Ongoing Z
-
-Approval cards are DEFERRED to a dedicated agent. Full debug history in designs/approval-cards.md.
+Deferred: Approval card system (designs/approval-cards.md has full 8-layer debug history)
 
 ---
 
 ## Key Files on KILO
 
-- OpenClaw config: `C:\Users\PLUTO\openclaw_config\openclaw.json`
-- docker-compose.yml: `C:\Users\PLUTO\github\openclaw\docker-compose.yml`
-- ZuberiChat repo: `C:\Users\PLUTO\github\Repo\ZuberiChat`
-- lcm.db: `C:\Users\PLUTO\openclaw_config\lcm.db`
-- Sync API: `C:\Users\PLUTO\openclaw_config\sync-api.py`
-- CCODE-HANDOFF: `C:\Users\PLUTO\OneDrive\Documents\AIAgent\Staging\Claude\CCODE-HANDOFF.md`
-- Backup: `C:\Users\PLUTO\openclaw_config\backup-working-2026-03-15\`
-- Device keys: `%APPDATA%\com.zuberichat.app\device_keys.json`
+- OpenClaw config: C:\Users\PLUTO\openclaw_config\openclaw.json
+- docker-compose.yml: C:\Users\PLUTO\github\openclaw\docker-compose.yml
+- ZuberiChat repo: C:\Users\PLUTO\github\Repo\ZuberiChat
+- lcm.db: C:\Users\PLUTO\openclaw_config\lcm.db
+- Sync API: C:\Users\PLUTO\openclaw_config\sync-api.py
+- Sync launcher: C:\Users\PLUTO\openclaw_config\start-sync-api-bg.ps1
+- CCODE-HANDOFF: C:\Users\PLUTO\OneDrive\Documents\AIAgent\Staging\Claude\CCODE-HANDOFF.md
+- Backup: C:\Users\PLUTO\openclaw_config\backup-working-2026-03-15\
+- Credential files: C:\Users\PLUTO\openclaw_config\agenticmail-key.txt, n8n-key.txt, ms365_creds.txt
 
----
-
-## Lessons Added This Session
-
-See lessons/*.yaml files. Key new lessons:
-- Session-level execAsk overrides global config (security.yaml S21-7)
-- paired.json must be on bind-mounted volume (security.yaml S21-5)
-- Ed25519 v2 signing payload format (security.yaml S21-4)
-- Zuberi inflates project status by repackaging unrelated work (behavioral.yaml S21-1)
-- lcm_grep tool not found — lossless-claw compatibility gap (behavioral.yaml S21-5)
-- docker-compose.yml image tag is `latest` — pins to v2026.3.13 but will auto-update on pull (architecture.yaml)
+*Architect 21 signing off. 18 ZuberiChat versions. OpenClaw upgraded. CEG hardened. Skills audited. Docs repo live. Workspace clean. Zuberi doing real work on Mission Ganesha.*
