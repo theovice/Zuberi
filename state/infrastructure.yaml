@@ -43,7 +43,7 @@ nodes:
         persistence: "Windows Task Scheduler (ZuberiSyncAPI, logon trigger)"
         reads_from: "C:\\Users\\PLUTO\\openclaw_config\\lcm.db"
       zuberichat:
-        version: "v1.0.22"
+        version: "v1.0.27"
         repo: "C:\\Users\\PLUTO\\github\\Repo\\ZuberiChat"
         github: "https://github.com/theovice/ZuberiChat"
         tests: "155/155"
@@ -52,6 +52,10 @@ nodes:
           - "Shell service detection in permissionPolicy (v1.0.18)"
           - "Connect RPC auth (v1.0.19, removed URL token)"
           - "Queue flush fix + nonce race fix (v1.0.22)"
+          - "UI overhaul: chat bubbles, typography, text selection (v1.0.23)"
+          - "Amber text color restored (v1.0.25)"
+          - "Typewriter streaming + thinking indicator + formatAssistantMessage (v1.0.26)"
+          - "Thinking diamond persists static after response (v1.0.27)"
     lossless_claw:
       version: "v0.3.0"
       location: "/home/node/.openclaw/extensions/lossless-claw"

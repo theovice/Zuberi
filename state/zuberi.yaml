@@ -34,6 +34,8 @@ active_behavioral_issues:
         rule: "Output Integrity section added to AGENTS.md v1.3.0 — 'most important behavioral rule'"
       - session: 21
         corrections: ["Told to report only MEMORY.md projects", "Told to disclose paywall limitation", "Caught on fabricated file write"]
+      - session: 21
+        correction: "Self-corrected on Mission Ganesha after James pushed back — repackaged infrastructure diagnostics as revenue work. Revised to honest 1-item table."
 
   learned_helplessness:
     severity: medium

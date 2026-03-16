@@ -1,0 +1,47 @@
+# ZUBETICHAT STATE
+# Last updated: 2026-03-16 | Session 21
+
+version: "v1.0.27"
+repo_local: "C:\\Users\\PLUTO\\github\\Repo\\ZuberiChat"
+repo_github: "https://github.com/theovice/ZuberiChat"
+tests: "155/155"
+installed_app: "not built — last production build unknown. Dev server used for testing."
+
+version_history:
+  v1.0.17: "Approval card connect RPC scope fix (Session 19)"
+  v1.0.18: "Shell service detection in permissionPolicy"
+  v1.0.19: "Connect RPC auth — token moved from URL to RPC body"
+  v1.0.20: "Ed25519 Rust crypto module + challenge-response handshake"
+  v1.0.21: "v2 pipe-delimited signing payload fix"
+  v1.0.22: "Queue flush before handshake fix + nonce race condition fix"
+  v1.0.23: "UI overhaul: chat bubbles, right-aligned user msgs, 14px font, diamond indicator"
+  v1.0.24: "Click/drag text selection fix (user-select on chat container)"
+  v1.0.25: "Amber text color restored, static diamond removed from completed messages"
+  v1.0.26: "Typewriter streaming effect, thinking indicator, formatAssistantMessage preprocessing"
+  v1.0.27: "Thinking diamond persists static after response completes"
+
+ui_state:
+  message_layout: "User bubbles right-aligned (max-width 70%), AI text left-aligned (max-width 85%)"
+  ai_text_color: "var(--text-ember) #f0c060 amber/gold"
+  font_size: "14px base"
+  line_height_ai: 1.6
+  line_height_user: 1.5
+  thinking_indicator: "Pulsing ◆ + 'Zuberi is thinking...' during generation. Diamond stays static after response."
+  typewriter: "Character-by-character release at ~40-60 chars/sec on streaming messages"
+  text_selection: "user-select: text on chat container"
+  scroll_bottom_padding: "Increased — last message not flush with input"
+
+active_bugs:
+  - "Thinking indicator may not show in all cases — needs more testing"
+  - "Typewriter smoothness needs validation across long responses"
+  - "Production app not built — all testing via pnpm tauri dev"
+  - "lcm_grep tool not found — lossless-claw tries to register it, gateway doesn't expose it"
+
+closeout_checklist:
+  note: "Every ccode prompt that changes ZuberiChat code must include ALL five steps"
+  steps:
+    1: "Kill existing pnpm tauri dev before changes"
+    2: "Version bump tauri.conf.json"
+    3: "Version bump ZuberiContextMenu.tsx"
+    4: "Regenerate version.json"
+    5: "Run update-local.ps1 or note rebuild needed"
