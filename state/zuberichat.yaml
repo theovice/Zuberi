@@ -1,7 +1,7 @@
 # ZUBETICHAT STATE
 # Last updated: 2026-03-16 | Session 21
 
-version: "v1.0.27"
+version: "v1.0.32"
 repo_local: "C:\\Users\\PLUTO\\github\\Repo\\ZuberiChat"
 repo_github: "https://github.com/theovice/ZuberiChat"
 tests: "155/155"
@@ -19,6 +19,11 @@ version_history:
   v1.0.25: "Amber text color restored, static diamond removed from completed messages"
   v1.0.26: "Typewriter streaming effect, thinking indicator, formatAssistantMessage preprocessing"
   v1.0.27: "Thinking diamond persists static after response completes"
+  v1.0.28: "Typewriter fix — single animation loop, no restart on delta"
+  v1.0.29: "Thinking indicator simplified — pulse until real text visible"
+  v1.0.30: "RTL-065 cancel turn — Stop button replaces Send during generation"
+  v1.0.31: "Conversation sidebar — split bookmarks backed by lossless-claw Sync API"
+  v1.0.32: "Sidebar rename on double-click, remove extra icon"
 
 ui_state:
   message_layout: "User bubbles right-aligned (max-width 70%), AI text left-aligned (max-width 85%)"
