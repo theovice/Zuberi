@@ -30,7 +30,7 @@ curl -s http://host.docker.internal:11434/api/generate -d '{"model":"MODEL","pro
 
 ## OpenClaw (localhost:18789)
 
-- **Version:** v2026.3.1
+- **Version:** v2026.3.13
 - **Container:** `openclaw-openclaw-gateway-1`
 - **Config:** `C:\Users\PLUTO\openclaw_config\openclaw.json` (volume-mounted)
 - **Sandbox mode:** `non-main` — webchat runs at gateway level, bypassing `sandbox.docker.network=none`

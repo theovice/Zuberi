@@ -5,7 +5,7 @@ description: "Hardware inventory, network topology, Docker services, port assign
 
 # INFRASTRUCTURE.md — Zuberi
 # Operator: James | Wahwearro Holdings, LLC
-# Version: 0.8.0 | 2026-03-02
+# Version: 1.0.0 | 2026-03-16
 #
 # Single source of truth for Zuberi's infrastructure.
 # When hardware changes, services are added, or ports shift — update here first.
@@ -102,12 +102,34 @@ Zuberi can load/unload models via Ollama skill. Unload for video/DRM/gaming.
 ```
 Container                       Image                   Port          Status
 ──────────────────────────────────────────────────────────────────────────────
-openclaw-openclaw-gateway-1     openclaw:local          18789         ✅ Running (v2026.2.26)
+openclaw-openclaw-gateway-1     ghcr.io/openclaw/openclaw:latest (a5a4c83b773a)
+                                                        18789         ✅ Running (v2026.3.13)
 ollama                          (native install)        11434         ✅ Running
 ```
 
 Container name `openclaw-openclaw-gateway-1` is Docker Compose auto-generated.
 Alias `container_name: openclaw` planned for docker-compose.yml.
+Docker compose path: C:\Users\PLUTO\github\openclaw\docker-compose.yml
+
+### Sync API (KILO)
+```
+Service:      Sync API
+Port:         18790
+Bind:         100.127.23.52 (Tailscale)
+Script:       C:\Users\PLUTO\openclaw_config\sync-api.py
+Purpose:      Read-only HTTP endpoint for lcm.db (lossless-claw SQLite)
+Persistence:  Windows Task Scheduler (ZuberiSyncAPI) + ZuberiChat auto-launch
+Status:       ✅ Running
+```
+
+### lossless-claw (OpenClaw Plugin)
+```
+Version:      v0.3.0
+SQLite:       C:\Users\PLUTO\openclaw_config\lcm.db (host)
+              /home/node/.openclaw/lcm.db (container)
+Records:      647+ messages, 11+ summaries
+Config:       LCM_* env vars in docker-compose.yml
+```
 
 ### ZuberiChat Dev (Tauri + Vite)
 ```
@@ -135,7 +157,13 @@ n8n             CEG     5678    Tailscale only      ✅ Running (API key auth, s
 cxdb            CEG     9009    Binary protocol     ✅ Running (built from source, 244MB)
 cxdb (HTTP+UI)  CEG     9010    Tailscale only      ✅ Running (REST API + React UI)
 kanban          CEG     3001    Tailscale only      ✅ Running (Express 5, JWT+API key auth)
-ccode (CLI)     CEG     —       SSH dispatch        ⏳ Pending (headless auth TBD)
+shell exec      CEG     3003    Tailscale only      ✅ Running (systemd zuberi-shell.service, POST /command + /write)
+usage tracker   CEG     3002    Tailscale only      ✅ Running
+agenticmail     CEG     3100    Tailscale only      ✅ Running (Gmail relay, zuberiwaweru@gmail.com)
+chroma          CEG     8000    Tailscale only      ✅ Running (vector DB — router_records + zuberi_conversations)
+routing shim    CEG     8100    Tailscale only      ✅ Running (FastAPI — routing feedback to CXDB + Chroma)
+sync bridge     CEG     —       background          ✅ Running (systemd sync-bridge.service, polls KILO:18790 every 30s)
+ccode (CLI)     CEG     —       SSH dispatch        ❌ Deprecated — shell service replaced it
 ```
 
 Docker compose: /opt/zuberi/docker/docker-compose.yml
@@ -155,10 +183,10 @@ Integration status:
 ```
 Service         Type          Notes                           Status
 ────────────────────────────────────────────────────────────────────────
-AgentMail       Cloud API     Zuberi's email identity         ⏳ Pending
-                              Free tier: 3 inboxes, 3K/mo
-                              MCP: agentmail-mcp server
-                              API key: OpenClaw secrets only
+AgenticMail     Self-hosted    Zuberi's email identity         ✅ Running
+                              Moved to CEG:3100 (MIT licensed)
+                              Gmail relay: zuberiwaweru@gmail.com
+                              API key: /home/node/.openclaw/agenticmail-key.txt
 ```
 
 ---
@@ -167,7 +195,7 @@ AgentMail       Cloud API     Zuberi's email identity         ⏳ Pending
 
 ```
 Config: C:\Users\PLUTO\openclaw_config\openclaw.json
-Version: v2026.2.26
+Version: v2026.3.13
 
 Key settings:
   model.primary:        ollama/gpt-oss:20b
@@ -202,6 +230,12 @@ Port    Service             Host    Notes
 8888    SearXNG             CEG     Tailscale only (Phase 3)
 5678    n8n                 CEG     Tailscale only (Phase 3)
 3001    Veritas Kanban       CEG     Tailscale only (Phase 3)
+3002    Usage tracker       CEG     Tailscale only (Phase 3)
+3003    Shell exec + write  CEG     Tailscale only (Phase 3)
+3100    AgenticMail         CEG     Tailscale only (Phase 3a)
+8000    Chroma              CEG     Tailscale only (Phase 3)
+8100    Routing shim        CEG     Tailscale only (Phase 3)
+18790   Sync API            KILO    Tailscale bind (100.127.23.52)
 22      SSH                 CEG     Tailscale only (Phase 3)
 ```
 
@@ -261,7 +295,14 @@ C:\Users\PLUTO\openclaw_workspace\         ~50MB total (stays lean)
 │   ├── infrastructure\SKILL.md        This file
 │   ├── heartbeat\SKILL.md             Proactive check schedule (disabled)
 │   ├── usage-tracking\SKILL.md        API usage tracking (CEG:3002)
-│   └── dispatch\SKILL.md              CEG-ccode sub-agent dispatch
+│   ├── dispatch\SKILL.md              CEG-ccode sub-agent dispatch
+│   ├── email\SKILL.md                 AgenticMail email skill
+│   ├── error-recovery\SKILL.md        Error recovery procedures
+│   ├── stack-guidance\SKILL.md        Operational stack details
+│   ├── capability-awareness\SKILL.md  Capability lifecycle checklist
+│   ├── web-fetch\SKILL.md             Web fetch via CEG shell service
+│   ├── trading-knowledge\SKILL.md     Trading knowledge base
+│   └── corrections\corrections.md     Self-improvement corrections log
 ├── memory\                             Daily session notes
 │   └── YYYY-MM-DD.md                   One file per day
 └── working\                            Scratch space — clearable
@@ -356,6 +397,7 @@ When a new M701q or other node is added to the infrastructure:
 | 0.6.0 | 2026-02-28 | Batch update: OpenClaw v2026.2.26, 4 Ollama models documented with VRAM notes, qwen3:14b-fast as primary, sandbox mode non-main, elevated exec documented, hybrid memory search + cache, OpenClaw config summary section added, 3 workspace skills (searxng/cxdb/ollama), IDENTITY.md + USER.md in workspace structure, container name documented, CEG reference repos directory added, Ollama model inventory section added. |
 | 0.7.0 | 2026-03-01 | CEG security hardening: UFW enabled (Tailscale-only), n8n owner auth, Docker images pinned to sha256 digests, SSH locked to Tailscale IP (ssh.socket override). Network watchdog deployed (systemd timer, 60s interval, auto-recovery chain). ZuberiChat: Vitest smoke test suite deployed (12 tests). Kanban backend documented (port 3001, separate Express server). |
 | 0.8.0 | 2026-03-02 | n8n skill wired (API key auth, REST API integration). Veritas-Kanban added to service map (CEG:3001). GPU updated to RTX 5070 Ti 16GB. Port inventory and integration status updated. |
+| 1.0.0 | 2026-03-16 | Session 22 audit: added 7 missing CEG services (shell, usage-tracker, agenticmail, chroma, routing-shim, sync-bridge, file-write). Added Sync API on KILO. Updated OpenClaw to v2026.3.13. Updated workspace skill listing. AgenticMail moved from Phase 3a external to CEG:3100 self-hosted. ccode CLI deprecated. |
 
 ## Known Issues
 

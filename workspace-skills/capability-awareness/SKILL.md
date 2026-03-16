@@ -12,7 +12,7 @@ When any external actor (architect, ccode, James) adds or changes a Zuberi capab
 1. **Update the relevant skill file** — operational truth Zuberi can read on demand
 2. **Update workspace docs** (AGENTS.md, TOOLS.md, etc.) — when behavior or rules change
 3. **Write a short CXDB capability record** — durable recall across sessions
-4. **Update CCODE-HANDOFF.md** — for ccode continuity only, not Zuberi's memory
+4. **Update the ArchitectZuberi repo** — push state changes to github.com/theovice/ArchitectZuberi for architect continuity
 
 All four steps are required. Skipping any step leaves the system in an inconsistent state where Zuberi may not know about its own capabilities.
 
