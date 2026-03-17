@@ -1,17 +1,18 @@
 ---
 name: browser
-description: "Web browser automation via Brave + CDP. Use when asked to navigate websites, fill forms, click buttons, take screenshots, read page content, or interact with any web UI. Also activates for: 'open this URL', 'go to', 'check this website', 'log into', 'screenshot', or 'what does this page show.' NOT for web search (use searxng skill) or fetching raw HTML (use web-fetch skill)."
+description: "Web browser automation via Chrome + CDP. Use when asked to navigate websites, fill forms, click buttons, take screenshots, read page content, or interact with any web UI. Also activates for: 'open this URL', 'go to', 'check this website', 'log into', 'screenshot', or 'what does this page show.' NOT for web search (use searxng skill) or fetching raw HTML (use web-fetch skill)."
 ---
 
 # Browser Automation
 
-Zuberi has a dedicated Brave browser instance ("Zuberi Browser") with remote debugging.
-OpenClaw connects via Chrome DevTools Protocol (CDP).
+Zuberi has a dedicated Chrome browser running as a Docker sidecar (kasmweb/chrome).
+OpenClaw connects via Chrome DevTools Protocol (CDP) over shared network namespace.
 
 ## Prerequisites
 
-- The "Zuberi Browser" shortcut on James's desktop must be open
-- If browser commands fail with connection errors, ask James to launch it
+- The browser runs as a Docker sidecar alongside OpenClaw — always available, no manual launch needed
+- James can watch the browser at https://localhost:6901 (password: zuberi2026)
+- Logins and cookies persist across restarts via Docker volume
 
 ## Available Actions
 
@@ -25,9 +26,10 @@ OpenClaw connects via Chrome DevTools Protocol (CDP).
 
 ## Browser Profile
 
-- Path: C:\Users\PLUTO\zuberi-brave-profile
-- Isolated from James's personal Brave — separate cookies, logins, history
-- CDP port: 9222 (local), host.docker.internal:9222 (from container)
+- Runs inside kasmweb/chrome Docker container (shared network with OpenClaw gateway)
+- CDP connection: http://localhost:9222 (shared network namespace)
+- Visual access: https://localhost:6901 (noVNC, password: zuberi2026)
+- Data persists in browser-data Docker volume
 - OpenClaw profile name: "zuberi"
 
 ## Usage Pattern
@@ -50,4 +52,4 @@ OpenClaw connects via Chrome DevTools Protocol (CDP).
 - CAPTCHAs: cannot solve. Ask James for help.
 - Anti-bot sites: some sites detect CDP automation (Cloudflare). Most sites work fine.
 - One active interaction at a time (can manage multiple tabs, acts on one)
-- Browser must be open — Zuberi cannot launch it herself (Windows GUI limitation from Docker)
+- Browser auto-starts with Docker stack — no manual launch needed
