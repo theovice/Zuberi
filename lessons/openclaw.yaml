@@ -48,3 +48,15 @@
 
 - id: 94
   lesson: "Git Bash on KILO mangles container paths (/home/node/ → C:/Program Files/Git/home/node/). Use docker exec <container> sh -c instead."
+
+- id: "S22-5"
+  lesson: "tools.allow in openclaw.json is a GLOBAL whitelist. If set, it blocks ALL tools not listed — agent-level overrides cannot enable tools that are globally blocked. The dashboard even warns: 'Global tools.allow is set. Agent overrides cannot enable tools that are globally blocked.' Session 22 discovered tools.allow was set to [read, write, exec], blocking browser, web_search, web_fetch, memory, sessions, and 24 other tools. Fix: delete tools.allow entirely so all tools are available, controlled by agent-level settings."
+
+- id: "S22-6"
+  lesson: "tools.web.search.enabled and tools.web.fetch.enabled were set to false in openclaw.json — explicitly disabling web search and fetch. Must be true for Zuberi to search/fetch."
+
+- id: "S22-7"
+  lesson: "/reset in the dashboard or chat resets the session but also drops dashboard auth — requires re-entering the token. Use /reset from ZuberiChat instead (auto-reconnects). Cannot delete agent:main:main session through dashboard — it's the primary session."
+
+- id: "S22-8"
+  lesson: "Session tool loading: the session JSON stores a snapshot of which tools were loaded at session creation. If tools.allow was restrictive at session creation time, the session only has those tools. /reset or new session needed to pick up config changes."

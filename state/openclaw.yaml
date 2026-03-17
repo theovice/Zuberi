@@ -22,6 +22,15 @@ exec:
   security: "full"
   note: "Reverted Session 21. security:full + ask:off = commands execute immediately, no approval cards. Working state."
 
+tools:
+  global_allow: "REMOVED Session 22. Was ['read','write','exec'] — blocked all other tools at config level. Agent overrides cannot override this. Now all tools available, controlled per-agent."
+  web_search: true
+  web_fetch: true
+  elevated: "enabled — webchat channel gets read, exec, write"
+  sandbox_allow: ["exec", "read", "write", "edit", "apply_patch"]
+  sandbox_deny: ["browser", "canvas", "nodes", "gateway", "telegram", "whatsapp", "discord", "slack"]
+  note: "Session 22 fix. tools.allow was the root cause of Zuberi only having 3 tools (read/write/exec). Removing it unlocked all 30 tools."
+
 compaction:
   mode: "safeguard (legacy — lossless-claw overrides)"
   reserve_tokens_floor: 25000
