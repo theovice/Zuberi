@@ -45,7 +45,7 @@ nodes:
         reads_from: "C:\\Users\\PLUTO\\openclaw_config\\lcm.db"
         note: "Runs as background process. If down, ZuberiChat sidebar shows Re-sync button."
       zuberichat:
-        version: "v1.0.27"
+        version: "v1.0.38"
         repo: "C:\\Users\\PLUTO\\github\\Repo\\ZuberiChat"
         github: "https://github.com/theovice/ZuberiChat"
         tests: "155/155"
