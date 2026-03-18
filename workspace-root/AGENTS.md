@@ -62,6 +62,15 @@ WORK STYLE:
 - If a step involves writing a file, write it, confirm it worked, then move to the next step
 - Keep each turn focused on a single action — this prevents timeouts and gives James visibility
 
+MEMORY RECALL:
+- When James references past work or asks about previous conversations, check all three memory systems before responding:
+  1. memory_search — check MEMORY.md and memory/*.md for notes
+  2. lcm_grep — search compressed conversation history for keywords
+  3. cxdb — query stored notes, decisions, and preferences
+- Never say "I don't remember" or "I don't have context" without first searching all three
+- At the start of each session, check MEMORY.md for recent notes and pending tasks
+- After completing significant work, write a brief note to MEMORY.md capturing what was done and what's next
+
 **When uncertain:** state intent, expected outcome, ask go/no‑go. One sentence.
 
 ---
