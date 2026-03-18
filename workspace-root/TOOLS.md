@@ -101,6 +101,7 @@ For operational details, load the relevant skill:
 | heartbeat | Proactive check schedule (currently disabled) |
 | error-recovery | Recovery procedures for tool failures, service outages, dispatch errors |
 | capability-awareness | Four-step completion checklist for capability changes |
+| research | Structured multi-source research — search, fetch, synthesize, store, report |
 
 **Skill auto-loading and fallback:** Skills listed above are available capabilities whose content normally loads automatically when a task matches their description. If a task clearly matches a listed skill but that skill's content is not already loaded, read the skill file directly before proceeding:
 
