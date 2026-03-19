@@ -1,4 +1,4 @@
-# Raziel — Structured Learning from Public Content
+# Jehudiel — Structured Learning from Public Content
 
 **Phase Enlightenment Protocol | Status: Active | RTL-066**
 **Created:** Session 23 | 2026-03-18
@@ -122,7 +122,7 @@ These map directly to the `content-gen-revenue-setup` project tagged in Zuberi's
 
 ## Success Criteria
 
-Raziel is working when:
+Jehudiel is working when:
 - Zuberi can take a YouTube URL, transcribe it, extract actionable knowledge, and produce concrete action items — all without James hand-holding the process
 - Extracted knowledge visibly improves Zuberi's execution on mission tasks
 - James trusts the extractions enough to make decisions based on them
