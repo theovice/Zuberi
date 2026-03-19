@@ -93,6 +93,15 @@ active:
     executor: Z
     status: "Active. James + Zuberi directly. No architect visibility into specifics."
 
+  - id: 14
+    task: "Raziel — structured learning from public content"
+    rtl: "RTL-066"
+    priority: ongoing
+    executor: Z
+    status: "Protocol designed. James curates sources (YouTube channels, articles). Zuberi processes via Whisper + structured extraction. First domain: AI content automation for Mission Ganesha."
+    note: "Phase Enlightenment track. Ongoing — not a task to complete, a capability to develop."
+    context: "designs/raziel-learning-protocol.md"
+
 completed_this_session:
   - task: "lossless-claw ContextEngine plugin"
     session: 21
@@ -156,6 +165,11 @@ phase_enlightenment:
       topic: "Beyond the framework"
       status: future
       note: "Replace OpenClaw with custom gateway. True individuality. Triggered by architectural limitations."
+
+    - name: "Raziel"
+      topic: "Learning from the world"
+      status: active
+      note: "Zuberi acquires knowledge from curated public content (YouTube, articles, docs). James selects sources, Zuberi processes and extracts actionable knowledge. First domain: AI content automation for Mission Ganesha revenue. Uses Whisper (CEG:8200) for transcription, structured extraction prompts for synthesis."
 
 deferred:
   - task: "Approval card system: Ed25519 + device auth + exec pipeline"
