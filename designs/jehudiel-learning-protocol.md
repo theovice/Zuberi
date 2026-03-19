@@ -28,11 +28,11 @@ James identifies a YouTube video, article, or resource relevant to an active mis
 - Navigate to the URL using the browser skill
 - Trigger the TabAudioRecorder extension to capture audio
 - Audio is sent to Whisper on CEG:8200 for transcription
-- Raw transcript is saved to workspace: `docs/learning/transcripts/YYYY-MM-DD_<slug>.md`
+- Raw transcript is saved to workspace: `docs/research/learning/transcripts/YYYY-MM-DD_<slug>.md`
 
 **For articles/documentation:**
 - Use web_fetch or SearXNG to retrieve the content
-- Save raw content to `docs/learning/raw/YYYY-MM-DD_<slug>.md`
+- Save raw content to `docs/research/learning/raw/YYYY-MM-DD_<slug>.md`
 
 ### 3. Structured Extraction (Zuberi)
 
@@ -70,7 +70,7 @@ DURATION/LENGTH: [video length or word count]
 - [How authoritative is this source? First-hand practitioner vs. aggregator vs. speculation?]
 ```
 
-Extraction is saved to: `docs/learning/extractions/YYYY-MM-DD_<slug>.md`
+Extraction is saved to: `docs/research/learning/extractions/YYYY-MM-DD_<slug>.md`
 
 ### 4. Integration (Zuberi + James)
 
@@ -116,7 +116,7 @@ These map directly to the `content-gen-revenue-setup` project tagged in Zuberi's
 - **Whisper on CEG:8200** — ✅ Live (deployed Session 23)
 - **TabAudioRecorder extension** — ✅ Updated for CEG:8200 (icons pending verification)
 - **Browser skill** — ✅ Available (Kasm sidecar)
-- **Learning workspace directories** — ❌ Need to create: `docs/learning/transcripts/`, `docs/learning/raw/`, `docs/learning/extractions/`
+- **Learning workspace directories** — ❌ Need to create: `docs/research/learning/transcripts/`, `docs/research/learning/raw/`, `docs/research/learning/extractions/`
 
 ---
 
