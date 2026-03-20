@@ -59,7 +59,7 @@ Then as needed:
 - .md files are prose documents (designs, research, handoffs).
 - Every fact appears in exactly one canonical location. If two files conflict, the one listed earlier in READ ORDER wins.
 - Timestamps are ISO 8601 UTC unless noted.
-- Session numbers are monotonically increasing. Current: 22.
+- Session numbers are monotonically increasing. Current: 23.
 - The CCODE-HANDOFF.md on KILO may be stale — always verify against state/*.yaml files in this repo.
 
 ## REPO STRUCTURE
@@ -125,6 +125,25 @@ ZuberiChat prompts additionally require the closeout checklist:
 
 This repo (theovice/ArchitectZuberi) is the docs repo. The architect agent commits directly during sessions.
 ZuberiChat code lives at C:\Users\PLUTO\github\Repo\ZuberiChat (theovice/ZuberiChat). Code changes go through ccode.
+
+Both repos use PAT-based auth in the remote URL for non-interactive push.
+PAT must be refreshed if expired — check with `git push origin main` and look for auth errors.
+
+## SESSION CLOSING CHECKLIST
+
+Before ending any architect session:
+
+1. **Sync workspace** — run ccode to mirror workspace files to this repo (workspace-root/, workspace-skills/, workspace-docs/)
+2. **Audit root files** — pull the synced repo and check for regressions:
+   - corrections/corrections.md — entries should only grow, never shrink
+   - infrastructure/SKILL.md — should be 200+ lines (was gutted in Session 23)
+   - AGENTS.md — verify no sections deleted
+   - MEMORY.md — verify session notes were added
+3. **Fix regressions** — if any file is damaged, fix it before closing
+4. **Write session handoff** — update sessions/ with a session summary
+5. **Update priorities.yaml** — move completed items, update statuses
+
+This is mandatory. Session 23 discovered that Zuberi silently overwrites root files — corrections log wiped, infrastructure skill gutted. Without audits these regressions compound across sessions.
 
 Both repos use PAT-based auth in the remote URL for non-interactive push.
 PAT must be refreshed if expired — check with `git push origin main` and look for auth errors.

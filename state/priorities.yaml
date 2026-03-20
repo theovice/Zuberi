@@ -102,6 +102,23 @@ active:
     note: "Phase Enlightenment track. Ongoing — not a task to complete, a capability to develop."
     context: "designs/jehudiel-learning-protocol.md"
 
+  - id: 15
+    task: "Automated workspace integrity monitor"
+    rtl: "RTL-068"
+    priority: p1
+    executor: CC
+    status: "Designed. Needs n8n workflow built on CEG:5678."
+    note: "n8n workflow that checksums root files on a schedule. Alerts James via email if any file loses >50% size or if critical files are missing. Catches destructive overwrites between architect sessions."
+    context: "designs/workspace-monitor.md"
+
+  - id: 16
+    task: "Manual architect audit — session checklist item"
+    rtl: "RTL-068"
+    priority: ongoing
+    executor: CC
+    status: "Active. Every architect session: sync workspace to repo before closing, audit root files for regressions."
+    note: "Added after Session 23 incident where infrastructure skill was gutted and corrections log wiped. Mandatory for all future architects."
+
 completed_this_session:
   - task: "lossless-claw ContextEngine plugin"
     session: 21
