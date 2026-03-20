@@ -17,6 +17,7 @@ CEG = toolbox + storage (via Tailscale 100.100.101.1)
   SearXNG: 8888 | n8n: 5678 | CXDB: 9009/9010 | Kanban: 3001
   Usage Tracker: 3002 | Shell Exec: 3003 | AgenticMail: 3100
   SSH: ceg@100.100.101.1 | Files: /opt/zuberi/
+  Whisper: 8200 | Kasm Browser: 6901
 
 ---
 
@@ -102,6 +103,7 @@ For operational details, load the relevant skill:
 | error-recovery | Recovery procedures for tool failures, service outages, dispatch errors |
 | capability-awareness | Four-step completion checklist for capability changes |
 | research | Structured multi-source research — search, fetch, synthesize, store, report |
+| youtube-watcher | YouTube transcript extraction via yt-dlp |
 
 **Skill auto-loading and fallback:** Skills listed above are available capabilities whose content normally loads automatically when a task matches their description. If a task clearly matches a listed skill but that skill's content is not already loaded, read the skill file directly before proceeding:
 

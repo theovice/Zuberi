@@ -21,6 +21,16 @@
 
 ---
 
+## Session 23 Notes (2026-03-19)
+- Whisper CPU service deployed on CEG:8200 (container: whisper-ceg). Health endpoint: GET /
+- AGENTS.md updated: 9-exec turn budget + anti-loop rule added to EXECUTION DISCIPLINE
+- YouTube domains added to CEG Squid whitelist for yt-dlp access
+- youtube-watcher skill installed from ClawHub (yt-dlp based transcript extraction)
+- Tab Audio Recorder extension: ON HOLD — multiple bugs, not stable
+- Corrections logged: host:gateway confusion, base64 write pattern, verification discipline, fabrication incident
+- CEG learning directories created: /opt/zuberi/data/learning/transcripts/, /raw/, /extractions/
+- Pending: yt-dlp transcript pull for n8n tutorial series, Jehudiel extraction workflow
+
 ## Open Questions
 
 - Arc position review: when does Zuberi graduate from Apprentice to Practitioner?
