@@ -1,7 +1,8 @@
 # Coaching Bridge — RTL-069
 
-**Status:** Built, ready to deploy | **Priority:** P0 | **Executor:** CC
+**Status:** Live | **Priority:** P0 → Complete | **Executor:** CC
 **Created:** Session 23 | 2026-03-19
+**Deployed:** Session 23 | 2026-03-20
 
 ---
 
@@ -11,27 +12,48 @@ Eliminate James as a copy-paste middleman between architect agents (Claude.ai) a
 
 ---
 
-## Architecture
+## Architecture — Final (n8n Webhook)
+
+The PowerShell polling approach was abandoned in favor of an n8n workflow — standard tooling, chat UX, no custom scripts.
 
 ```
-Architect (this Claude.ai session)
-    ↓ writes prompt via bash_tool
-CEG: /opt/zuberi/data/coaching/inbox/prompt.md
-    ↓ detected by
-PowerShell Bridge (KILO) — polls CEG every 5 seconds
-    ↓ POSTs to OpenClaw REST API
-OpenClaw gateway (localhost:18789) /v1/chat/completions
+Any machine on Tailscale
+    ↓ POST {"message": "prompt"}
+n8n Webhook (CEG:5678/webhook/coaching-bridge)
+    ↓ HTTP Request node
+OpenClaw REST API (KILO:18789/v1/chat/completions)
     ↓ full Zuberi: tools, memory, skills, identity
 Zuberi responds
-    ↓ bridge captures response
-CEG: /opt/zuberi/data/coaching/outbox/response_N.md
-    ↓ architect reads
-Architect reads via bash_tool → writes next prompt → loop
+    ↓ Code node extracts response
+n8n Respond to Webhook
+    ↓ {"response": "Zuberi's answer"}
+Caller receives response
 ```
 
-**Key discovery:** OpenClaw v2026.3.13 supports an OpenAI-compatible REST endpoint at `/v1/chat/completions`. Enabled by adding `gateway.http.endpoints.chatCompletions.enabled: true` to openclaw.json. Uses `model: "openclaw:main"` to route through the full agent pipeline. Both streaming and non-streaming work. Auth: Bearer token.
+### Endpoints
 
-**No UI automation needed.** No FlaUI, no clipboard, no window focus, no Electron DOM scraping. Pure HTTP.
+- **Webhook URL:** `http://100.100.101.1:5678/webhook/coaching-bridge`
+  - Method: POST
+  - Body: `{"message": "your question here"}`
+  - Response: `{"response": "Zuberi's answer", "model": "openclaw:main"}`
+- **n8n UI:** `http://100.100.101.1:5678` → Workflow: "Coaching Bridge — Architect ↔ Zuberi"
+- **Workflow ID:** `LpIv6lL5I83wxwiY`
+
+### Usage
+
+From any machine on Tailscale:
+```
+curl -X POST http://100.100.101.1:5678/webhook/coaching-bridge \
+  -H "Content-Type: application/json" \
+  -d '{"message": "Hello Zuberi"}'
+```
+
+### Workflow Nodes
+
+1. **Webhook** — receives POST with `{"message": "..."}` 
+2. **HTTP Request** — POST to OpenClaw `/v1/chat/completions` with Bearer token, model `openclaw:main`
+3. **Code** — extracts `choices[0].message.content` with null-safety
+4. **Respond to Webhook** — returns `{"response": "...", "model": "openclaw:main"}`
 
 ---
 

@@ -120,12 +120,12 @@ active:
     note: "Added after Session 23 incident where infrastructure skill was gutted and corrections log wiped. Mandatory for all future architects."
 
   - id: 17
-    task: "Coaching Bridge — PowerShell UI automation for architect↔Zuberi communication"
+    task: "Coaching Bridge — n8n webhook for architect↔Zuberi communication"
     rtl: "RTL-069"
-    priority: p0
+    priority: complete
     executor: CC
-    status: "Designing. PowerShell script on KILO watches CEG for prompts, injects into Claude Desktop, captures responses, posts back to CEG."
-    note: "Eliminates James as copy-paste middleman between architect and Zuberi. Security: signed script, prompt sanitization, rate limiting, kill switch, audit log, auth on coaching endpoint."
+    status: "Live. n8n workflow on CEG:5678. Webhook: http://100.100.101.1:5678/webhook/coaching-bridge. POST {message} → Zuberi responds via OpenClaw REST API."
+    note: "PowerShell approach abandoned — n8n is standard tooling with proper chat UX. No custom scripts needed."
     context: "designs/coaching-bridge.md"
 
 completed_this_session:
