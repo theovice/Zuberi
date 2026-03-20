@@ -1,1 +1,0 @@
-Zuberi, say hello and confirm your name.
