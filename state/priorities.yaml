@@ -119,6 +119,15 @@ active:
     status: "Active. Every architect session: sync workspace to repo before closing, audit root files for regressions."
     note: "Added after Session 23 incident where infrastructure skill was gutted and corrections log wiped. Mandatory for all future architects."
 
+  - id: 17
+    task: "Coaching Bridge — PowerShell UI automation for architect↔Zuberi communication"
+    rtl: "RTL-069"
+    priority: p0
+    executor: CC
+    status: "Designing. PowerShell script on KILO watches CEG for prompts, injects into Claude Desktop, captures responses, posts back to CEG."
+    note: "Eliminates James as copy-paste middleman between architect and Zuberi. Security: signed script, prompt sanitization, rate limiting, kill switch, audit log, auth on coaching endpoint."
+    context: "designs/coaching-bridge.md"
+
 completed_this_session:
   - task: "lossless-claw ContextEngine plugin"
     session: 21
