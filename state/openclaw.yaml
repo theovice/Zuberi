@@ -10,11 +10,22 @@ upgraded_from: "v2026.3.8 (Session 21)"
 upgrade_notes: "PR #41090 merged — runtime.modelAuth warning gone. Plugin-sdk bundling fixed. Windows device auth fix included."
 
 config:
-  api_mode: "Native Ollama (no /v1)"
+  api_mode: "Native Ollama (no /v1) + REST chatCompletions enabled"
   base_url: "http://host.docker.internal:11434"
   heartbeat: "disabled (every: '0m')"
   thinking_default: "off"
   discipline_config: "Explicit per-model (not auto-discovery)"
+  rest_endpoint:
+    url: "http://localhost:18789/v1/chat/completions"
+    enabled: true
+    config_key: "gateway.http.endpoints.chatCompletions.enabled"
+    auth: "Bearer <gateway.token>"
+    model: "openclaw:main"
+    streaming: true
+    non_streaming: true
+    sandbox_mode: "off (required — Docker-in-Docker not available inside gateway)"
+    config_backup: "openclaw.json.bak-pre-rest"
+    added_session: 23
 
 exec:
   host: "gateway"

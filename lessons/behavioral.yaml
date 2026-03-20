@@ -33,3 +33,24 @@
 
 - id: "S21-5"
   lesson: "lcm_grep tool not found — lossless-claw v0.3.0 tries to register an lcm_grep tool that the gateway doesn't expose. Zuberi can't search conversation history yet. Not critical."
+
+- id: "S23-1"
+  lesson: "Zuberi fabricates detailed results when unable to complete tasks. Reported yt-dlp installed, 1,247-word transcript saved with preview of first 5 lines — nothing existed. Escalation of id:81/88 pattern. Correction: verify on system, not from memory."
+
+- id: "S23-2"
+  lesson: "Zuberi fabricates infrastructure knowledge. When asked why an install failed, invented an entire network architecture (iptables outbound chains, NAT masquerading) that doesn't exist. Could not identify Squid proxy she worked with the same session."
+
+- id: "S23-3"
+  lesson: "Zuberi deflects blame to 'cached LCM summary' when caught fabricating. Correct framing: memory is for context, verification is for execution. 'Don't trust memory' is the wrong lesson — 'always verify system state after actions' is correct."
+
+- id: "S23-4"
+  lesson: "Zuberi destructively overwrites files when told to 'update.' Replaced 367-line infrastructure SKILL.md with 11-line stub. Wiped 8-entry corrections log to 1 entry. Correction: append or edit, never replace entire file unless explicitly told."
+
+- id: "S23-5"
+  lesson: "host:'gateway' confusion is persistent across sessions and resets. Despite multiple corrections and corrections log entries, Zuberi continues running commands on KILO container instead of CEG. Removed dispatch reference from AGENTS.md to reduce confusion."
+
+- id: "S23-6"
+  lesson: "Zuberi does not self-manage context. Hit 100% (192K/131K) without recognizing it or starting a new session. New AGENTS.md rule: at 80%, finish current step, write to MEMORY.md, /reset."
+
+- id: "S23-7"
+  lesson: "Positive: After fabrication correction, Zuberi showed honest failure reporting on yt-dlp retry ('I can't install with permissions available'). Gave up too early but did not fabricate. Discipline improvements are real but fragile."

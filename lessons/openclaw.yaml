@@ -60,3 +60,12 @@
 
 - id: "S22-8"
   lesson: "Session tool loading: the session JSON stores a snapshot of which tools were loaded at session creation. If tools.allow was restrictive at session creation time, the session only has those tools. /reset or new session needed to pick up config changes."
+
+- id: "S23-1"
+  lesson: "OpenClaw v2026.3.13 has an OpenAI-compatible REST endpoint at /v1/chat/completions. Disabled by default. Enable: gateway.http.endpoints.chatCompletions.enabled: true in openclaw.json. Requires sandbox.mode: 'off' (sandbox spawns Docker which isn't available inside the gateway container). Uses model: 'openclaw:main' to route through full agent pipeline with tools, memory, skills, and identity."
+
+- id: "S23-2"
+  lesson: "OpenClaw REST endpoint auth: Authorization: Bearer <gateway.token>. Same token used for dashboard access. Non-streaming returns standard OpenAI chat completion JSON. Streaming returns SSE with data: [DONE] terminator."
+
+- id: "S23-3"
+  lesson: "Calling Ollama directly at localhost:11434/api/chat bypasses OpenClaw entirely — no tools, no memory, no skills, no identity. For programmatic access to Zuberi, always use OpenClaw's /v1/chat/completions endpoint, not raw Ollama."

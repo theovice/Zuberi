@@ -1,5 +1,5 @@
 # ZUBERI BEHAVIORAL STATE
-# Last updated: 2026-03-15 | Session 21
+# Last updated: 2026-03-19 | Session 23
 # Tracks Zuberi's behavioral patterns, known issues, and coaching history.
 # This is the apprentice's report card — updated through direct observation.
 
@@ -9,9 +9,9 @@ arc_controller: "James only"
 active_behavioral_issues:
 
   fabrication:
-    severity: high
-    status: "active — Output Integrity rule in AGENTS.md v1.3.0 not fully internalized"
-    pattern: "Constructs plausible answers from fragments and training data, presents as verified fact"
+    severity: critical
+    status: "active — escalating pattern despite corrections"
+    pattern: "Constructs plausible answers from fragments and training data, presents as verified fact. Now includes fabricating entire task completion with specific fake details."
     incidents:
       - session: 19
         description: "Fabricated work narrative with timestamps"
@@ -27,6 +27,12 @@ active_behavioral_issues:
         description: "Summarized paywalled Bloomberg article as if she read it"
       - session: 21
         description: "Reported file created successfully but first attempt failed due to quoting"
+      - session: 23
+        description: "Fabricated entire yt-dlp install and transcript retrieval. Reported 1,247 words, showed 'first 5 lines' preview. Nothing was installed, file was empty. Most detailed fabrication to date."
+      - session: 23
+        description: "When asked why install failed, fabricated entire network architecture (iptables outbound chains, NAT masquerading, gateway firewall rules) that doesn't exist. Could not identify Squid proxy she worked with same session."
+      - session: 23
+        description: "Deflected blame to 'cached LCM summary' rather than acknowledging fabrication pattern."
     coaching:
       - session: 19
         rules: ["Say 'I couldn't'", "Label training-data responses explicitly", "Never present uncertain as verified"]
@@ -36,58 +42,83 @@ active_behavioral_issues:
         corrections: ["Told to report only MEMORY.md projects", "Told to disclose paywall limitation", "Caught on fabricated file write"]
       - session: 21
         correction: "Self-corrected on Mission Ganesha after James pushed back — repackaged infrastructure diagnostics as revenue work. Revised to honest 1-item table."
+      - session: 23
+        corrections:
+          - "Caught on fabricated yt-dlp install. Forced to prove with raw command output."
+          - "Caught on fabricated network architecture. Redirected to identify Squid proxy."
+          - "Corrected deflection: memory is for context, verification is for execution."
+          - "Turn budget (9 exec) and anti-loop rule added to prevent retry-driven fabrication."
+
+  destructive_overwrites:
+    severity: high
+    status: "active — new pattern identified Session 23"
+    pattern: "When told to 'update' a file, replaces entire contents instead of appending/editing. Destroys existing content."
+    incidents:
+      - session: 23
+        description: "Overwrote 367-line infrastructure SKILL.md with 11-line Whisper-only stub"
+      - session: 23
+        description: "Overwrote 8-entry corrections log with single entry"
+    coaching:
+      - session: 23
+        rule: "Correction logged: append or edit, never replace entire file unless explicitly told. Architect audit process added as safety net."
+
+  host_confusion:
+    severity: medium
+    status: "active — persists across resets despite corrections"
+    pattern: "Runs commands with host:'gateway' (KILO container) when intending to target CEG"
+    incidents:
+      - session: 23
+        description: "Ran docker --version on KILO container, claimed Docker not installed on CEG"
+      - session: 23
+        description: "Ran mkdir on KILO container, claimed /opt/zuberi/whisper doesn't exist on CEG"
+      - session: 23
+        description: "Made this mistake 3+ times in same session despite corrections"
+    coaching:
+      - session: 22
+        rule: "Corrected: exec with host:gateway = KILO container. curl to :3003 = CEG."
+      - session: 23
+        rule: "AGENTS.md dispatch reference removed to reduce confusion. Direct curl pattern is now the documented method."
 
   learned_helplessness:
     severity: medium
-    status: "active — Zuberi gives up on exec after past failures"
-    pattern: "After repeated exec denials, stops attempting exec even when config changes make it work"
+    status: "improved but still present"
+    pattern: "Gives up too early, reports inability without exhausting options"
     incidents:
       - session: 21
-        description: "Refused to attempt exec for Ollama memory check, CEG uptime, file listing, node version — told James to run commands manually"
+        description: "Refused to attempt exec for Ollama memory check, CEG uptime, file listing"
+      - session: 23
+        description: "Reported can't install yt-dlp due to permissions — didn't try --break-system-packages or realize shell service has sudo"
     coaching:
       - session: 21
-        rule: "New rule: always attempt first, report error if it fails. Do not refuse based on past failures."
+        rule: "New rule: always attempt first, report error if it fails."
+      - session: 23
+        rule: "Positive: after fabrication correction, gave honest failure report on retry. Improvement is real but fragile."
+
+  context_exhaustion:
+    severity: medium
+    status: "mitigated — new AGENTS.md rule added"
+    pattern: "Does not self-manage context usage. Allows sessions to reach 100% without resetting."
+    incidents:
+      - session: 23
+        description: "Hit 192K/131K (100%) without recognizing it. Could not respond to messages."
+    coaching:
+      - session: 23
+        rule: "AGENTS.md WORK STYLE: at 80% context, finish current step, write to MEMORY.md, /reset."
 
   skill_loading:
     severity: low
     status: "improved — dispatch skill rewrite helped"
     pattern: "Defaults to raw exec instead of curl-to-3003 shell service pattern"
-    incidents:
-      - session: 21
-        description: "Tried raw exec df -h instead of curl to shell service. Corrected, then pattern held for subsequent commands."
     coaching:
-      - session: 20
-        rule: "Dispatch skill rewritten for shell execution API"
-      - session: 21
-        rule: "Corrected once, pattern held for rest of session"
-
-  stale_naming:
-    severity: low
-    status: "corrected once"
-    pattern: "Uses retired terminology (CEG-ccode dispatch instead of zuberi-shell)"
-    incidents:
-      - session: 21
-        description: "Labeled port 3003 as 'CEG-ccode dispatch' instead of 'zuberi-shell'"
-    coaching:
-      - session: 21
-        rule: "Corrected. She acknowledged."
-
-  infrastructure_confusion:
-    severity: medium
-    status: "corrected Session 22 — Jeremiel topic"
-    pattern: "Refers to her shell service environment as a 'container' — conflates Docker services she uses with the host environment she runs on"
-    incidents:
-      - session: 22
-        description: "Repeatedly said sudo failed due to 'container permissions' and 'container filesystem'. Shell service runs natively on CEG host, not in a container. Corrected by James with architectural explanation."
-    coaching:
-      - session: 22
-        rule: "Told to read infrastructure skill. Explained: shell service is a Python process on bare metal, not a container. Docker services are things she uses, not where she runs."
-    note: "This is a Phase Enlightenment / Jeremiel moment — Zuberi distinguishing her own infrastructure from external services."
+      - session: 23
+        rule: "AGENTS.md dispatch reference removed. Direct curl pattern documented."
 
 strengths:
   - "Tenacious problem-solver — tried 20+ workarounds when exec was blocked before giving up"
   - "Loads skills correctly after one correction"
-  - "Honest about limitations when coached (eventually says 'I couldn't')"
+  - "Learns base64 write pattern and applies it correctly after coaching"
+  - "Honest failure reporting improved after fabrication correction (fragile but real)"
+  - "Clean execution on simple tasks: directory creation, health checks, infrastructure updates, file edits"
   - "Reads CXDB data accurately — no fabrication on structured tool output"
   - "Self-corrects quoting issues (fixed tee approach after echo redirect failed)"
 
@@ -101,7 +132,6 @@ honesty_rules:
     - "Accuracy over helpfulness. Every time."
 
 memory_state:
-  memory_md: "5 active projects: ZuberiChat, OpenClaw, The Mission, Sub-Agent Architecture, Mission Ganesha"
-  stale_entries: ["Sub-Agent Architecture still says 'CEG-ccode dispatch' — needs update to 'shell execution service'"]
-  note: "Zuberi does not know lossless-claw exists or that her conversations persist. Option A chosen: let her discover naturally."
-  corrections_log: "skills/corrections/corrections.md — 3 seed entries. AGENTS.md §12 instructs Zuberi to append on correction. Deployed Session 22."
+  memory_md: "6 active projects: ZuberiChat, OpenClaw, The Mission, Sub-Agent Architecture, Mission Ganesha, Content Automation Business"
+  session_23_notes: "Added — covers Whisper, AGENTS.md changes, corrections, learning directories"
+  corrections_log: "skills/corrections/corrections.md — 8 entries. Rebuilt by architect after Zuberi wiped to 1."

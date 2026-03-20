@@ -44,3 +44,12 @@
 
 - id: "S22-4"
   lesson: "Shell service is now at /etc/systemd/system/zuberi-shell.service (system service), NOT ~/.config/systemd/user/ (user service). Survives reboots without loginctl linger. Manage with: sudo systemctl restart/status zuberi-shell.service"
+
+- id: "S23-1"
+  lesson: "Squid proxy whitelist controls all outbound HTTPS from CEG. New domains must be added to /etc/squid/whitelist_domains.txt and Squid reloaded. YouTube required: youtube.com, www.youtube.com, m.youtube.com, youtu.be, googlevideo.com, .googlevideo.com, ytimg.com, .ytimg.com, i.ytimg.com, yt3.ggpht.com"
+
+- id: "S23-2"
+  lesson: "pip3 install on CEG requires --break-system-packages flag. Shell service runs with sudo so system-wide installs work via /command endpoint."
+
+- id: "S23-3"
+  lesson: "Port allocation on CEG: 8000=Chroma, 8100=reserved RTL-058 routing shim, 8200=Whisper. Check before assigning new services."

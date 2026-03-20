@@ -182,17 +182,41 @@ services_on_ceg:
     status: deprecated
     note: "Authenticated but no longer used for CEG operations. Shell service replaced it."
 
+  whisper:
+    port: 8200
+    bind: "0.0.0.0"
+    status: running
+    purpose: "Whisper CPU transcription (whisperx, base model, int8)"
+    container: "whisper-ceg"
+    image: "whisper-ceg:latest"
+    endpoints:
+      health: "GET http://100.100.101.1:8200/"
+      transcribe: "POST http://100.100.101.1:8200/transcribe (multipart, key: file)"
+    added_session: 23
+
+  squid_proxy:
+    port: 3128
+    status: running
+    purpose: "SNI proxy — controls all outbound HTTPS from CEG"
+    config: "/etc/squid/squid.conf"
+    whitelist: "/etc/squid/whitelist_domains.txt"
+    reload: "sudo systemctl reload squid"
+    youtube_whitelisted: true
+    note: "Any new external domain Zuberi needs to reach requires whitelist addition + reload. YouTube domains added Session 23."
+    added_session: 22
+
 workspace:
   location: "C:\\Users\\PLUTO\\openclaw_workspace\\"
   root_files:
-    - {file: "AGENTS.md", version: "v1.3.0"}
+    - {file: "AGENTS.md", version: "v1.3.0", note: "Session 23: turn budget (9), context mgmt (80%), dispatch ref fixed"}
     - {file: "SOUL.md", version: "v0.1.1"}
-    - {file: "MEMORY.md", version: "v1.0.0"}
-    - {file: "TOOLS.md", version: "v1.1.0"}
+    - {file: "MEMORY.md", version: "v1.0.1", note: "Session 23 notes added"}
+    - {file: "TOOLS.md", version: "v1.1.0", note: "Session 23: Whisper:8200, Kasm:6901, youtube-watcher added"}
     - {file: "IDENTITY.md"}
     - {file: "USER.md"}
-  note: "Cleaned Session 21. HEARTBEAT.md deleted (was wasting ~1KB/turn). Stale dirs purged (.git, .pi, .openclaw, MD_Backups, memory, memory-recall, working, STAGE, opt). ms365_creds.txt moved to openclaw_config/."
-  skills_count: 15
+  skills_count: 16
+  new_skills_session_23: ["youtube-watcher"]
+  note: "Session 23 audit: infrastructure SKILL.md restored from backup (was gutted to 11 lines). Corrections log rebuilt (was wiped to 1 entry). Mandatory architect audit added to prevent recurrence."
 
 disciplines:
   - {name: "General expertise", model: "gpt-oss:20b", size: "13GB", context: "131K", tools: true, status: "active (primary)"}
