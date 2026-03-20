@@ -1,5 +1,5 @@
 # coaching-bridge.ps1 — Architect ↔ Zuberi Coaching Bridge
-# Location: C:\Users\PLUTO\scripts\coaching-bridge\coaching-bridge.ps1
+# Location: C:\Users\PLUTO\openclaw_config\coaching-bridge\coaching-bridge.ps1
 # RTL-069 | Session 23
 #
 # Polls CEG for architect prompts, sends to Zuberi via OpenClaw REST API,

@@ -133,7 +133,7 @@ curl -s -X POST http://100.100.101.1:3003/command -H "Content-Type: application/
 
 ## Key Paths Added This Session
 - Whisper: CEG:8200 (container: whisper-ceg)
-- Coaching bridge: C:\Users\PLUTO\scripts\coaching-bridge\
+- Coaching bridge: C:\Users\PLUTO\openclaw_config\coaching-bridge\
 - Learning data: /opt/zuberi/data/learning/ on CEG
 - Coaching data: /opt/zuberi/data/coaching/ on CEG
 - OpenClaw REST: http://localhost:18789/v1/chat/completions (Bearer token auth)

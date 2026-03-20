@@ -39,7 +39,7 @@ Architect reads via bash_tool → writes next prompt → loop
 
 ### 1. PowerShell Bridge Script (`coaching-bridge.ps1`)
 
-Location: `C:\Users\PLUTO\scripts\coaching-bridge\coaching-bridge.ps1`
+Location: `C:\Users\PLUTO\openclaw_config\coaching-bridge\coaching-bridge.ps1`
 
 Core loop:
 1. Poll CEG inbox for new `.md` files via shell service HTTP
@@ -102,9 +102,9 @@ James's only role: start the bridge script and monitor. The architect and Zuberi
 
 ## Deployment
 
-1. Copy `coaching-bridge.ps1` to `C:\Users\PLUTO\scripts\coaching-bridge\`
+1. Copy `coaching-bridge.ps1` to `C:\Users\PLUTO\openclaw_config\coaching-bridge\`
 2. Set env var: `$env:OPENCLAW_GATEWAY_TOKEN = "<token>"`
-3. Run: `pwsh C:\Users\PLUTO\scripts\coaching-bridge\coaching-bridge.ps1`
+3. Run: `pwsh C:\Users\PLUTO\openclaw_config\coaching-bridge\coaching-bridge.ps1`
 4. Bridge starts polling. Drop prompts in inbox to begin.
 
 ---
