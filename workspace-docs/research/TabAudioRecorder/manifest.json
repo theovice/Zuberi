@@ -1,16 +1,17 @@
 {
   "manifest_version": 3,
   "name": "Tab Audio Recorder & Transcriber",
-  "description": "Record tab audio in real time and transcribe to a text file.",
-  "version": "1.0",
+  "description": "Record tab audio and transcribe via Whisper on CEG.",
+  "version": "1.1",
   "permissions": [
     "tabCapture",
+    "activeTab",
     "storage",
-    "downloads",
-    "scripting"
+    "offscreen"
   ],
   "host_permissions": [
-    "<all_urls>"
+    "http://100.100.101.1:8200/*",
+    "http://100.100.101.1:3003/*"
   ],
   "background": {
     "service_worker": "background.js"

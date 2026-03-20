@@ -4,12 +4,65 @@
   <meta charset="utf-8">
   <title>Tab Recorder</title>
   <style>
-    body { font-family: sans-serif; margin: 1em; }
-    button { width: 100%; padding: .5em; margin-top:.5em; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      margin: 0;
+      padding: 12px 16px;
+      min-width: 240px;
+      background: #1a1a2e;
+      color: #e0e0e0;
+    }
+    h3 {
+      margin: 0 0 10px 0;
+      font-size: 13px;
+      color: #888;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    button {
+      width: 100%;
+      padding: 10px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+      border-radius: 6px;
+      color: #fff;
+      transition: background 0.2s;
+    }
+    #start {
+      background: #2d7d46;
+    }
+    #start:hover {
+      background: #236835;
+    }
+    #stop {
+      background: #c0392b;
+    }
+    #stop:hover {
+      background: #a93226;
+    }
+    #status {
+      margin-top: 8px;
+      font-size: 12px;
+      color: #888;
+      text-align: center;
+      min-height: 16px;
+    }
+    .hidden {
+      display: none;
+    }
+    .recording {
+      color: #e74c3c;
+      font-weight: bold;
+    }
   </style>
 </head>
 <body>
-  <button id="stop">Stop Recording</button>
+  <h3>Tab Audio Recorder</h3>
+  <button id="start">Start Recording</button>
+  <button id="stop" class="hidden">Stop Recording</button>
+  <div id="status"></div>
   <script src="popup.js"></script>
 </body>
 </html>
